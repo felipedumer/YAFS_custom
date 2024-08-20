@@ -1,15 +1,19 @@
 [
   {
     "id": 0,
-    "name": 0,
+    "name": "amazingapp1",
     "HwReqs": 1,
-    "MaxReqs": 200,
-    "MaxLatency": 50,
+    "MaxReqs": 2090,
+    "MaxLatency": 500000,
 
     "transmission": [
       {
         "message_in": "M.USER.APP.0",
         "module": "0_01"
+      },
+      {
+        "message_in": "M.USER.APP.0_02",
+        "module": "0_02"
       }
     ],
     "module": [
@@ -17,7 +21,13 @@
         "id": 1,
         "name": "0_01",
         "type": "MODULE",
-        "RAM": 1
+        "RAM": 100
+      },
+      {
+        "id": 2,
+        "name": "0_02",
+        "type": "MODULE",
+        "RAM": 100
       }
     ],
     "message": [
@@ -26,15 +36,23 @@
         "name": "M.USER.APP.0",
         "s": "None",
         "d": "0_01",
-        "bytes": 20,
-        "instructions": 30
+        "bytes": 20009999,
+        "instructions": 300
+      },
+      {
+        "id": 1,
+        "name": "M.USER.APP.0_02",
+        "s": "None",
+        "d": "0_02",
+        "bytes": 20009999,
+        "instructions": 300123123
       }
     ]
   },
 
   {
     "id": 1,
-    "name": 1,
+    "name": "amazingappnumber2",
     "HwReqs": 1,
     "MaxReqs": 200,
     "MaxLatency": 50,
@@ -60,13 +78,13 @@
         "s": "None",
         "d": "1_01",
         "bytes": 20,
-        "instructions": 30
+        "instructions": 1232
       }
     ]
   },
   {
     "id": 2,
-    "name": 2,
+    "name": "amazingappnumber3",
     "HwReqs": 1,
     "MaxReqs": 200,
     "MaxLatency": 50,
@@ -92,13 +110,13 @@
         "s": "None",
         "d": "2_01",
         "bytes": 20,
-        "instructions": 30
+        "instructions": 302111
       }
     ]
   },
   {
     "id": 3,
-    "name": 3,
+    "name": "amazingapp4",
     "HwReqs": 1,
     "MaxReqs": 200,
     "MaxLatency": 50,
@@ -131,7 +149,7 @@
   },
   {
     "id": 4,
-    "name": 4,
+    "name": "amazingapp5",
     "HwReqs": 1,
     "MaxReqs": 200,
     "MaxLatency": 50,
@@ -164,7 +182,7 @@
   },
   {
     "id": 5,
-    "name": 5,
+    "name": "amazingapp6",
     "HwReqs": 1,
     "MaxReqs": 200,
     "MaxLatency": 50,
@@ -197,7 +215,7 @@
   },
   {
     "id": 6,
-    "name": 6,
+    "name": "amazingapp7",
     "HwReqs": 1,
     "MaxReqs": 200,
     "MaxLatency": 50,

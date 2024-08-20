@@ -62,14 +62,16 @@ def main(stop_time, it,folder_results):
     """
     APPLICATION or SERVICES
     """
-    dataApp = json.load(open('data/appDefinition.json'))
+    dataApp = json.load(open(os.path.join(os.path.dirname(__file__), 'data/appDefinition.json')))
     apps = create_applications_from_json(dataApp)
 
     """
     SERVICE PLACEMENT 
     """
-    placementJson = json.load(open('data/allocDefinition.json'))
+    placementJson = json.load(open(os.path.join(os.path.dirname(__file__), 'data/allocDefinition.json')))
     placement = JSONPlacement(name="Placement", json=placementJson)
+
+    print(apps["amazingapp1"])
 
     """
     Defining ROUTING algorithm to define how path messages in the topology among modules
@@ -90,7 +92,7 @@ def main(stop_time, it,folder_results):
     """
     Deploy users
     """
-    userJSON = json.load(open('data/usersDefinition.json'))
+    userJSON = json.load(open(os.path.join(os.path.dirname(__file__), 'data/usersDefinition.json')))
     for user in userJSON["sources"]:
         app_name = user["app"]
         app = s.apps[app_name]
@@ -116,7 +118,7 @@ if __name__ == '__main__':
     folder_results = str(folder_results)+"/"
 
     nIterations = 1  # iteration for each experiment
-    simulationDuration = 20000  
+    simulationDuration = 200000
 
     # Iteration for each experiment changing the seed of randoms
     for iteration in range(nIterations):
@@ -124,13 +126,12 @@ if __name__ == '__main__':
         logging.info("Running experiment it: - %i" % iteration)
 
         start_time = time.time()
-        main(stop_time=simulationDuration,
-             it=iteration,folder_results=folder_results)
+        main(stop_time=simulationDuration, it=iteration,folder_results=folder_results)
 
         print("\n--- %s seconds ---" % (time.time() - start_time))
 
     print("Simulation Done!")
-  
+
     # Analysing the results. 
     dfl = pd.read_csv(folder_results+"sim_trace"+"_link.csv")
     print("Number of total messages between nodes: %i"%len(dfl))
