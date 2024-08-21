@@ -79,7 +79,7 @@ class CustomStrategy():
 
     def __call__(self, sim, routing):
 
-        # logging.info("Activating Custom process - number %i "%self.activations)
+        logging.info("Activating Custom process - number %i "%self.activations)
         self.activations += 1
         routing.invalid_cache_value = True # when the topology changes the cache of the Path.routing is outdated.
 
@@ -156,13 +156,13 @@ def main(stop_time, it, folder_results):
     """
     APPLICATION or SERVICES
     """
-    dataApp = json.load(open('data/appDefinition.json'))
+    dataApp = json.load(open(os.path.join(os.path.dirname(__file__), 'data/appDefinition.json')))
     apps = create_applications_from_json(dataApp)
 
     """
     SERVICE PLACEMENT 
     """
-    placementJson = json.load(open('data/allocDefinition.json'))
+    placementJson = json.load(open(os.path.join(os.path.dirname(__file__), 'data/allocDefinition.json')))
     placement = JSONPlacement(name="Placement", json=placementJson)
 
     """
@@ -184,7 +184,7 @@ def main(stop_time, it, folder_results):
     """
     Deploy users
     """
-    userJSON = json.load(open('data/usersDefinition.json'))
+    userJSON = json.load(open(os.path.join(os.path.dirname(__file__), 'data/usersDefinition.json')))
     for user in userJSON["sources"]:
         app_name = user["app"]
         app = s.apps[app_name]
@@ -203,9 +203,9 @@ def main(stop_time, it, folder_results):
     dist = deterministicDistributionStartPoint(stop_time/4., stop_time/2.0/10.0, name="Deterministic")
     evol = CustomStrategy(folder_results)
     s.deploy_monitor("CrazyTopology",
-                     evol,
-                     dist,
-                     **{"sim": s, "routing": selectorPath}) # __call__ args 
+                        evol,
+                        dist,
+                        **{"sim": s, "routing": selectorPath}) # __call__ args 
 
 
 

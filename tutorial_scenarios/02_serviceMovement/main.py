@@ -175,9 +175,9 @@ def main(stop_time, it,folder_results):
     dist = deterministicDistributionStartPoint(stop_time/4., stop_time/2.0/10.0, name="Deterministic")
     evol = CustomStrategy(folder_results)
     s.deploy_monitor("RandomAllocation",
-                     evol,
-                     dist,
-                     **{"sim": s, "routing": selectorPath}) # __call__ args
+                        evol,
+                        dist,
+                        **{"sim": s, "routing": selectorPath}) # __call__ args
 
 
 

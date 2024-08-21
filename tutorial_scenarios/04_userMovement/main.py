@@ -107,13 +107,13 @@ def main(stop_time, it, folder_results):
     """
     APPLICATION or SERVICES
     """
-    dataApp = json.load(open('data/appDefinition.json'))
+    dataApp = json.load(open(os.path.join(os.path.dirname(__file__), 'data/appDefinition.json')))
     apps = create_applications_from_json(dataApp)
 
     """
     SERVICE PLACEMENT 
     """
-    placementJson = json.load(open('data/allocDefinition.json'))
+    placementJson = json.load(open(os.path.join(os.path.dirname(__file__), 'data/allocDefinition.json')))
     placement = JSONPlacement(name="Placement", json=placementJson)
 
     """
@@ -137,7 +137,7 @@ def main(stop_time, it, folder_results):
     """
     ### IN THIS CASE, We control the users from our custom strategy
 
-    # userJSON = json.load(open('data/usersDefinition.json'))
+    # userJSON = json.load(open(os.path.join(os.path.dirname(__file__), 'data/usersDefinition.json')))
     # for user in userJSON["sources"]:
     #     app_name = user["app"]
     #     app = s.apps[app_name]
