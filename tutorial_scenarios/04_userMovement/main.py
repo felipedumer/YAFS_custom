@@ -47,7 +47,7 @@ class CustomStrategy():
         return idDES
 
     def __call__(self, sim, routing):
-        # logging.info("Activating Custom process - number %i " % self.activations)
+        logging.info("Activating Custom process - number %i " % self.activations)
         self.activations += 1
         # In this case, the new users not change the topology
         # routing.invalid_cache_value = True # when the service change the cache of the Path.routing is outdated.
@@ -67,7 +67,9 @@ class CustomStrategy():
             userDES = random.sample(self.listUsers, 1)[0]
             newNode = random.sample(sim.topology.G.nodes(), 1)[0]
             logging.info(" Moving a user %i from node %i to %i" % (userDES, self.placeAt[userDES],newNode))
-            sim.alloc_DES[self.placeAt[userDES]] = newNode
+            # sim.alloc_DES[self.placeAt[userDES]] = newNode < This logic is wrong. Confirming with issue https://github.com/acsicuib/YAFS/issues/76
+            sim.alloc_DES[userDES] = newNode
+            self.placeAt[userDES] = newNode
         else:
             # we remove an user
             userDES = random.sample(self.listUsers,1)[0]
@@ -194,21 +196,21 @@ if __name__ == '__main__':
         main(stop_time=simulationDuration,
              it=iteration,folder_results=folder_results)
 
-        print("\n--- %s seconds ---" % (time.time() - start_time))
+        logging.info("\n--- %s seconds ---" % (time.time() - start_time))
 
-    print("Simulation Done!")
+    logging.info("Simulation Done!")
 
      # Analysing the results. 
     dfl = pd.read_csv(folder_results+"sim_trace"+"_link.csv")
-    print("Number of total messages between nodes: %i"%len(dfl))
+    logging.info("Number of total messages between nodes: %i"%len(dfl))
 
     df = pd.read_csv(folder_results+"sim_trace.csv")
-    print("Number of requests handled by deployed services: %i"%len(df))
+    logging.info("Number of requests handled by deployed services: %i"%len(df))
 
-    print(df.head())
-    print("Requested Apps %s"%np.unique(df.app)) #only few apps are required from the new users
+    logging.info(df.head(10))
+    logging.info("Requested Apps %s"%np.unique(df.app)) #only few apps are required from the new users
 
     dfapp6 = df[df.app == 6].copy()
     
-    position_of_users_app6 = np.unique(dfapp6[dfapp6["module.src"] == "None"]["TOPO.src"])
-    print("Positions of the new users requesting app6: %s"%position_of_users_app6)
+    position_of_users_app6 = np.unique(dfapp6[dfapp6["module.src"].isna()]["TOPO.src"].values)
+    logging.info("Positions of the new users requesting app6: %s"%position_of_users_app6)
