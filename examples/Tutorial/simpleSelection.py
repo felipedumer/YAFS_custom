@@ -28,10 +28,23 @@ class MinimunPath(Selection):
 
             path = list(nx.shortest_path(sim.topology.G, source=node_src, target=dst_node))
 
-            bestPath = [path]
-            bestDES = [des]
+            # custom
+            # if bestPath is empty array
+            if not bestPath:
+                bestPath = path
+                bestDES = [des]
 
-        return bestPath, bestDES
+            if bestPath > path:
+                bestPath = path
+                bestDES = [des]
+            print("Path: ", path)
+            print("Best DES? ", des)
+
+            # original 
+            # bestPath = [path]
+            # bestDES = [des]
+
+        return [bestPath], bestDES
 
 
 class MinPath_RoundRobin(Selection):
@@ -55,8 +68,9 @@ class MinPath_RoundRobin(Selection):
 
         print(("GET PATH"))
         print(("\tNode _ src (id_topology): %i" %node_src))
+        print(("\tMessage SRC: %s " %(message.src)))
         print(("\tRequest service: %s " %(message.dst)))
-        print(("\tProcess serving that service: %s (pos ID: %i)" %(DES_dst,self.rr[message.dst])))
+        print(("\tProcesses (DES) serving that service: %s (pos ID: %i)" %(DES_dst,self.rr[message.dst])))
 
         bestPath = []
         bestDES = []

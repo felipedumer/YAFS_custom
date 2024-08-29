@@ -52,7 +52,7 @@ def main(simulated_time):
     """
 
     t = Topology()
-    t.G = nx.read_graphml("Euclidean.graphml")
+    t.G = nx.read_graphml(os.getcwd()+"/examples/DynamicFailuresOnNodes/Euclidean.graphml")
 
     ls = list(t.G.nodes)
     li = {x: int(x) for x in ls}
@@ -137,7 +137,9 @@ if __name__ == '__main__':
     import logging.config
     import os
 
-    logging.config.fileConfig(os.getcwd()+'/logging.ini')
+    print(os.getcwd()+'/examples/DynamicFailuresOnNodes/logging.ini')
+
+    logging.config.fileConfig(os.getcwd()+'/examples/DynamicFailuresOnNodes/logging.ini')
 
     start_time = time.time()
 
