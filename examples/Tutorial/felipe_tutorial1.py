@@ -1,5 +1,6 @@
 import time
 import networkx
+import random
 
 from pathlib import Path
 
@@ -78,6 +79,188 @@ def createTopology():
     topology_object["link"].append(link_2_to_4)
     return topology_object
 
+def createRandomTopology(num_fog_nodes=3, num_routers=5, num_sensors_per_router=2, 
+                        num_actuators_per_router=1, fog_ipt=1000*10**6, fog_ram=8000,
+                        fog_cost=2, fog_watt=10.0, link_bw_fog=10, link_pr_fog=10,
+                        link_bw_router=5, link_pr_router=5, link_bw_device=1, 
+                        link_pr_device=1, random_seed=None, city_width=100, city_height=100):
+    """
+    Create a city-like network topology simulating urban infrastructure.
+    
+    Topology simulates:
+    - Fog nodes: Data centers/edge computing facilities distributed across the city
+    - Routers: Neighborhood network hubs (one per residential area/block)
+    - Sensors/Actuators: Smart home IoT devices (multiple per neighborhood)
+    
+    Network structure:
+    - Fog nodes form a backbone mesh (connected to nearest neighbors)
+    - Routers connect to nearest fog node (geographic proximity)
+    - Nearby routers interconnect for redundancy (street-level mesh)
+    - Homes (sensors/actuators) connect to their neighborhood router
+    
+    Parameters:
+    - num_fog_nodes: Number of fog data centers in the city
+    - num_routers: Number of neighborhood routers (residential areas)
+    - num_sensors_per_router: Number of smart home sensors per neighborhood
+    - num_actuators_per_router: Number of smart home actuators per neighborhood
+    - fog_ipt: Instructions per time for fog nodes
+    - fog_ram: RAM for fog nodes
+    - fog_cost: Cost for fog nodes
+    - fog_watt: Wattage for fog nodes
+    - link_bw_fog: Bandwidth for backbone links between fog nodes
+    - link_pr_fog: Propagation delay for backbone links
+    - link_bw_router: Bandwidth for links between routers and fog/other routers
+    - link_pr_router: Propagation delay for router links
+    - link_bw_device: Bandwidth for home device connections
+    - link_pr_device: Propagation delay for home device connections
+    - random_seed: Seed for random number generator (for reproducibility)
+    - city_width: Width of the city grid (coordinate space)
+    - city_height: Height of the city grid (coordinate space)
+    
+    Returns:
+    - topology_object: Dictionary containing the topology structure
+    """
+    
+    if random_seed is not None:
+        random.seed(random_seed)
+    
+    topology_object = {}
+    topology_object["entity"] = []
+    topology_object["link"] = []
+    
+    node_id = 0
+    
+    # Create fog nodes distributed across the city (like data centers at strategic locations)
+    fog_ids = []
+    fog_positions = []  # Store (x, y) coordinates for distance calculations
+    
+    for i in range(num_fog_nodes):
+        # Distribute fog nodes across the city grid
+        pos_x = random.uniform(0, city_width)
+        pos_y = random.uniform(0, city_height)
+        fog_positions.append((pos_x, pos_y))
+        
+        fog_dev = {
+            "id": node_id,
+            "model": f"fog-device-{i}",
+            "mytag": "fog",
+            "IPT": fog_ipt,
+            "RAM": fog_ram,
+            "COST": fog_cost,
+            "WATT": fog_watt,
+            "x": pos_x,
+            "y": pos_y,
+        }
+        topology_object["entity"].append(fog_dev)
+        fog_ids.append(node_id)
+        node_id += 1
+    
+    # Create city backbone network: connect each fog node to its 2-3 nearest neighbors
+    for i, fog_id in enumerate(fog_ids):
+        distances = []
+        for j, other_fog_id in enumerate(fog_ids):
+            if i != j:
+                # Calculate Euclidean distance
+                dist = ((fog_positions[i][0] - fog_positions[j][0])**2 + 
+                       (fog_positions[i][1] - fog_positions[j][1])**2)**0.5
+                distances.append((dist, other_fog_id))
+        
+        # Connect to 2-3 nearest fog nodes for redundant backbone
+        distances.sort()
+        num_connections = min(random.randint(2, 3), len(distances))
+        for k in range(num_connections):
+            if fog_id < distances[k][1]:  # Avoid duplicate bidirectional links
+                link = {"s": fog_id, "d": distances[k][1], "BW": link_bw_fog, "PR": link_pr_fog}
+                topology_object["link"].append(link)
+    
+    # Create neighborhood routers and home devices (sensors/actuators)
+    router_ids = []
+    router_positions = []
+    
+    for i in range(num_routers):
+        # Distribute routers across the city (representing neighborhoods)
+        pos_x = random.uniform(0, city_width)
+        pos_y = random.uniform(0, city_height)
+        router_positions.append((pos_x, pos_y))
+        
+        router_dev = {
+            "id": node_id,
+            "model": f"router-{i}",
+            "mytag": "router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": pos_x,
+            "y": pos_y,
+        }
+        topology_object["entity"].append(router_dev)
+        router_id = node_id
+        router_ids.append(router_id)
+        node_id += 1
+        
+        # Connect router to the geographically nearest fog node
+        min_dist = float('inf')
+        nearest_fog = fog_ids[0]
+        for j, fog_id in enumerate(fog_ids):
+            dist = ((pos_x - fog_positions[j][0])**2 + 
+                   (pos_y - fog_positions[j][1])**2)**0.5
+            if dist < min_dist:
+                min_dist = dist
+                nearest_fog = fog_id
+        
+        link = {"s": nearest_fog, "d": router_id, "BW": link_bw_router, "PR": link_pr_router}
+        topology_object["link"].append(link)
+        
+        # Create smart home sensors in this neighborhood
+        for j in range(num_sensors_per_router):
+            sensor_dev = {
+                "id": node_id,
+                "model": sensorNodeName,
+            }
+            topology_object["entity"].append(sensor_dev)
+            
+            # Connect sensor to neighborhood router
+            link = {"s": router_id, "d": node_id, "BW": link_bw_device, "PR": link_pr_device}
+            topology_object["link"].append(link)
+            
+            node_id += 1
+        
+        # Create smart home actuators in this neighborhood
+        for j in range(num_actuators_per_router):
+            actuator_dev = {
+                "id": node_id,
+                "model": actuatorNodeName,
+            }
+            topology_object["entity"].append(actuator_dev)
+            
+            # Connect actuator to neighborhood router
+            link = {"s": router_id, "d": node_id, "BW": link_bw_device, "PR": link_pr_device}
+            topology_object["link"].append(link)
+            
+            node_id += 1
+    
+    # Create street-level mesh: connect nearby routers for redundancy
+    # Routers within ~30% of city width connect to 1-2 nearest neighbors
+    distance_threshold = city_width * 0.3
+    
+    for i, router_id in enumerate(router_ids):
+        distances = []
+        for j, other_router_id in enumerate(router_ids):
+            if i != j:
+                dist = ((router_positions[i][0] - router_positions[j][0])**2 + 
+                       (router_positions[i][1] - router_positions[j][1])**2)**0.5
+                if dist <= distance_threshold:
+                    distances.append((dist, other_router_id))
+        
+        # Connect to 1-2 nearest routers within threshold
+        distances.sort()
+        num_connections = min(random.randint(1, 2), len(distances))
+        for k in range(num_connections):
+            if router_id < distances[k][1]:  # Avoid duplicate links
+                link = {"s": router_id, "d": distances[k][1], "BW": link_bw_router, "PR": link_pr_router}
+                topology_object["link"].append(link)
+    
+    return topology_object
+
 def createApplication():
     applicationObject = Application(name="FelipeCase")
 
@@ -124,7 +307,12 @@ if __name__ == "__main__":
 
     # The topology is being created using the function createTopology()
     topology = Topology()
-    topology.load(createTopology())
+    # topology.load(createTopology())
+    topology.load(createRandomTopology(num_fog_nodes=30, num_routers=500, num_sensors_per_router=2, 
+                        num_actuators_per_router=1, fog_ipt=1000*10**6, fog_ram=8000,
+                        fog_cost=2, fog_watt=10.0, link_bw_fog=10, link_pr_fog=10,
+                        link_bw_router=5, link_pr_router=5, link_bw_device=1, 
+                        link_pr_device=1, random_seed=42))
     
     networkx.write_gexf(
         topology.G, results_path + "graph_felipe_tutorial1.gexf"
