@@ -493,74 +493,26 @@ if __name__ == "__main__":
     )
 
     # The application is being created using the function createApplication()
-    application1 = create_application("Application-1")
-    application2 = create_application("Application-2")
+    # application1 = create_application("Application-1")
+    # application2 = create_application("Application-2")
 
-    # Initial placement if "mytag": "cloud"
-    placementAlgorithm1 = CloudPlacement("tagEqualsToCloud")
-    placementAlgorithm1.scaleService({f"Application-1-Service": 1, f"Application-2-Service": 1})
+    # # Initial placement if "mytag": "cloud"
+    # placementAlgorithm1 = CloudPlacement("tagEqualsToCloud")
+    # placementAlgorithm1.scaleService({f"Application-1-Service": 1, f"Application-2-Service": 1})
 
-    placementAlgorithm2 = CloudPlacement("tagEqualsToCloud")
-    placementAlgorithm2.scaleService({f"Application-2-Service": 1})
+    # placementAlgorithm2 = CloudPlacement("tagEqualsToCloud")
+    # placementAlgorithm2.scaleService({f"Application-2-Service": 1})
 
     dDistribution = deterministic_distribution(name="Deterministic", time=100)
 
-    population_1 = Statical("Statical-1")
-    population_1.set_src_control({"model": "Application-1-Sensor", "number":1,"message": application1.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
-    population_1.set_sink_control({"model": "Application-1-Actuator","number":1,"module":application1.get_sink_modules()})
+    # population_1 = Statical("Statical-1")
+    # population_1.set_src_control({"model": "Application-1-Sensor", "number":1,"message": application1.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
+    # population_1.set_sink_control({"model": "Application-1-Actuator","number":1,"module":application1.get_sink_modules()})
 
-    population_2 = Statical("Statical-2")
-    population_2.set_src_control({"model": "Application-2-Sensor", "number":1,"message": application2.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
-    population_2.set_sink_control({"model": "Application-2-Actuator","number":1,"module":application2.get_sink_modules()})
+    # population_2 = Statical("Statical-2")
+    # population_2.set_src_control({"model": "Application-2-Sensor", "number":1,"message": application2.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
+    # population_2.set_sink_control({"model": "Application-2-Actuator","number":1,"module":application2.get_sink_modules()})
 
-
-    # # Population Algorithm
-    # populationAlgorithm1 = Statical("Statical")
-    # # For each type of sink modules we set a deployment on some type of devices
-    # # A control sink consists on:
-    # #  args:
-    # #     model (str): identifies the device or devices where the sink is linked
-    # #     number (int): quantity of sinks linked in each device
-    # #     module (str): identifies the module from the app who receives the messages
-    # populationAlgorithm1.set_sink_control(
-    #     {"model": actuatorNodeName, "number": 1, "module": application1.get_sink_modules()}
-    # )
-
-    # # In addition, a source includes a distribution function, This basically says send message every 50 simulation times
-    # distributionObject = deterministic_distribution(name="Deterministic", time=50)
-
-    # populationAlgorithm1.set_src_control(
-    #     {
-    #         "model": "Sensor-23",
-    #         "number": 1,
-    #         "message": application1.get_message("Hey This is Sensor Calling Service!"),
-    #         "distribution": distributionObject,
-    #     }
-    # )
-
-    # Population Algorithm
-    # populationAlgorithm2 = Statical("Statical")
-    # For each type of sink modules we set a deployment on some type of devices
-    # A control sink consists on:
-    #  args:
-    #     model (str): identifies the device or devices where the sink is linked
-    #     number (int): quantity of sinks linked in each device
-    #     module (str): identifies the module from the app who receives the messages
-    # populationAlgorithm2.set_sink_control(
-    #     {"model": actuatorNodeName, "number": 1, "module": application1.get_sink_modules()}
-    # )
-
-    # In addition, a source includes a distribution function, This basically says send message every 50 simulation times
-    distributionObject = deterministic_distribution(name="Deterministic", time=50)
-
-    # populationAlgorithm2.set_src_control(
-    #     {
-    #         "model": "Sensor-43",
-    #         "number": 1,
-    #         "message": application1.get_message("Hey This is Sensor Calling Service!"),
-    #         "distribution": distributionObject,
-    #     }
-    # )
 
     # Their "selector" is actually the shortest way, there is not type of orchestration algorithm.
     # This implementation is already created in selector.class,called: First_ShortestPath
@@ -569,8 +521,44 @@ if __name__ == "__main__":
     stop_time = 1000
 
     simulationObject = Sim(topology, default_results_path=results_path + "sim_trace")
-    simulationObject.deploy_app2(application1, placementAlgorithm1, population_1, selectorPathAlgorithm)
-    simulationObject.deploy_app2(application2, placementAlgorithm1, population_2, selectorPathAlgorithm)
+    
+    # Identify all applications from the topology entities
+    app_ids = set()
+    for entity in topo_data["entity"]:
+        if "model" in entity and entity["model"].startswith("Application-"):
+            # Format: Application-{id}-DeviceType
+            parts = entity["model"].split("-")
+            if len(parts) >= 2 and parts[1].isdigit():
+                app_ids.add(int(parts[1]))
+    
+    sorted_app_ids = sorted(list(app_ids))
+    print(f"Deploying {len(sorted_app_ids)} applications...")
+
+    for app_id in sorted_app_ids:
+        app_name = f"Application-{app_id}"
+        app = create_application(app_name)
+        
+        # Placement
+        # We use a unique placement policy name per application to ensure they are independent
+        placement = CloudPlacement(f"CloudPlacement-{app_id}")
+        placement.scaleService({f"{app_name}-Service": 1})
+        
+        # Population
+        pop = Statical(f"Statical-{app_id}")
+        pop.set_src_control({
+            "model": f"{app_name}-Sensor", 
+            "number": 1, 
+            "message": app.get_message("Sensor calling Service"), 
+            "distribution": dDistribution,
+            "param": {"time_shift": 100}
+        })
+        pop.set_sink_control({
+            "model": f"{app_name}-Actuator", 
+            "number": 1, 
+            "module": app.get_sink_modules()
+        })
+        
+        simulationObject.deploy_app2(app, placement, pop, selectorPathAlgorithm)
 
     simulationObject.run(stop_time)
 
