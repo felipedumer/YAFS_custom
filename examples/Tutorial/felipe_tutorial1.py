@@ -361,7 +361,7 @@ def createApplication():
     applicationObject.add_source_messages(anotherMessageFromSensorToSink)
 
     # Modules redirect the messages ??? but it can also be a sink
-    applicationObject.add_service_module(service1Name, messageFromSensorToService, messageFromServiceToConsumer, fractional_selectivity(threshold=1.0))
+    applicationObject.add_service_module(service1Name, messageFromSensorToService, messageFromServiceToConsumer, fractional_selectivity, threshold=1.0)
 
     return applicationObject
 
