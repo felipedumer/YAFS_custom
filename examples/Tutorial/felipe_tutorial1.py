@@ -369,9 +369,13 @@ if __name__ == "__main__":
     import logging.config
     import os
 
-    path = os.getcwd()
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Define the log file path
+    log_file_path = os.path.join(script_dir, 'execution.log')
 
-    logging.config.fileConfig(os.getcwd() + "/logging.ini")
+    logging.config.fileConfig(os.path.join(script_dir, "logging.ini"), defaults={'logfilename': log_file_path})
 
     start_time = time.time()
 
