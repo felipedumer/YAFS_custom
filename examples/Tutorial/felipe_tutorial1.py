@@ -458,4 +458,6 @@ if __name__ == "__main__":
     simulationObject = Sim(topology, default_results_path=results_path + "sim_trace")
     simulationObject.deploy_app2(application, placementAlgorithm, populationAlgorithm, selectorPathAlgorithm)
 
+    simulationObject.run(stop_time)
+
     print("\n--- %s seconds ---" % (time.time() - start_time))
