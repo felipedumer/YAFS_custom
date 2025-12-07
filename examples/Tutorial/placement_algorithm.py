@@ -103,3 +103,78 @@ class CloudPlacement(Placement):
                             if not file_exists:
                                 writer.writerow(["App", "Module", "NodeID", "RequiredRAM", "AvailableRAM", "Message"])
                             writer.writerow([app_name, module, "None", required_ram, "N/A", msg])
+    
+    def run(self, sim):
+        """
+        This method is invoked periodically by the simulator to reallocate services.
+        Here we implement a simple reallocation strategy:
+        - Check if any service is running on Fog.
+        - If so, try to move it to the Cloud.
+        """
+        logging.info(f"Running Reallocation Strategy for {self.name}")
+        
+        # We need to iterate over the applications managed by this placement policy
+        # Since we create one policy per app, we can extract the app name from the policy name
+        # Policy name format: "CloudPlacement-{app_id}" -> App name: "Application-{app_id}"
+        try:
+            app_id = self.name.split("-")[1]
+            app_name = f"Application-{app_id}"
+        except IndexError:
+            logging.error(f"Could not parse app ID from placement policy name: {self.name}")
+            return
+
+        if app_name not in sim.apps:
+            return
+
+        app = sim.apps[app_name]
+        services = app.services
+        
+        # Get Cloud Node ID
+        value_cloud = {"mytag": "cloud"}
+        id_cloud_list = sim.topology.find_IDs(value_cloud)
+        if not id_cloud_list:
+            return
+        id_cloud = id_cloud_list[0]
+
+        # Iterate over services to check if they are NOT on the Cloud (i.e. on Fog)
+        for module in services:
+            # Check where the module is currently deployed
+            # sim.alloc_module[app_name][module] returns a list of DES IDs (not Node IDs)
+            des_ids = sim.alloc_module[app_name].get(module, [])
+            
+            for des_id in des_ids:
+                # Get the actual Node ID from the DES ID
+                current_node_id = sim.alloc_DES[des_id]
+                
+                if current_node_id != id_cloud:
+                    logging.info(f"Service {module} of {app_name} is on Fog (ID: {current_node_id}). Migrating to Cloud...")
+                    
+                    cloud_node = sim.topology.get_node(id_cloud)
+                    available_ram = cloud_node.get("RAM", 0)
+                    
+                    # We need to know the RAM requirement of the module
+                    required_ram = 0
+                    for item in app.data:
+                        if module in item:
+                            required_ram = item[module].get("RAM", 0)
+                            break
+                    
+                    if available_ram >= required_ram:
+                        # Perform Migration
+                        logging.info(f"Migrating {module} from Fog (ID: {current_node_id}) to Cloud (ID: {id_cloud})")
+                        
+                        # 1. Undeploy from Fog (requires DES ID)
+                        sim.undeploy_module(app_name, module, des_id)
+                        fog_node = sim.topology.get_node(current_node_id)
+                        
+                        if "RAM" in fog_node:
+                            fog_node["RAM"] += required_ram
+                        else:
+                            logging.warning(f"Node {current_node_id} ({fog_node.get('label')}) has no 'RAM' attribute. Cannot restore RAM.")
+
+                        # 2. Deploy to Cloud
+                        sim.deploy_module(app_name, module, services[module], [id_cloud])
+                        cloud_node["RAM"] -= required_ram
+                        
+                    else:
+                        logging.info(f"Could not migrate {module} to Cloud. Cloud has not enough RAM.")
