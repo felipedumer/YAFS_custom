@@ -8,3 +8,38 @@
 build/
 src/yafs.egg-info/
 
+# IDEs
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Distribution / packaging
+dist/
+*.egg
+*.egg-info/
+.installed.cfg
+*.whl
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+.env.local
+
+# OS generated files
+Thumbs.db
