@@ -107,11 +107,12 @@ class CloudPlacement(Placement):
     def run(self, sim):
         """
         This method is invoked periodically by the simulator to reallocate services.
-        Here we implement a simple reallocation strategy:
-        - Check if any service is running on Fog.
-        - If so, try to move it to the Cloud.
+        Strategy:
+        - Time < 2000: Migrate Fog -> Cloud.
+        - Time >= 2000: Migrate Cloud -> Fog.
         """
-        logging.info(f"Running Reallocation Strategy for {self.name}")
+        current_time = sim.env.now
+        logging.info(f"Running Reallocation Strategy for {self.name} at time {current_time}")
         
         # We need to iterate over the applications managed by this placement policy
         # Since we create one policy per app, we can extract the app name from the policy name
@@ -136,7 +137,11 @@ class CloudPlacement(Placement):
             return
         id_cloud = id_cloud_list[0]
 
-        # Iterate over services to check if they are NOT on the Cloud (i.e. on Fog)
+        # Get Fog Nodes
+        value_fog = {"mytag": "fog"}
+        id_fog_list = sim.topology.find_IDs(value_fog)
+
+        # Iterate over services
         for module in services:
             # Check where the module is currently deployed
             # sim.alloc_module[app_name][module] returns a list of DES IDs (not Node IDs)
@@ -146,35 +151,83 @@ class CloudPlacement(Placement):
                 # Get the actual Node ID from the DES ID
                 current_node_id = sim.alloc_DES[des_id]
                 
-                if current_node_id != id_cloud:
-                    logging.info(f"Service {module} of {app_name} is on Fog (ID: {current_node_id}). Migrating to Cloud...")
-                    
-                    cloud_node = sim.topology.get_node(id_cloud)
-                    available_ram = cloud_node.get("RAM", 0)
-                    
-                    # We need to know the RAM requirement of the module
-                    required_ram = 0
-                    for item in app.data:
-                        if module in item:
-                            required_ram = item[module].get("RAM", 0)
-                            break
-                    
-                    if available_ram >= required_ram:
-                        # Perform Migration
-                        logging.info(f"Migrating {module} from Fog (ID: {current_node_id}) to Cloud (ID: {id_cloud})")
-                        
-                        # 1. Undeploy from Fog (requires DES ID)
-                        sim.undeploy_module(app_name, module, des_id)
-                        fog_node = sim.topology.get_node(current_node_id)
-                        
-                        if "RAM" in fog_node:
-                            fog_node["RAM"] += required_ram
-                        else:
-                            logging.warning(f"Node {current_node_id} ({fog_node.get('label')}) has no 'RAM' attribute. Cannot restore RAM.")
+                # Get required RAM
+                required_ram = 0
+                for item in app.data:
+                    if module in item:
+                        required_ram = item[module].get("RAM", 0)
+                        break
 
-                        # 2. Deploy to Cloud
-                        sim.deploy_module(app_name, module, services[module], [id_cloud])
-                        cloud_node["RAM"] -= required_ram
+                # Strategy 1: Fog -> Cloud (Time < 2000)
+                if current_time < 2000:
+                    if current_node_id != id_cloud:
+                        logging.info(f"Time < 2000: Service {module} is on Fog (ID: {current_node_id}). Migrating to Cloud...")
                         
-                    else:
-                        logging.info(f"Could not migrate {module} to Cloud. Cloud has not enough RAM.")
+                        cloud_node = sim.topology.get_node(id_cloud)
+                        available_ram = cloud_node.get("RAM", 0)
+                        
+                        if available_ram >= required_ram:
+                            # Perform Migration
+                            logging.info(f"Migrating {module} from Fog (ID: {current_node_id}) to Cloud (ID: {id_cloud})")
+                            
+                            # 1. Undeploy from Fog
+                            sim.undeploy_module(app_name, module, des_id)
+                            fog_node = sim.topology.get_node(current_node_id)
+                            
+                            if "RAM" in fog_node:
+                                fog_node["RAM"] += required_ram
+                            else:
+                                logging.warning(f"Node {current_node_id} ({fog_node.get('label')}) has no 'RAM' attribute. Cannot restore RAM.")
+
+                            # 2. Deploy to Cloud
+                            sim.deploy_module(app_name, module, services[module], [id_cloud])
+                            cloud_node["RAM"] -= required_ram
+                            
+                        else:
+                            logging.info(f"Could not migrate {module} to Cloud. Cloud has not enough RAM.")
+
+                # Strategy 2: Cloud -> Fog (Time >= 2000)
+                else:
+                    if current_node_id == id_cloud:
+                        logging.info(f"Time >= 2000: Service {module} is on Cloud. Migrating to Fog...")
+                        
+                        # Find nearest Fog node logic
+                        sensor_model = f"{app_name}-Sensor"
+                        sensor_nodes = sim.topology.find_IDs({"model": sensor_model})
+                        
+                        target_fog_list = list(id_fog_list)
+                        
+                        if sensor_nodes:
+                            sensor_id = sensor_nodes[0]
+                            fog_distances = []
+                            for fog_id in target_fog_list:
+                                try:
+                                    distance = nx.shortest_path_length(sim.topology.G, source=sensor_id, target=fog_id, weight='PR')
+                                    fog_distances.append((fog_id, distance))
+                                except nx.NetworkXNoPath:
+                                    fog_distances.append((fog_id, float('inf')))
+                            fog_distances.sort(key=lambda x: x[1])
+                            target_fog_list = [x[0] for x in fog_distances]
+                        
+                        migrated = False
+                        for id_fog in target_fog_list:
+                            fog_node = sim.topology.get_node(id_fog)
+                            available_ram = fog_node.get("RAM", 0)
+                            
+                            if available_ram >= required_ram:
+                                logging.info(f"Migrating {module} from Cloud to {fog_node.get('label')} (ID: {id_fog})")
+                                
+                                # 1. Undeploy from Cloud
+                                sim.undeploy_module(app_name, module, des_id)
+                                cloud_node = sim.topology.get_node(id_cloud)
+                                cloud_node["RAM"] += required_ram
+                                
+                                # 2. Deploy to Fog
+                                sim.deploy_module(app_name, module, services[module], [id_fog])
+                                fog_node["RAM"] -= required_ram
+                                
+                                migrated = True
+                                break
+                        
+                        if not migrated:
+                            logging.info(f"Could not migrate {module} from Cloud. No Fog node has enough RAM.")
