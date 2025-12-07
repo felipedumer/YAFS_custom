@@ -1,5 +1,7 @@
 from yafs.placement import Placement
 import logging
+import csv
+import os
 
 class CloudPlacement(Placement):
     """
@@ -41,6 +43,19 @@ class CloudPlacement(Placement):
                         cloud_node["RAM"] -= required_ram
                         logging.info(f"Deployed {module} on Cloud (ID: {id_cloud}). Remaining RAM: {cloud_node['RAM']}")
                     else:
-                        logging.error(f"Not enough RAM on Cloud (ID: {id_cloud}) for {module}. "
-                              f"Required: {required_ram}, Available: {available_ram}")
-                        raise Exception(f"Deployment failed for {module}: Insufficient RAM.")
+                        msg = f"Not enough RAM on Cloud (ID: {id_cloud}) for {module}. Required: {required_ram}, Available: {available_ram}"
+                        logging.error(msg)
+                        
+                        # Register error in a CSV file
+                        error_log_path = "resultados/deployment_errors.csv"
+                        os.makedirs(os.path.dirname(error_log_path), exist_ok=True)
+
+                        file_exists = os.path.isfile(error_log_path)
+                        with open(error_log_path, 'a', newline='') as f:
+                            writer = csv.writer(f)
+                            if not file_exists:
+                                writer.writerow(["App", "Module", "NodeID", "RequiredRAM", "AvailableRAM", "Message"])
+                            writer.writerow([app_name, module, id_cloud, required_ram, available_ram, msg])
+                        
+                        # We do not raise exception, just log the error and skip deployment
+                        # raise Exception(f"Deployment failed for {module}: Insufficient RAM.")
