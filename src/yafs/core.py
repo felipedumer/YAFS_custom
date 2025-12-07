@@ -191,12 +191,19 @@ class Sim:
                     # print "NODES (%i): %s"%(len(self.topology.G.nodes()),self.topology.G.nodes())
                     self.logger.debug("NODES (%i)" % len(self.topology.G.nodes()))
 
-                    if self.control_movement_class is not None:
-                        self.logger.debug("STEP : ",self.control_movement_class.current_step)
+                    # This doesn't exist
+                    # if self.control_movement_class is not None:
+                    #     self.logger.debug("STEP : ",self.control_movement_class.current_step)
 
             else:
+                src_node_id = self.alloc_DES[idDES]
+                src_label = self.topology.get_node(src_node_id).get('label', src_node_id)
+                dst_labels = []
+                for dst_des in DES_dst:
+                    dst_node_id = self.alloc_DES[dst_des]
+                    dst_labels.append(self.topology.get_node(dst_node_id).get('label', dst_node_id))
 
-                self.logger.debug("(#DES:%i)\t--- SENDING Message:\t%s: PATH:%s  DES:%s" % (idDES, message.name,paths,DES_dst))
+                self.logger.debug("(#DES:%i)\t--- SENDING Message:\t%s: PATH:%s  DES:%s | SRC: %s -> DST: %s" % (idDES, message.name,paths,DES_dst, src_label, dst_labels))
 
                 # print "MESSAGES"
                 #May be, the selector of path decides broadcasting multiples paths
@@ -223,12 +230,12 @@ class Sim:
         while not self.stop:
             message = yield self.network_ctrl_pipe.get()
 
-            # print "NetworkProcess --- Current time %d " %self.env.now
-            # print "name " + message.name
-            # print "Path:",message.path
-            # print "DST_INT:",message.dst_int
-            # #print message.timestamp
-            # print "DST",message.dst
+            print("NetworkProcess --- Current time %d " %self.env.now)
+            print("name " + message.name)
+            print("Path:",message.path)
+            print("DST_INT:",message.dst_int)
+            print(message.timestamp)
+            print("DST",message.dst)
 
 
             # If same SRC and PATH or the message has achieved the penultimate node to reach the dst
