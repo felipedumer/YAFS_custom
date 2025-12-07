@@ -13,82 +13,15 @@ from yafs.distribution import deterministic_distribution
 from placement_algorithm import CloudPlacement
 from simpleSelection import MinimunPath
 
-ACTUATOR_MODEL_NAME = "actuator-device"
-SENSOR_MODEL_NAME = "sensor-device"
-
-def create_fixed_topology():
-    """
-    Creates a simple fixed topology for testing purposes.
-
-    Returns:
-        dict: A dictionary representing the topology with 'entity' and 'link' lists.
-    """
-
-    ## REQUIRED FIELDS
-    topology_json = {}
-    topology_json["entity"] = []
-    topology_json["link"] = []
-
-    cloud_dev = {
-        "id": 0,
-        "model": "cloud",
-        "mytag": "cloud",
-        "IPT": 5000 * 10**6,
-        "RAM": 40000,
-        "COST": 3,
-        "WATT": 20.0,
-    }
-    fog_device = {
-        "id": 1,
-        "model": "fog-device",
-        "mytag": "fog",
-        "IPT": 1000 * 10**6,
-        "RAM": 8000,
-        "COST": 2,
-        "WATT": 10.0,
-    }
-    router_device = {
-        "id": 2,
-        "model": "router",
-        "mytag": "router",
-        "IPT": 0,
-        "RAM": 0,
-    }
-    sensor_dev = {
-        "id": 3,
-        "model": SENSOR_MODEL_NAME,
-    }
-    actuator_dev = {
-        "id": 4,
-        "model": ACTUATOR_MODEL_NAME,
-    }
-
-    link_0_to_1 = {"s": 0, "d": 1, "BW": 10, "PR": 10}
-    link_1_to_2 = {"s": 1, "d": 2, "BW": 5, "PR": 5}
-    link_2_to_3 = {"s": 2, "d": 3, "BW": 1, "PR": 10}
-    link_2_to_4 = {"s": 2, "d": 4, "BW": 1, "PR": 1}
-
-    topology_json["entity"].append(cloud_dev)
-    topology_json["entity"].append(sensor_dev)
-    topology_json["entity"].append(actuator_dev)
-    topology_json["entity"].append(router_device)
-    topology_json["entity"].append(fog_device)
-
-    topology_json["link"].append(link_0_to_1)
-    topology_json["link"].append(link_1_to_2)
-    topology_json["link"].append(link_2_to_3)
-    topology_json["link"].append(link_2_to_4)
-    return topology_json
-
 def create_random_topology(
     num_fog_nodes=2,
     random_seed=None,
     cloud_ipt=5 * 10**6,
-    cloud_ram=40,
+    cloud_ram=10000,
     cloud_cost=10,
     cloud_watt=100.0,
     fog_ipt=1000 * 10**6,
-    fog_ram=8000,
+    fog_ram=500,
     fog_cost=2,
     fog_watt=10.0,
     link_bw_cloud=100,
@@ -333,80 +266,6 @@ def create_random_topology(
 
     return topology_json
 
-def create_simple_application(name: str) -> Application:
-    """
-    Creates the application definition with modules and messages.
-
-    Returns:
-        Application: The application object containing modules, messages, and services.
-    """
-    applicationObject = Application(name=name)
-
-    sensor1Name = "SensorCollectingRawData"
-    service1Name = "ServiceProcessingTheRequest"
-    sink1Name = "SinkMessageConsumer"
-
-    # Creating modules
-    applicationObject.set_modules(
-        [
-            {sensor1Name: {"Type": Application.TYPE_SOURCE}},
-            {service1Name: {"RAM": 10, "Type": Application.TYPE_MODULE}},
-            {sink1Name: {"Type": Application.TYPE_SINK}},
-        ]
-    )
-
-    # Creating messages
-    messageFromSensorToService = Message("Hey This is Sensor Calling Service!", sensor1Name, service1Name, instructions=20 * 10**6, bytes=1000)
-    messageFromServiceToConsumer = Message("This is Service sending message to the Consumer!", service1Name, sink1Name, instructions=20 * 10**6, bytes=1000)
-    anotherMessageFromSensorToSink = Message("Sensor sending message directly to sink !", sensor1Name, sink1Name, instructions=30 * 10**6, bytes=500)
-
-    # Source messages are controlled by popution algorithm
-    applicationObject.add_source_messages(messageFromSensorToService)
-    applicationObject.add_source_messages(anotherMessageFromSensorToSink)
-
-    # Modules redirect the messages ??? but it can also be a sink
-    applicationObject.add_service_module(service1Name, messageFromSensorToService, messageFromServiceToConsumer, fractional_selectivity, threshold=1.0)
-
-    return applicationObject
-
-def create_complex_application_unused(name: str) -> Application:
-    """
-    Creates a more complex application definition with modules and messages.
-
-    Returns:
-        Application: The application object containing modules, messages, and services.
-    """
-    applicationObject = Application(name=name)
-
-    sensorName = "Sensor"
-    serviceAName = "ServiceA"
-    serviceBName = "ServiceB"
-    sinkName = "Actuator"
-
-    # Creating modules
-    applicationObject.set_modules(
-        [
-            {sensorName: {"Type": Application.TYPE_SOURCE}},
-            {serviceAName: {"RAM": 10, "Type": Application.TYPE_MODULE}},
-            {serviceBName: {"RAM": 10, "Type": Application.TYPE_MODULE}},
-            {sinkName: {"Type": Application.TYPE_SINK}},
-        ]
-    )
-
-    # Creating messages
-    messageA = Message("M.A", sensorName, serviceAName, instructions=20 * 10**6, bytes=1000)
-    messageB = Message("M.B", serviceAName, serviceBName, instructions=30 * 10**6, bytes=500)
-    messageC = Message("M.C", serviceBName, sinkName, instructions=25 * 10**6, bytes=800)
-
-    # Source messages are controlled by population algorithm
-    applicationObject.add_source_messages(messageA)
-
-    # Modules redirect the messages
-    applicationObject.add_service_module(serviceAName, messageA, messageB, fractional_selectivity, threshold=1.0)
-    applicationObject.add_service_module(serviceBName, messageB, messageC, fractional_selectivity, threshold=1.0)
-
-    return applicationObject
-
 def create_application_structure(name: str) -> Application:
     # APLICATION
     app = Application(name)
@@ -492,27 +351,7 @@ if __name__ == "__main__":
         topology.G, results_path + f"graph_{num_fog_nodes}_fog.gexf"
     )
 
-    # The application is being created using the function create_application_structure()
-    # application1 = create_application_structure("Application-1")
-    # application2 = create_application_structure("Application-2")
-
-    # # Initial placement if "mytag": "cloud"
-    # placementAlgorithm1 = CloudPlacement("tagEqualsToCloud")
-    # placementAlgorithm1.scaleService({f"Application-1-Service": 1, f"Application-2-Service": 1})
-
-    # placementAlgorithm2 = CloudPlacement("tagEqualsToCloud")
-    # placementAlgorithm2.scaleService({f"Application-2-Service": 1})
-
     distribution = deterministic_distribution(name="Deterministic", time=100)
-
-    # population_1 = Statical("Statical-1")
-    # population_1.set_src_control({"model": "Application-1-Sensor", "number":1,"message": application1.get_message("Sensor calling Service"), "distribution": distribution,"param": {"time_shift": 100}})#5.1}})
-    # population_1.set_sink_control({"model": "Application-1-Actuator","number":1,"module":application1.get_sink_modules()})
-
-    # population_2 = Statical("Statical-2")
-    # population_2.set_src_control({"model": "Application-2-Sensor", "number":1,"message": application2.get_message("Sensor calling Service"), "distribution": distribution,"param": {"time_shift": 100}})#5.1}})
-    # population_2.set_sink_control({"model": "Application-2-Actuator","number":1,"module":application2.get_sink_modules()})
-
 
     # Their "selector" is actually the shortest way, there is not type of orchestration algorithm.
     # This implementation is already created in selector.class,called: First_ShortestPath
@@ -540,7 +379,9 @@ if __name__ == "__main__":
         
         # Placement
         # We use a unique placement policy name per application to ensure they are independent
-        placement_policy = CloudPlacement(f"CloudPlacement-{app_id}")
+        # Activation distribution for reallocation: every 1000 time units
+        reallocation_dist = deterministic_distribution(name="Reallocation", time=1000)
+        placement_policy = CloudPlacement(f"CloudPlacement-{app_id}", activation_dist=reallocation_dist)
         placement_policy.scaleService({f"{app_name}-Service": 1})
         
         # Population
