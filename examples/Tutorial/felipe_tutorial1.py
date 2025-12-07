@@ -10,7 +10,7 @@ from yafs.application import Application, Message, fractional_selectivity
 from yafs.population import Statical
 from yafs.distribution import deterministic_distribution
 
-from simplePlacement import CloudPlacement
+from placement_algorithm import CloudPlacement
 from simpleSelection import MinimunPath
 
 ACTUATOR_MODEL_NAME = "actuator-device"
@@ -83,8 +83,8 @@ def create_fixed_topology():
 def create_random_topology(
     num_fog_nodes=2,
     random_seed=None,
-    cloud_ipt=50000 * 10**6,
-    cloud_ram=400000,
+    cloud_ipt=5 * 10**6,
+    cloud_ram=40,
     cloud_cost=10,
     cloud_watt=100.0,
     fog_ipt=1000 * 10**6,
@@ -489,7 +489,7 @@ if __name__ == "__main__":
                 topology.G.edges[u, v][key] = str(value)
     
     networkx.write_gexf(
-        topology.G, results_path + "graph_felipe_tutorial1.gexf"
+        topology.G, results_path + f"graph.gexf"
     )
 
     # The application is being created using the function create_application_structure()
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     # This implementation is already created in selector.class,called: First_ShortestPath
     selection_policy = MinimunPath()
 
-    stop_time = 1000
+    stop_time = 10000
 
     simulator = Sim(topology, default_results_path=results_path + "sim_trace")
     
