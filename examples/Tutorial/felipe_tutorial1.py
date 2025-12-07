@@ -142,7 +142,7 @@ def createRandomTopology(
     # Automatically determine topology structure
     middle_per_fog = random.randint(2, 3)
     routers_per_middle = random.randint(2, 3)
-    sensors_per_router = random.randint(1, 2)
+    sensors_per_router = 1
     actuators_per_router = 1
 
     topology_object = {"entity": [], "link": []}
@@ -274,16 +274,20 @@ def createRandomTopology(
                         existing_horizontal_links.add(link_pair)
 
     # 4. End Layer (Home Routers + Devices)
+    router_global_idx = 0
     for _, mid_id in middle_ids:
         for router_idx in range(routers_per_middle):
+            router_global_idx += 1
+            app_id = router_global_idx
+
             router_id = next_id()
             router_x = random_x()
             topology_object["entity"].append(
                 {
                     "id": router_id,
-                    "model": f"home-router",
+                    "model": f"Application-{app_id}-Router",
                     "mytag": "router",
-                    "label": f"Router-{mid_id}-{router_idx}",
+                    "label": f"Application-{app_id}-Router",
                     "IPT": 0,
                     "RAM": 0,
                     "x": router_x,
@@ -301,8 +305,8 @@ def createRandomTopology(
                 topology_object["entity"].append(
                     {
                         "id": sensor_id,
-                        "model": f"Sensor-{sensor_id}",
-                        "label": f"Sensor-{sensor_id}",
+                        "model": f"Application-{app_id}-Sensor",
+                        "label": f"Application-{app_id}-Sensor",
                         "x": router_x + random.uniform(-2, 2),
                         "y": device_y,
                     }
@@ -317,8 +321,8 @@ def createRandomTopology(
                 topology_object["entity"].append(
                     {
                         "id": actuator_id,
-                        "model": actuatorNodeName,
-                        "label": f"Actuator-{actuator_id}",
+                        "model": f"Application-{app_id}-Actuator",
+                        "label": f"Application-{app_id}-Actuator",
                         "x": router_x + random.uniform(-2, 2),
                         "y": device_y,
                     }
@@ -502,12 +506,12 @@ if __name__ == "__main__":
     dDistribution = deterministic_distribution(name="Deterministic", time=100)
 
     population_1 = Statical("Statical-1")
-    population_1.set_src_control({"model": "Sensor-23", "number":1,"message": application1.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
-    population_1.set_sink_control({"model": "Sensor-23","number":1,"module":application1.get_sink_modules()})
+    population_1.set_src_control({"model": "Application-1-Sensor", "number":1,"message": application1.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
+    population_1.set_sink_control({"model": "Application-1-Actuator","number":1,"module":application1.get_sink_modules()})
 
     population_2 = Statical("Statical-2")
-    population_2.set_src_control({"model": "Sensor-34", "number":1,"message": application2.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
-    population_2.set_sink_control({"model": "Sensor-34","number":1,"module":application2.get_sink_modules()})
+    population_2.set_src_control({"model": "Application-2-Sensor", "number":1,"message": application2.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
+    population_2.set_sink_control({"model": "Application-2-Actuator","number":1,"module":application2.get_sink_modules()})
 
 
     # # Population Algorithm
