@@ -283,9 +283,14 @@ class Sim:
 
                     #print "-link: %s -- lat: %d" %(link,latency_msg_link)
 
+                    src_label = self.topology.get_node(link[0]).get('label', link[0])
+                    dst_label = self.topology.get_node(link[1]).get('label', link[1])
+
                     # update link metrics
                     self.metrics.insert_link(
-                        {"id":message.id,"type": self.LINK_METRIC,"src":link[0],"dst":link[1],"app":message.app_name,"latency":latency_msg_link,"message": message.name,"ctime":self.env.now,"size":message.bytes,"buffer":self.network_pump})#"path":message.path})
+                        {"id":message.id,"type": self.LINK_METRIC,"src":link[0],"dst":link[1],
+                         "srcLabel": src_label, "dstLabel": dst_label,
+                         "app":message.app_name,"latency":latency_msg_link,"message": message.name,"ctime":self.env.now,"size":message.bytes,"buffer":self.network_pump})#"path":message.path})
 
                     # We compute the future latency considering the current utilization of the link
                     if last_used < self.env.now:
@@ -478,10 +483,17 @@ class Sim:
             # print "Source DES ",sourceDES
             # print "-" * 50
 
+            topo_src_id = message.path[0]
+            topo_dst_id = id_node
+            
+            topo_src_label = self.topology.get_node(topo_src_id).get('label', topo_src_id)
+            topo_dst_label = self.topology.get_node(topo_dst_id).get('label', topo_dst_id)
+
             self.metrics.insert(
                 {"id":message.id,"type": type, "app": app, "module": module, "message": message.name,
                  "DES.src": sourceDES, "DES.dst":des,"module.src": message.src,
-                 "TOPO.src": message.path[0], "TOPO.dst": id_node,
+                 "TOPO.src": topo_src_id, "TOPO.dst": topo_dst_id,
+                 "TOPO.srcLabel": topo_src_label, "TOPO.dstLabel": topo_dst_label,
 
                  "service": time_service, "time_in": self.env.now,
                  "time_out": time_service + self.env.now, "time_emit": float(message.timestamp),

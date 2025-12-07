@@ -13,9 +13,9 @@ class Metrics:
 
 
     def __init__(self, default_results_path=None):
-        columns_event = ["id","type", "app", "module", "message","DES.src","DES.dst","TOPO.src","TOPO.dst","module.src","service", "time_in","time_out",
+        columns_event = ["id","type", "app", "module", "message","DES.src","DES.dst","TOPO.src","TOPO.dst","TOPO.srcLabel","TOPO.dstLabel","module.src","service", "time_in","time_out",
                          "time_emit","time_reception"]
-        columns_link = ["id","type", "src", "dst", "app", "latency", "message", "ctime", "size","buffer"]
+        columns_link = ["id","type", "src", "dst", "srcLabel", "dstLabel", "app", "latency", "message", "ctime", "size","buffer"]
 
         path = "result"
         if  default_results_path is not None:
@@ -42,6 +42,8 @@ class Metrics:
                     value["DES.dst"],
                     value["TOPO.src"],
                     value["TOPO.dst"],
+                    value.get("TOPO.srcLabel", ""),
+                    value.get("TOPO.dstLabel", ""),
                     value["module.src"],
                     value["service"],
                     value["time_in"],
@@ -54,6 +56,8 @@ class Metrics:
         self.__ff_link.writerow([value["id"],value["type"],
                     value["src"],
                     value["dst"],
+                    value.get("srcLabel", ""),
+                    value.get("dstLabel", ""),
                     value["app"],
                     value["latency"],
                     value["message"],
