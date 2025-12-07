@@ -13,10 +13,10 @@ from yafs.distribution import deterministic_distribution
 from simplePlacement import CloudPlacement
 from simpleSelection import MinimunPath
 
-actuatorNodeName = "actuator-device"
-sensorNodeName = "sensor-device"
+ACTUATOR_MODEL_NAME = "actuator-device"
+SENSOR_MODEL_NAME = "sensor-device"
 
-def createTopology():
+def create_fixed_topology():
     """
     Creates a simple fixed topology for testing purposes.
 
@@ -25,9 +25,9 @@ def createTopology():
     """
 
     ## REQUIRED FIELDS
-    topology_object = {}
-    topology_object["entity"] = []
-    topology_object["link"] = []
+    topology_json = {}
+    topology_json["entity"] = []
+    topology_json["link"] = []
 
     cloud_dev = {
         "id": 0,
@@ -56,11 +56,11 @@ def createTopology():
     }
     sensor_dev = {
         "id": 3,
-        "model": sensorNodeName,
+        "model": SENSOR_MODEL_NAME,
     }
     actuator_dev = {
         "id": 4,
-        "model": actuatorNodeName,
+        "model": ACTUATOR_MODEL_NAME,
     }
 
     link_0_to_1 = {"s": 0, "d": 1, "BW": 10, "PR": 10}
@@ -68,19 +68,19 @@ def createTopology():
     link_2_to_3 = {"s": 2, "d": 3, "BW": 1, "PR": 10}
     link_2_to_4 = {"s": 2, "d": 4, "BW": 1, "PR": 1}
 
-    topology_object["entity"].append(cloud_dev)
-    topology_object["entity"].append(sensor_dev)
-    topology_object["entity"].append(actuator_dev)
-    topology_object["entity"].append(router_device)
-    topology_object["entity"].append(fog_device)
+    topology_json["entity"].append(cloud_dev)
+    topology_json["entity"].append(sensor_dev)
+    topology_json["entity"].append(actuator_dev)
+    topology_json["entity"].append(router_device)
+    topology_json["entity"].append(fog_device)
 
-    topology_object["link"].append(link_0_to_1)
-    topology_object["link"].append(link_1_to_2)
-    topology_object["link"].append(link_2_to_3)
-    topology_object["link"].append(link_2_to_4)
-    return topology_object
+    topology_json["link"].append(link_0_to_1)
+    topology_json["link"].append(link_1_to_2)
+    topology_json["link"].append(link_2_to_3)
+    topology_json["link"].append(link_2_to_4)
+    return topology_json
 
-def createRandomTopology(
+def create_random_topology(
     num_fog_nodes=2,
     random_seed=None,
     cloud_ipt=50000 * 10**6,
@@ -95,21 +95,21 @@ def createRandomTopology(
     link_pr_cloud=20,
     link_bw_fog=15,
     link_pr_fog=8,
-    link_bw_middle=8,
-    link_pr_middle=5,
-    link_bw_router=2,
-    link_pr_router=1,
+    link_bw_aggregation=8,
+    link_pr_aggregation=5,
+    link_bw_edge=2,
+    link_pr_edge=1,
     city_width=100,
     layer_gap=40,
 ):
     """
-    Create a strict 4-layer topology (Cloud -> Fog -> Middle -> End).
+    Create a strict 4-layer topology (Cloud -> Fog -> Aggregation -> Edge).
     The number of nodes in lower layers is automatically generated.
 
     Layer 0 (Cloud): Single cloud node (high capacity).
     Layer 1 (Fog): Computational nodes connected to the cloud.
-    Layer 2 (Middle): Communication-only nodes (routers/switches) connected to Fog nodes.
-    Layer 3 (End): Home routers connected to Middle nodes, with sensors/actuators attached.
+    Layer 2 (Aggregation): Communication-only nodes (routers/switches) connected to Fog nodes.
+    Layer 3 (Edge): Home routers connected to Aggregation nodes, with sensors/actuators attached.
 
     Parameters:
         num_fog_nodes (int): Number of Fog nodes connected to the single Cloud node.
@@ -124,12 +124,12 @@ def createRandomTopology(
         fog_watt (float): Power consumption of Fog nodes.
         link_bw_cloud (float): Bandwidth for link from Cloud to Fog.
         link_pr_cloud (float): Propagation delay for link from Cloud to Fog.
-        link_bw_fog (float): Bandwidth for links from Fog to Middle.
-        link_pr_fog (float): Propagation delay for links from Fog to Middle.
-        link_bw_middle (float): Bandwidth for links from Middle to End routers.
-        link_pr_middle (float): Propagation delay for links from Middle to End routers.
-        link_bw_router (float): Bandwidth for links from End routers to devices.
-        link_pr_router (float): Propagation delay for links from End routers to devices.
+        link_bw_fog (float): Bandwidth for links from Fog to Aggregation.
+        link_pr_fog (float): Propagation delay for links from Fog to Aggregation.
+        link_bw_aggregation (float): Bandwidth for links from Aggregation to Edge routers.
+        link_pr_aggregation (float): Propagation delay for links from Aggregation to Edge routers.
+        link_bw_edge (float): Bandwidth for links from Edge routers to devices.
+        link_pr_edge (float): Propagation delay for links from Edge routers to devices.
         city_width (float): Width of the simulation area (for x-coordinates).
         layer_gap (float): Vertical distance between layers (for y-coordinates).
 
@@ -140,12 +140,12 @@ def createRandomTopology(
         random.seed(random_seed)
 
     # Automatically determine topology structure
-    middle_per_fog = random.randint(2, 3)
-    routers_per_middle = random.randint(2, 3)
-    sensors_per_router = 1
-    actuators_per_router = 1
+    aggregation_nodes_per_fog = random.randint(2, 3)
+    edge_nodes_per_aggregation = random.randint(2, 3)
+    sensors_per_edge_node = 1
+    actuators_per_edge_node = 1
 
-    topology_object = {"entity": [], "link": []}
+    topology_json = {"entity": [], "link": []}
     node_id = 0
 
     def next_id():
@@ -160,13 +160,13 @@ def createRandomTopology(
     # Predefined y positions so NetworkX layouts show clear layers
     cloud_y = layer_gap * 3
     fog_y = layer_gap * 2
-    middle_y = layer_gap
-    router_y = 0
+    aggregation_y = layer_gap
+    edge_y = 0
     device_y = -layer_gap
 
     # 1. Cloud Layer (Single Node)
     cloud_id = next_id()
-    topology_object["entity"].append(
+    topology_json["entity"].append(
         {
             "id": cloud_id,
             "model": "cloud",
@@ -185,7 +185,7 @@ def createRandomTopology(
     fog_ids = []
     for i in range(num_fog_nodes):
         fog_id = next_id()
-        topology_object["entity"].append(
+        topology_json["entity"].append(
             {
                 "id": fog_id,
                 "model": f"fog",
@@ -200,31 +200,31 @@ def createRandomTopology(
             }
         )
         # Connect Fog to Cloud
-        topology_object["link"].append(
+        topology_json["link"].append(
             {"s": cloud_id, "d": fog_id, "BW": link_bw_cloud, "PR": link_pr_cloud}
         )
         fog_ids.append(fog_id)
 
-    # 3. Middle Layer (Communication Only)
-    middle_ids = []
+    # 3. Aggregation Layer (Communication Only)
+    aggregation_node_ids = []
     for fog_idx, fog_id in enumerate(fog_ids):
-        for mid_idx in range(middle_per_fog):
-            mid_id = next_id()
-            topology_object["entity"].append(
+        for agg_idx in range(aggregation_nodes_per_fog):
+            agg_id = next_id()
+            topology_json["entity"].append(
                 {
-                    "id": mid_id,
+                    "id": agg_id,
                     "model": f"middle",
                     "mytag": "router", # Tagged as router since it's comm-only
-                    "label": f"Middle-{fog_idx}-{mid_idx}",
+                    "label": f"Middle-{fog_idx}-{agg_idx}",
                     "IPT": 0, # No computational power
                     "RAM": 0,
                     "x": random_x(),
-                    "y": middle_y,
+                    "y": aggregation_y,
                 }
             )
-            # Connect Middle to Fog (Primary Link)
-            topology_object["link"].append(
-                {"s": fog_id, "d": mid_id, "BW": link_bw_fog, "PR": link_pr_fog}
+            # Connect Aggregation to Fog (Primary Link)
+            topology_json["link"].append(
+                {"s": fog_id, "d": agg_id, "BW": link_bw_fog, "PR": link_pr_fog}
             )
             
             connected_fogs = {fog_id}
@@ -236,104 +236,104 @@ def createRandomTopology(
                 other_fogs = [f for f in fog_ids if f not in connected_fogs]
                 if other_fogs:
                     extra_fog = random.choice(other_fogs)
-                    topology_object["link"].append(
-                        {"s": extra_fog, "d": mid_id, "BW": link_bw_fog, "PR": link_pr_fog}
+                    topology_json["link"].append(
+                        {"s": extra_fog, "d": agg_id, "BW": link_bw_fog, "PR": link_pr_fog}
                     )
                     connected_fogs.add(extra_fog)
 
-            middle_ids.append((fog_id, mid_id))
+            aggregation_node_ids.append((fog_id, agg_id))
 
-    # Redundancy: Horizontal connections between Middle nodes
-    # Connect each middle node to at least one other middle node (Ring-like + Random)
-    all_middle_nodes = [mid_id for _, mid_id in middle_ids]
+    # Redundancy: Horizontal connections between Aggregation nodes
+    # Connect each aggregation node to at least one other aggregation node (Ring-like + Random)
+    all_aggregation_nodes = [agg_id for _, agg_id in aggregation_node_ids]
     existing_horizontal_links = set()
     
-    if len(all_middle_nodes) > 1:
+    if len(all_aggregation_nodes) > 1:
         # 1. Create a ring to ensure all are connected horizontally
-        for i in range(len(all_middle_nodes)):
-            u = all_middle_nodes[i]
-            v = all_middle_nodes[(i + 1) % len(all_middle_nodes)] # Next node (circular)
+        for i in range(len(all_aggregation_nodes)):
+            u = all_aggregation_nodes[i]
+            v = all_aggregation_nodes[(i + 1) % len(all_aggregation_nodes)] # Next node (circular)
             
             link_pair = tuple(sorted((u, v)))
             if link_pair not in existing_horizontal_links:
-                topology_object["link"].append(
-                    {"s": u, "d": v, "BW": link_bw_middle, "PR": link_pr_middle}
+                topology_json["link"].append(
+                    {"s": u, "d": v, "BW": link_bw_aggregation, "PR": link_pr_aggregation}
                 )
                 existing_horizontal_links.add(link_pair)
 
         # 2. Add random cross-links for extra redundancy
-        for mid_id in all_middle_nodes:
+        for agg_id in all_aggregation_nodes:
             if random.random() < 0.3: # 30% chance for an extra link
-                neighbor = random.choice(all_middle_nodes)
-                if neighbor != mid_id:
-                    link_pair = tuple(sorted((mid_id, neighbor)))
+                neighbor = random.choice(all_aggregation_nodes)
+                if neighbor != agg_id:
+                    link_pair = tuple(sorted((agg_id, neighbor)))
                     if link_pair not in existing_horizontal_links:
-                        topology_object["link"].append(
-                            {"s": mid_id, "d": neighbor, "BW": link_bw_middle, "PR": link_pr_middle}
+                        topology_json["link"].append(
+                            {"s": agg_id, "d": neighbor, "BW": link_bw_aggregation, "PR": link_pr_aggregation}
                         )
                         existing_horizontal_links.add(link_pair)
 
-    # 4. End Layer (Home Routers + Devices)
-    router_global_idx = 0
-    for _, mid_id in middle_ids:
-        for router_idx in range(routers_per_middle):
-            router_global_idx += 1
-            app_id = router_global_idx
+    # 4. Edge Layer (Home Routers + Devices)
+    edge_node_global_idx = 0
+    for _, agg_id in aggregation_node_ids:
+        for edge_idx in range(edge_nodes_per_aggregation):
+            edge_node_global_idx += 1
+            app_id = edge_node_global_idx
 
-            router_id = next_id()
-            router_x = random_x()
-            topology_object["entity"].append(
+            edge_node_id = next_id()
+            edge_node_x = random_x()
+            topology_json["entity"].append(
                 {
-                    "id": router_id,
+                    "id": edge_node_id,
                     "model": f"Application-{app_id}-Router",
                     "mytag": "router",
                     "label": f"Application-{app_id}-Router",
                     "IPT": 0,
                     "RAM": 0,
-                    "x": router_x,
-                    "y": router_y,
+                    "x": edge_node_x,
+                    "y": edge_y,
                 }
             )
-            # Connect Home Router to Middle Node
-            topology_object["link"].append(
-                {"s": mid_id, "d": router_id, "BW": link_bw_middle, "PR": link_pr_middle}
+            # Connect Home Router to Aggregation Node
+            topology_json["link"].append(
+                {"s": agg_id, "d": edge_node_id, "BW": link_bw_aggregation, "PR": link_pr_aggregation}
             )
 
             # Sensors
-            for sensor_idx in range(sensors_per_router):
+            for sensor_idx in range(sensors_per_edge_node):
                 sensor_id = next_id()
-                topology_object["entity"].append(
+                topology_json["entity"].append(
                     {
                         "id": sensor_id,
                         "model": f"Application-{app_id}-Sensor",
                         "label": f"Application-{app_id}-Sensor",
-                        "x": router_x + random.uniform(-2, 2),
+                        "x": edge_node_x + random.uniform(-2, 2),
                         "y": device_y,
                     }
                 )
-                topology_object["link"].append(
-                    {"s": router_id, "d": sensor_id, "BW": link_bw_router, "PR": link_pr_router}
+                topology_json["link"].append(
+                    {"s": edge_node_id, "d": sensor_id, "BW": link_bw_edge, "PR": link_pr_edge}
                 )
 
             # Actuators
-            for actuator_idx in range(actuators_per_router):
+            for actuator_idx in range(actuators_per_edge_node):
                 actuator_id = next_id()
-                topology_object["entity"].append(
+                topology_json["entity"].append(
                     {
                         "id": actuator_id,
                         "model": f"Application-{app_id}-Actuator",
                         "label": f"Application-{app_id}-Actuator",
-                        "x": router_x + random.uniform(-2, 2),
+                        "x": edge_node_x + random.uniform(-2, 2),
                         "y": device_y,
                     }
                 )
-                topology_object["link"].append(
-                    {"s": router_id, "d": actuator_id, "BW": link_bw_router, "PR": link_pr_router}
+                topology_json["link"].append(
+                    {"s": edge_node_id, "d": actuator_id, "BW": link_bw_edge, "PR": link_pr_edge}
                 )
 
-    return topology_object
+    return topology_json
 
-def createSimpleApplication(name: str) -> Application:
+def create_simple_application(name: str) -> Application:
     """
     Creates the application definition with modules and messages.
 
@@ -369,7 +369,7 @@ def createSimpleApplication(name: str) -> Application:
 
     return applicationObject
 
-def createRealApplication_off(name: str) -> Application:
+def create_complex_application_unused(name: str) -> Application:
     """
     Creates a more complex application definition with modules and messages.
 
@@ -407,33 +407,33 @@ def createRealApplication_off(name: str) -> Application:
 
     return applicationObject
 
-def create_application(name: str) -> Application:
+def create_application_structure(name: str) -> Application:
     # APLICATION
-    a = Application(name)
+    app = Application(name)
 
     # (Sensor) --> (Service) --> (Actuator)
-    a.set_modules([{f"{name}-Sensor":{"Type":Application.TYPE_SOURCE}},
+    app.set_modules([{f"{name}-Sensor":{"Type":Application.TYPE_SOURCE}},
                     {f"{name}-Service": {"RAM": 10, "Type": Application.TYPE_MODULE}},
                     {f"{name}-Actuator": {"Type": Application.TYPE_SINK}}
                     ])
     """
     Messages among MODULES (AppEdge in iFogSim)
     """
-    m_a = Message("Sensor calling Service", f"{name}-Sensor", f"{name}-Service", instructions=20*10**6, bytes=1000)
-    m_b = Message("Service calling Actuator", f"{name}-Service", f"{name}-Actuator", instructions=30*10**6, bytes=500)
+    msg_sensor_to_service = Message("Sensor calling Service", f"{name}-Sensor", f"{name}-Service", instructions=20*10**6, bytes=1000)
+    msg_service_to_actuator = Message("Service calling Actuator", f"{name}-Service", f"{name}-Actuator", instructions=30*10**6, bytes=500)
 
     """
     Defining which messages will be dynamically generated # the generation is controlled by Population algorithm
     """
-    a.add_source_messages(m_a)
+    app.add_source_messages(msg_sensor_to_service)
 
     """
     MODULES/SERVICES: Definition of Generators and Consumers (AppEdges and TupleMappings in iFogSim)
     """
     # MODULE SERVICES
-    a.add_service_module(f"{name}-Service", m_a, m_b, fractional_selectivity, threshold=1.0)
+    app.add_service_module(f"{name}-Service", msg_sensor_to_service, msg_service_to_actuator, fractional_selectivity, threshold=1.0)
 
-    return a
+    return app
 
 if __name__ == "__main__":
     import logging.config
@@ -453,24 +453,24 @@ if __name__ == "__main__":
     results_path.mkdir(parents=True, exist_ok=True)
     results_path = str(results_path) + "/"
 
-    # The topology is being created using the function createTopology()
+    # The topology is being created using the function create_fixed_topology()
     topology = Topology()
     
     # Capture the topology data to access labels
-    topo_data = createRandomTopology(
+    topology_json = create_random_topology(
             num_fog_nodes=4,
             random_seed=42,
         )
-    topology.load(topo_data)
+    topology.load(topology_json)
 
     # Explicitly add all attributes to the NetworkX graph so they are saved in the GEXF
-    for entity in topo_data["entity"]:
+    for entity in topology_json["entity"]:
         for key, value in entity.items():
             if key != "id":
                 topology.G.nodes[entity["id"]][key] = value
 
     # Explicitly add all attributes to the edges as well
-    for link in topo_data["link"]:
+    for link in topology_json["link"]:
         s = link["s"]
         d = link["d"]
         for key, value in link.items():
@@ -492,9 +492,9 @@ if __name__ == "__main__":
         topology.G, results_path + "graph_felipe_tutorial1.gexf"
     )
 
-    # The application is being created using the function createApplication()
-    # application1 = create_application("Application-1")
-    # application2 = create_application("Application-2")
+    # The application is being created using the function create_application_structure()
+    # application1 = create_application_structure("Application-1")
+    # application2 = create_application_structure("Application-2")
 
     # # Initial placement if "mytag": "cloud"
     # placementAlgorithm1 = CloudPlacement("tagEqualsToCloud")
@@ -503,28 +503,28 @@ if __name__ == "__main__":
     # placementAlgorithm2 = CloudPlacement("tagEqualsToCloud")
     # placementAlgorithm2.scaleService({f"Application-2-Service": 1})
 
-    dDistribution = deterministic_distribution(name="Deterministic", time=100)
+    distribution = deterministic_distribution(name="Deterministic", time=100)
 
     # population_1 = Statical("Statical-1")
-    # population_1.set_src_control({"model": "Application-1-Sensor", "number":1,"message": application1.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
+    # population_1.set_src_control({"model": "Application-1-Sensor", "number":1,"message": application1.get_message("Sensor calling Service"), "distribution": distribution,"param": {"time_shift": 100}})#5.1}})
     # population_1.set_sink_control({"model": "Application-1-Actuator","number":1,"module":application1.get_sink_modules()})
 
     # population_2 = Statical("Statical-2")
-    # population_2.set_src_control({"model": "Application-2-Sensor", "number":1,"message": application2.get_message("Sensor calling Service"), "distribution": dDistribution,"param": {"time_shift": 100}})#5.1}})
+    # population_2.set_src_control({"model": "Application-2-Sensor", "number":1,"message": application2.get_message("Sensor calling Service"), "distribution": distribution,"param": {"time_shift": 100}})#5.1}})
     # population_2.set_sink_control({"model": "Application-2-Actuator","number":1,"module":application2.get_sink_modules()})
 
 
     # Their "selector" is actually the shortest way, there is not type of orchestration algorithm.
     # This implementation is already created in selector.class,called: First_ShortestPath
-    selectorPathAlgorithm = MinimunPath()
+    selection_policy = MinimunPath()
 
     stop_time = 1000
 
-    simulationObject = Sim(topology, default_results_path=results_path + "sim_trace")
+    simulator = Sim(topology, default_results_path=results_path + "sim_trace")
     
     # Identify all applications from the topology entities
     app_ids = set()
-    for entity in topo_data["entity"]:
+    for entity in topology_json["entity"]:
         if "model" in entity and entity["model"].startswith("Application-"):
             # Format: Application-{id}-DeviceType
             parts = entity["model"].split("-")
@@ -536,30 +536,30 @@ if __name__ == "__main__":
 
     for app_id in sorted_app_ids:
         app_name = f"Application-{app_id}"
-        app = create_application(app_name)
+        app = create_application_structure(app_name)
         
         # Placement
         # We use a unique placement policy name per application to ensure they are independent
-        placement = CloudPlacement(f"CloudPlacement-{app_id}")
-        placement.scaleService({f"{app_name}-Service": 1})
+        placement_policy = CloudPlacement(f"CloudPlacement-{app_id}")
+        placement_policy.scaleService({f"{app_name}-Service": 1})
         
         # Population
-        pop = Statical(f"Statical-{app_id}")
-        pop.set_src_control({
+        population = Statical(f"Statical-{app_id}")
+        population.set_src_control({
             "model": f"{app_name}-Sensor", 
             "number": 1, 
             "message": app.get_message("Sensor calling Service"), 
-            "distribution": dDistribution,
+            "distribution": distribution,
             "param": {"time_shift": 100}
         })
-        pop.set_sink_control({
+        population.set_sink_control({
             "model": f"{app_name}-Actuator", 
             "number": 1, 
             "module": app.get_sink_modules()
         })
         
-        simulationObject.deploy_app2(app, placement, pop, selectorPathAlgorithm)
+        simulator.deploy_app2(app, placement_policy, population, selection_policy)
 
-    simulationObject.run(stop_time)
+    simulator.run(stop_time)
 
     print("\n--- %s seconds ---" % (time.time() - start_time))
