@@ -423,7 +423,7 @@ if __name__ == "__main__":
 
     # Initial placement if "mytag": "cloud"
     placementAlgorithm = CloudPlacement("tagEqualsToCloud")
-    placementAlgorithm.scaleService({"ServiceA": 1})
+    placementAlgorithm.scaleService({"ServiceProcessingTheRequest": 1})
 
     # Population Algorithm
     populationAlgorithm = Statical("Statical")
