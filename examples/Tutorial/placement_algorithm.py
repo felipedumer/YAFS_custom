@@ -8,7 +8,67 @@ class CloudPlacement(Placement):
     """
     This implementation locates the services of the application in the nearest Fog node with available RAM.
     If there is no space (RAM), it tries the Cloud.
+    
+    Strategies:
+    - 'latency': Minimize propagation delay (PR).
+    - 'hops': Minimize number of network hops.
+    - 'cost': Minimize infrastructure cost (COST attribute).
+    - 'ipt': Maximize processing power (IPT attribute).
     """
+    def __init__(self, name, activation_dist=None, logger=None, strategy='latency'):
+        super(CloudPlacement, self).__init__(name, activation_dist, logger)
+        self.strategy = strategy
+
+    def _sort_fog_nodes(self, sim, app_name, id_fog_list):
+        """
+        Sorts the list of Fog nodes based on the selected strategy.
+        """
+        if not id_fog_list:
+            return []
+
+        # Strategies that require a source sensor
+        if self.strategy in ['latency', 'hops']:
+            sensor_model = f"{app_name}-Sensor"
+            sensor_nodes = sim.topology.find_IDs({"model": sensor_model})
+            
+            if not sensor_nodes:
+                logging.warning(f"Sensor for {app_name} not found. Fallback to simple sort.")
+                return sorted(id_fog_list)
+            
+            sensor_id = sensor_nodes[0]
+            weight = 'PR' if self.strategy == 'latency' else None
+            
+            fog_distances = []
+            for fog_id in id_fog_list:
+                try:
+                    distance = nx.shortest_path_length(sim.topology.G, source=sensor_id, target=fog_id, weight=weight)
+                    fog_distances.append((fog_id, distance))
+                except nx.NetworkXNoPath:
+                    fog_distances.append((fog_id, float('inf')))
+            
+            # Sort by distance (ascending)
+            fog_distances.sort(key=lambda x: x[1])
+            
+            # Logging for debugging
+            sensor_label = sim.topology.get_node(sensor_id).get('label', sensor_id)
+            formatted_distances = [f"{sim.topology.get_node(fid).get('label', fid)}: {dist}" for fid, dist in fog_distances]
+            logging.info(f"[{self.strategy.upper()}] App {app_name}: Distances from {sensor_label} to Fog: {', '.join(formatted_distances)}")
+            
+            return [x[0] for x in fog_distances]
+
+        # Strategies based on Node Attributes
+        elif self.strategy == 'cost':
+            # Sort by COST (ascending)
+            return sorted(id_fog_list, key=lambda x: sim.topology.get_node(x).get('COST', float('inf')))
+            
+        elif self.strategy == 'ipt':
+            # Sort by IPT (descending - higher is better)
+            return sorted(id_fog_list, key=lambda x: sim.topology.get_node(x).get('IPT', 0), reverse=True)
+            
+        else:
+            logging.warning(f"Unknown strategy '{self.strategy}'. Defaulting to simple sort.")
+            return sorted(id_fog_list)
+
     def initial_allocation(self, sim, app_name):
         # Get Cloud Node
         value_cloud = {"mytag": "cloud"} 
@@ -23,33 +83,8 @@ class CloudPlacement(Placement):
         value_fog = {"mytag": "fog"}
         id_fog_list = sim.topology.find_IDs(value_fog)
         
-        # Find the sensor node for this application to determine proximity
-        sensor_model = f"{app_name}-Sensor"
-        sensor_nodes = sim.topology.find_IDs({"model": sensor_model})
-        
-        if sensor_nodes:
-            sensor_id = sensor_nodes[0]
-            # Calculate shortest path (latency) from sensor to each fog node
-            # We use 'PR' (Propagation Delay) as the weight
-            fog_distances = []
-            for fog_id in id_fog_list:
-                try:
-                    # Calculate distance based on Propagation Delay (PR)
-                    distance = nx.shortest_path_length(sim.topology.G, source=sensor_id, target=fog_id, weight='PR')
-                    fog_distances.append((fog_id, distance))
-                except nx.NetworkXNoPath:
-                    fog_distances.append((fog_id, float('inf')))
-            
-            # Sort fog nodes by distance (nearest first)
-            fog_distances.sort(key=lambda x: x[1])
-            id_fog_list = [x[0] for x in fog_distances]
-
-            sensor_label = sim.topology.get_node(sensor_id).get('label', sensor_id)
-            formatted_distances = [f"{sim.topology.get_node(fid).get('label', fid)}: {dist}" for fid, dist in fog_distances]
-            logging.info(f"App {app_name}: Distances from {sensor_label} (ID: {sensor_id}) to Fog nodes: {', '.join(formatted_distances)}")
-        else:
-            # Fallback to simple sort if sensor not found
-            id_fog_list.sort()
+        # Sort Fog Nodes based on Strategy
+        id_fog_list = self._sort_fog_nodes(sim, app_name, id_fog_list)
         
         app = sim.apps[app_name]
         services = app.services
@@ -191,23 +226,8 @@ class CloudPlacement(Placement):
                     if current_node_id == id_cloud:
                         logging.info(f"Time >= 2000: Service {module} is on Cloud. Migrating to Fog...")
                         
-                        # Find nearest Fog node logic
-                        sensor_model = f"{app_name}-Sensor"
-                        sensor_nodes = sim.topology.find_IDs({"model": sensor_model})
-                        
-                        target_fog_list = list(id_fog_list)
-                        
-                        if sensor_nodes:
-                            sensor_id = sensor_nodes[0]
-                            fog_distances = []
-                            for fog_id in target_fog_list:
-                                try:
-                                    distance = nx.shortest_path_length(sim.topology.G, source=sensor_id, target=fog_id, weight='PR')
-                                    fog_distances.append((fog_id, distance))
-                                except nx.NetworkXNoPath:
-                                    fog_distances.append((fog_id, float('inf')))
-                            fog_distances.sort(key=lambda x: x[1])
-                            target_fog_list = [x[0] for x in fog_distances]
+                        # Sort Fog Nodes based on Strategy
+                        target_fog_list = self._sort_fog_nodes(sim, app_name, id_fog_list)
                         
                         migrated = False
                         for id_fog in target_fog_list:

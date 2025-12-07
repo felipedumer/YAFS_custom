@@ -373,6 +373,10 @@ if __name__ == "__main__":
     sorted_app_ids = sorted(list(app_ids))
     print(f"Deploying {len(sorted_app_ids)} applications...")
 
+    # Define the placement strategy here
+    # Options: 'latency', 'hops', 'cost', 'ipt'
+    PLACEMENT_STRATEGY = 'latency'
+
     for app_id in sorted_app_ids:
         app_name = f"Application-{app_id}"
         app = create_application_structure(app_name)
@@ -381,7 +385,11 @@ if __name__ == "__main__":
         # We use a unique placement policy name per application to ensure they are independent
         # Activation distribution for reallocation: every 1000 time units
         reallocation_dist = deterministic_distribution(name="Reallocation", time=1000)
-        placement_policy = CloudPlacement(f"CloudPlacement-{app_id}", activation_dist=reallocation_dist)
+        placement_policy = CloudPlacement(
+            f"CloudPlacement-{app_id}", 
+            activation_dist=reallocation_dist,
+            strategy=PLACEMENT_STRATEGY
+        )
         placement_policy.scaleService({f"{app_name}-Service": 1})
         
         # Population
