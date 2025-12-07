@@ -2,10 +2,11 @@ from yafs.placement import Placement
 import logging
 import csv
 import os
+import networkx as nx
 
 class CloudPlacement(Placement):
     """
-    This implementation locates the services of the application in the Fog nodes first.
+    This implementation locates the services of the application in the nearest Fog node with available RAM.
     If there is no space (RAM), it tries the Cloud.
     """
     def initial_allocation(self, sim, app_name):
@@ -21,20 +22,34 @@ class CloudPlacement(Placement):
         # Get Fog Nodes
         value_fog = {"mytag": "fog"}
         id_fog_list = sim.topology.find_IDs(value_fog)
-        # Sort for deterministic behavior
-        id_fog_list.sort()
         
-        # Implement Round Robin based on App ID
-        # Since a new Placement object is created for each App, we can't store state.
-        # We use the App ID to determine the starting node.
-        try:
-            # Assuming app_name format "Application-X"
-            app_id_num = int(app_name.split("-")[1])
-            start_index = app_id_num % len(id_fog_list)
-            # Rotate the list so we start checking from a different node each time
-            id_fog_list = id_fog_list[start_index:] + id_fog_list[:start_index]
-        except (IndexError, ValueError):
-            pass # Fallback to default order if name format is unexpected
+        # Find the sensor node for this application to determine proximity
+        sensor_model = f"{app_name}-Sensor"
+        sensor_nodes = sim.topology.find_IDs({"model": sensor_model})
+        
+        if sensor_nodes:
+            sensor_id = sensor_nodes[0]
+            # Calculate shortest path (latency) from sensor to each fog node
+            # We use 'PR' (Propagation Delay) as the weight
+            fog_distances = []
+            for fog_id in id_fog_list:
+                try:
+                    # Calculate distance based on Propagation Delay (PR)
+                    distance = nx.shortest_path_length(sim.topology.G, source=sensor_id, target=fog_id, weight='PR')
+                    fog_distances.append((fog_id, distance))
+                except nx.NetworkXNoPath:
+                    fog_distances.append((fog_id, float('inf')))
+            
+            # Sort fog nodes by distance (nearest first)
+            fog_distances.sort(key=lambda x: x[1])
+            id_fog_list = [x[0] for x in fog_distances]
+
+            sensor_label = sim.topology.get_node(sensor_id).get('label', sensor_id)
+            formatted_distances = [f"{sim.topology.get_node(fid).get('label', fid)}: {dist}" for fid, dist in fog_distances]
+            logging.info(f"App {app_name}: Distances from {sensor_label} (ID: {sensor_id}) to Fog nodes: {', '.join(formatted_distances)}")
+        else:
+            # Fallback to simple sort if sensor not found
+            id_fog_list.sort()
         
         app = sim.apps[app_name]
         services = app.services
