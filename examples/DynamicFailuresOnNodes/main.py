@@ -15,6 +15,7 @@ import itertools
 import time
 import operator
 import copy
+import os
 import networkx as nx
 import numpy as np
 
@@ -26,6 +27,7 @@ from yafs.distribution import *
 
 from Evolutive_population import Pop_and_Failures
 from selection_multipleDeploys import  BroadPath
+from matplotlib import pyplot as plt
 
 RANDOM_SEED = 1
 
@@ -52,11 +54,16 @@ def main(simulated_time):
     """
 
     t = Topology()
-    t.G = nx.read_graphml(os.getcwd()+"/examples/DynamicFailuresOnNodes/Euclidean.graphml")
+    t.G = nx.read_graphml(os.path.join(os.path.dirname(__file__), "Euclidean.graphml"))
 
     ls = list(t.G.nodes)
     li = {x: int(x) for x in ls}
     nx.relabel_nodes(t.G, li, False) #Transform str-labels to int-labels
+
+    # show the network as figures
+    nx.draw(t.G, with_labels=True)
+    plt.show()
+
 
 
     print("Nodes: %i" %len(t.G.nodes()))
@@ -73,7 +80,7 @@ def main(simulated_time):
 
     sorted_clustMeasure = sorted(centrality.items(), key=operator.itemgetter(1), reverse=True)
 
-    top20_devices =  sorted_clustMeasure[:20]
+    top20_devices =  sorted_clustMeasure[:1]
     main_fog_device = copy.copy(top20_devices[0][0])
 
     print("-" * 20)
@@ -137,9 +144,9 @@ if __name__ == '__main__':
     import logging.config
     import os
 
-    print(os.getcwd()+'/examples/DynamicFailuresOnNodes/logging.ini')
+    # print(os.getcwd()+'/examples/DynamicFailuresOnNodes/logging.ini')
 
-    logging.config.fileConfig(os.getcwd()+'/examples/DynamicFailuresOnNodes/logging.ini')
+    logging.config.fileConfig(os.path.join(os.path.dirname(__file__), 'logging.ini'))
 
     start_time = time.time()
 
