@@ -457,8 +457,9 @@ if __name__ == "__main__":
     topology = Topology()
     
     # Capture the topology data to access labels
+    num_fog_nodes = 4
     topology_json = create_random_topology(
-            num_fog_nodes=4,
+            num_fog_nodes=num_fog_nodes,
             random_seed=42,
         )
     topology.load(topology_json)
@@ -487,9 +488,8 @@ if __name__ == "__main__":
         for key, value in list(topology.G.edges[u, v].items()):
             if isinstance(value, tuple):
                 topology.G.edges[u, v][key] = str(value)
-    
     networkx.write_gexf(
-        topology.G, results_path + f"graph.gexf"
+        topology.G, results_path + f"graph_{num_fog_nodes}_fog.gexf"
     )
 
     # The application is being created using the function create_application_structure()
