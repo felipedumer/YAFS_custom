@@ -241,6 +241,10 @@ def create_random_topology(
                         "id": sensor_id,
                         "model": f"Application-{app_id}-Sensor",
                         "label": f"Application-{app_id}-Sensor",
+                        "IPT": 100 * 10**6,
+                        "RAM": 10,
+                        "COST": 1,
+                        "WATT": 0.1,
                         "x": edge_node_x + random.uniform(-2, 2),
                         "y": device_y,
                     }
@@ -257,6 +261,10 @@ def create_random_topology(
                         "id": actuator_id,
                         "model": f"Application-{app_id}-Actuator",
                         "label": f"Application-{app_id}-Actuator",
+                        "IPT": 100 * 10**6,
+                        "RAM": 10,
+                        "COST": 1,
+                        "WATT": 0.1,
                         "x": edge_node_x + random.uniform(-2, 2),
                         "y": device_y,
                     }
@@ -271,27 +279,32 @@ def create_application_structure(name: str) -> Application:
     # APLICATION
     app = Application(name)
 
-    # (Sensor) --> (Service) --> (Actuator)
-    app.set_modules([{f"{name}-Sensor":{"Type":Application.TYPE_SOURCE}},
-                    {f"{name}-Service": {"RAM": 10, "Type": Application.TYPE_MODULE}},
-                    {f"{name}-Actuator": {"Type": Application.TYPE_SINK}}
-                    ])
-    """
-    Messages among MODULES (AppEdge in iFogSim)
-    """
-    msg_sensor_to_service = Message("Sensor calling Service", f"{name}-Sensor", f"{name}-Service", instructions=20*10**6, bytes=1000)
-    msg_service_to_actuator = Message("Service calling Actuator", f"{name}-Service", f"{name}-Actuator", instructions=30*10**6, bytes=500)
+    # (Sensor) --> (Service) --> (Sensor)
+    # Sensor is both Source (generator) and Module (consumer of response)
+    app.set_modules([
+        {f"{name}-Sensor": {"Type": Application.TYPE_MODULE}},
+        {f"{name}-Service": {"RAM": 10, "Type": Application.TYPE_MODULE}}
+    ])
 
     """
-    Defining which messages will be dynamically generated # the generation is controlled by Population algorithm
+    Messages among MODULES
     """
-    app.add_source_messages(msg_sensor_to_service)
+    msg_req = Message("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=20*10**6, bytes=1000)
+    msg_resp = Message("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=30*10**6, bytes=500)
 
     """
-    MODULES/SERVICES: Definition of Generators and Consumers (AppEdges and TupleMappings in iFogSim)
+    Defining which messages will be dynamically generated
     """
-    # MODULE SERVICES
-    app.add_service_module(f"{name}-Service", msg_sensor_to_service, msg_service_to_actuator, fractional_selectivity, threshold=1.0)
+    app.add_source_messages(msg_req)
+
+    """
+    MODULES/SERVICES
+    """
+    # Sensor -> Service (Request) -> Service -> Sensor (Response)
+    app.add_service_module(f"{name}-Service", msg_req, msg_resp, fractional_selectivity, threshold=1.0)
+    
+    # Sensor receives Response (Sink behavior)
+    app.add_service_module(f"{name}-Sensor", msg_resp)
 
     return app
 
@@ -398,21 +411,16 @@ if __name__ == "__main__":
             activation_dist=reallocation_dist,
             strategy=PLACEMENT_STRATEGY
         )
-        placement_policy.scaleService({f"{app_name}-Service": 1})
+        placement_policy.scaleService({f"{app_name}-Service": 1, f"{app_name}-Sensor": 1})
         
         # Population
         population = Statical(f"Statical-{app_id}")
         population.set_src_control({
             "model": f"{app_name}-Sensor", 
             "number": 1, 
-            "message": app.get_message("Sensor calling Service"), 
+            "message": app.get_message("M_Req"), 
             "distribution": distribution,
             "param": {"time_shift": 100}
-        })
-        population.set_sink_control({
-            "model": f"{app_name}-Actuator", 
-            "number": 1, 
-            "module": app.get_sink_modules()
         })
         
         simulator.deploy_app2(app, placement_policy, population, selection_policy)

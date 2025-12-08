@@ -116,8 +116,8 @@ class CloudPlacement(Placement):
             min_lat, max_lat = get_min_max('latency')
 
             # Weights (Adjustable)
-            W_LATENCY = 0.4
-            W_IPT = 0.2
+            W_LATENCY = 0.1
+            W_IPT = 0.5
             W_COST = 0.2
             W_WATT = 0.2
 
@@ -182,6 +182,14 @@ class CloudPlacement(Placement):
             module_specs.update(item)
 
         for module in services:
+            # Handle Sensor Placement (Fixed on the Sensor Node)
+            if module.endswith("-Sensor"):
+                 sensor_nodes = sim.topology.find_IDs({"model": module})
+                 if sensor_nodes:
+                     sim.deploy_module(app_name, module, services[module], sensor_nodes)
+                     logging.info(f"Deployed {module} on Sensor Node (ID: {sensor_nodes[0]})")
+                     continue
+
             if module in self.scaleServices:
                 for rep in range(0, self.scaleServices[module]):
                     required_ram = module_specs[module].get("RAM", 0)
@@ -265,6 +273,10 @@ class CloudPlacement(Placement):
 
         # Iterate over services
         for module in services:
+            # Skip Sensor modules (Fixed placement)
+            if module.endswith("-Sensor"):
+                continue
+
             # Check where the module is currently deployed
             # sim.alloc_module[app_name][module] returns a list of DES IDs (not Node IDs)
             des_ids = sim.alloc_module[app_name].get(module, [])
