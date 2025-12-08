@@ -287,12 +287,6 @@ class Sim:
                     src_label = self.topology.get_node(link[0]).get('label', link[0])
                     dst_label = self.topology.get_node(link[1]).get('label', link[1])
 
-                    # update link metrics
-                    self.metrics.insert_link(
-                        {"id":message.id,"type": self.LINK_METRIC,"src":link[0],"dst":link[1],
-                         "srcLabel": src_label, "dstLabel": dst_label,
-                         "app":message.app_name,"latency":latency_msg_link,"message": message.name,"ctime":self.env.now,"size":message.bytes,"buffer":self.network_pump})#"path":message.path})
-
                     # We compute the future latency considering the current utilization of the link
                     if last_used < self.env.now:
                         shift_time = 0.0
@@ -300,6 +294,12 @@ class Sim:
                     else:
                         shift_time = last_used - self.env.now
                         last_used = self.env.now + shift_time + latency_msg_link
+
+                    # update link metrics
+                    self.metrics.insert_link(
+                        {"id":message.id,"type": self.LINK_METRIC,"src":link[0],"dst":link[1],
+                         "srcLabel": src_label, "dstLabel": dst_label,
+                         "app":message.app_name,"latency":latency_msg_link,"wait": shift_time, "message": message.name,"ctime":self.env.now,"size":message.bytes,"buffer":self.network_pump})#"path":message.path})
 
                     # print "Send next WakeUp : ", last_used
                     # print "-" * 30

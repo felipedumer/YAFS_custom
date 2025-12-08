@@ -116,8 +116,8 @@ class CloudPlacement(Placement):
             min_lat, max_lat = get_min_max('latency')
 
             # Weights (Adjustable)
-            W_LATENCY = 0.9
-            W_IPT = 0.1
+            W_LATENCY = 0.95
+            W_IPT = 0.05
             W_COST = 0.0
             W_WATT = 0.0
 
