@@ -8,22 +8,22 @@ import json
 def create_random_topology(
     num_fog_nodes=2,
     random_seed=None,
-    cloud_ipt=5 * 10**6,
-    cloud_ram=10000,
+    cloud_ipt=100 * 10**9, # 100 GIPS
+    cloud_ram=64000, # 64 GB
     cloud_cost=10,
     cloud_watt=100.0,
-    fog_ipt=1000 * 10**6,
-    fog_ram=500,
+    fog_ipt=10 * 10**9, # 10 GIPS
+    fog_ram=16000, # 16 GB
     fog_cost=2,
     fog_watt=10.0,
-    link_bw_cloud=10000,
-    link_pr_cloud=2000,
-    link_bw_fog=1500,
-    link_pr_fog=100,
-    link_bw_aggregation=1000,
-    link_pr_aggregation=100,
-    link_bw_edge=200,
-    link_pr_edge=100,
+    link_bw_cloud=125000000, # 1 Gbps
+    link_pr_cloud=100, # 100 ms
+    link_bw_fog=125000000, # 1 Gbps
+    link_pr_fog=5, # 5 ms
+    link_bw_aggregation=125000000, # 1 Gbps
+    link_pr_aggregation=5, # 5 ms
+    link_bw_edge=12500000, # 100 Mbps
+    link_pr_edge=10, # 10 ms
     city_width=100,
     layer_gap=40,
 ):
@@ -65,8 +65,8 @@ def create_random_topology(
         random.seed(random_seed)
 
     # Automatically determine topology structure
-    aggregation_nodes_per_fog = random.randint(10, 15)
-    edge_nodes_per_aggregation = random.randint(20, 30)
+    # aggregation_nodes_per_fog = random.randint(10, 15) # Moved inside loop
+    # edge_nodes_per_aggregation = random.randint(20, 30) # Moved inside loop
     sensors_per_edge_node = 1
 
     topology_json = {"entity": [], "link": []}
@@ -121,10 +121,10 @@ def create_random_topology(
                 "model": f"fog",
                 "mytag": "fog",
                 "label": f"Fog-{i}",
-                "IPT": random.randint(10000, 20000) * 10**6,
-                "RAM": random.randint(1500, 3000),
-                "COST": random.uniform(1.0, 3.0),
-                "WATT": random.uniform(8.0, 12.0),
+                "IPT": int(fog_ipt * random.uniform(0.8, 1.2)),
+                "RAM": int(fog_ram * random.uniform(0.8, 1.2)),
+                "COST": fog_cost * random.uniform(0.8, 1.2),
+                "WATT": fog_watt * random.uniform(0.8, 1.2),
                 "ISP": random.choice(["ISP-A", "ISP-B", "ISP-C", "ISP-D"]),
                 "x": random_x(),
                 "y": fog_y,
@@ -138,8 +138,11 @@ def create_random_topology(
 
     # 3. Aggregation Layer (Communication Only)
     aggregation_node_ids = []
+    num_middle_nodes = 0
     for fog_idx, fog_id in enumerate(fog_ids):
+        aggregation_nodes_per_fog = random.randint(7, 12)
         for agg_idx in range(aggregation_nodes_per_fog):
+            num_middle_nodes += 1
             agg_id = next_id()
             topology_json["entity"].append(
                 {
@@ -206,8 +209,11 @@ def create_random_topology(
 
     # 4. Edge Layer (Home Routers + Devices)
     edge_node_global_idx = 0
+    num_edge_nodes = 0
     for _, agg_id in aggregation_node_ids:
+        edge_nodes_per_aggregation = random.randint(10, 15)
         for edge_idx in range(edge_nodes_per_aggregation):
+            num_edge_nodes += 1
             edge_node_global_idx += 1
             app_id = edge_node_global_idx
 
@@ -250,7 +256,7 @@ def create_random_topology(
                     {"s": edge_node_id, "d": sensor_id, "BW": get_random_bw(link_bw_edge), "PR": get_random_pr(link_pr_edge)}
                 )
 
-    return topology_json
+    return topology_json, num_fog_nodes, num_middle_nodes, num_edge_nodes
 
 def main():
     # Define path
@@ -258,15 +264,16 @@ def main():
     results_path = os.path.join(script_dir, "topologia/")
     os.makedirs(results_path, exist_ok=True)
     
-    topology_file = os.path.join(results_path, "random_topology.json")
-
     # Create topology
-    num_fog_nodes = 5
+    num_fog_nodes = 8
     print(f"Generating topology with {num_fog_nodes} fog nodes...")
-    topology_json = create_random_topology(
+    topology_json, n_fog, n_middle, n_edge = create_random_topology(
         num_fog_nodes=num_fog_nodes,
         random_seed=42,
     )
+
+    filename = f"fog{n_fog}-middle{n_middle}-end{n_edge}"
+    topology_file = os.path.join(results_path, f"{filename}.json")
 
     # Save to JSON
     print(f"Saving topology to {topology_file}...")
@@ -302,7 +309,7 @@ def main():
             if isinstance(value, tuple):
                 topology.G.edges[u, v][key] = str(value)
     
-    gexf_path = os.path.join(results_path, f"graph_{num_fog_nodes}_fog.gexf")
+    gexf_path = os.path.join(results_path, f"{filename}.gexf")
     print(f"Saving GEXF to {gexf_path}...")
     networkx.write_gexf(topology.G, gexf_path)
 

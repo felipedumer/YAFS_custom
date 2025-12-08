@@ -35,14 +35,17 @@ def create_application_structure(name: str) -> Application:
     # Sensor is both Source (generator) and Module (consumer of response)
     app.set_modules([
         {f"{name}-Sensor": {"Type": Application.TYPE_MODULE}},
-        {f"{name}-Service": {"RAM": random.randint(8, 15), "Type": Application.TYPE_MODULE}}
+        {f"{name}-Service": {"RAM": random.randint(50, 100), "Type": Application.TYPE_MODULE}}
     ])
 
     """
     Messages among MODULES
     """
-    msg_req = RandomMessage("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=(15*10**6, 25*10**6), bytes=(800, 1200))
-    msg_resp = RandomMessage("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=(25*10**6, 35*10**6), bytes=(400, 600))
+    # M_Req: Sensor -> Service. High instructions (Service workload), Medium size.
+    msg_req = RandomMessage("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=(200*10**6, 500*10**6), bytes=(1000, 2000))
+    
+    # M_Resp: Service -> Sensor. Low instructions (Sensor logging), Medium size.
+    msg_resp = RandomMessage("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=(1*10**6, 2*10**6), bytes=(1000, 2000))
 
     """
     Defining which messages will be dynamically generated
@@ -90,7 +93,9 @@ if __name__ == "__main__":
     stop_time = 1000
 
     # Load topology from file
-    topology_path = os.path.join(script_dir, "topologia/random_topology.json")
+
+    file_to_load = "fog3-middle37-end942"
+    topology_path = os.path.join(script_dir, f"topologia/{file_to_load}.json")
     logging.info(f"Loading topology from {topology_path}...")
     with open(topology_path, "r") as f:
         topology_json = json.load(f)
@@ -115,10 +120,10 @@ if __name__ == "__main__":
 
     # Define the placement strategy here
     # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
-    PLACEMENT_STRATEGY = 'latency'
+    PLACEMENT_STRATEGY = 'custom_proposed_by_felipe'
 
     # Pattern: {numberOfFogNodes}-{placementStrategy}
-    sim_trace_path = results_path + f"{num_fog_nodes}-{PLACEMENT_STRATEGY}-sim_trace"
+    sim_trace_path = results_path + f"{file_to_load}-{PLACEMENT_STRATEGY}-sim_trace"
     simulator = Sim(topology, default_results_path=sim_trace_path)
 
     for app_id in sorted_app_ids:
