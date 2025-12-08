@@ -1,0 +1,3336 @@
+{
+    "entity": [
+        {
+            "id": 0,
+            "model": "cloud",
+            "mytag": "cloud",
+            "label": "Cloud",
+            "IPT": 5000000,
+            "RAM": 10000,
+            "COST": 10.0,
+            "WATT": 100.0,
+            "x": 50.0,
+            "y": 120
+        },
+        {
+            "id": 1,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-0",
+            "IPT": 812000000,
+            "RAM": 589,
+            "COST": 1.5500586367382385,
+            "WATT": 8.892842952595291,
+            "ISP": "ISP-A",
+            "x": 67.66994874229113,
+            "y": 80
+        },
+        {
+            "id": 2,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-1",
+            "IPT": 1016000000,
+            "RAM": 408,
+            "COST": 1.0595944388761407,
+            "WATT": 8.874551899214413,
+            "ISP": "ISP-A",
+            "x": 56.1245062938613,
+            "y": 80
+        },
+        {
+            "id": 3,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-2",
+            "IPT": 1079000000,
+            "RAM": 507,
+            "COST": 1.4408812440813934,
+            "WATT": 10.357062735503636,
+            "ISP": "ISP-A",
+            "x": 75.88073671297673,
+            "y": 80
+        },
+        {
+            "id": 4,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-3",
+            "IPT": 974000000,
+            "RAM": 471,
+            "COST": 1.310958999623563,
+            "WATT": 11.828852288827125,
+            "ISP": "ISP-C",
+            "x": 10.22102765198487,
+            "y": 80
+        },
+        {
+            "id": 5,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-0-0",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 84.74943663474598,
+            "y": 40
+        },
+        {
+            "id": 6,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-0-1",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 97.31157639793706,
+            "y": 40
+        },
+        {
+            "id": 7,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-0-2",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 70.45718362149235,
+            "y": 40
+        },
+        {
+            "id": 8,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-0-3",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 86.64836667552697,
+            "y": 40
+        },
+        {
+            "id": 9,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-0-4",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 35.52707002275215,
+            "y": 40
+        },
+        {
+            "id": 10,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-1-0",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 17.1138648198097,
+            "y": 40
+        },
+        {
+            "id": 11,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-1-1",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 63.999975985409286,
+            "y": 40
+        },
+        {
+            "id": 12,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-1-2",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 80.50458007712143,
+            "y": 40
+        },
+        {
+            "id": 13,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-1-3",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 49.92312594922773,
+            "y": 40
+        },
+        {
+            "id": 14,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-1-4",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 53.89772896672904,
+            "y": 40
+        },
+        {
+            "id": 15,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-2-0",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 99.75376064951102,
+            "y": 40
+        },
+        {
+            "id": 16,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-2-1",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 15.998200172245024,
+            "y": 40
+        },
+        {
+            "id": 17,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-2-2",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 46.804988778467724,
+            "y": 40
+        },
+        {
+            "id": 18,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-2-3",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 53.69703304087952,
+            "y": 40
+        },
+        {
+            "id": 19,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-2-4",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 15.815775434466971,
+            "y": 40
+        },
+        {
+            "id": 20,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-3-0",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 76.19621990520646,
+            "y": 40
+        },
+        {
+            "id": 21,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-3-1",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 76.25108000751513,
+            "y": 40
+        },
+        {
+            "id": 22,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-3-2",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 36.298076718093355,
+            "y": 40
+        },
+        {
+            "id": 23,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-3-3",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 48.59904633166138,
+            "y": 40
+        },
+        {
+            "id": 24,
+            "model": "middle",
+            "mytag": "router",
+            "label": "Middle-3-4",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 47.52823780987313,
+            "y": 40
+        },
+        {
+            "id": 25,
+            "model": "Application-1-Router",
+            "mytag": "router",
+            "label": "Application-1-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 54.21952013742742,
+            "y": 0
+        },
+        {
+            "id": 26,
+            "model": "Application-1-Sensor",
+            "label": "Application-1-Sensor",
+            "IPT": 117000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 54.23092166910548,
+            "y": -40
+        },
+        {
+            "id": 27,
+            "model": "Application-2-Router",
+            "mytag": "router",
+            "label": "Application-2-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 96.07789032744503,
+            "y": 0
+        },
+        {
+            "id": 28,
+            "model": "Application-2-Sensor",
+            "label": "Application-2-Sensor",
+            "IPT": 84000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 94.34973378094806,
+            "y": -40
+        },
+        {
+            "id": 29,
+            "model": "Application-3-Router",
+            "mytag": "router",
+            "label": "Application-3-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 94.15961272290893,
+            "y": 0
+        },
+        {
+            "id": 30,
+            "model": "Application-3-Sensor",
+            "label": "Application-3-Sensor",
+            "IPT": 82000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 92.48754634488843,
+            "y": -40
+        },
+        {
+            "id": 31,
+            "model": "Application-4-Router",
+            "mytag": "router",
+            "label": "Application-4-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 52.278271553195886,
+            "y": 0
+        },
+        {
+            "id": 32,
+            "model": "Application-4-Sensor",
+            "label": "Application-4-Sensor",
+            "IPT": 100000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 51.3407296033213,
+            "y": -40
+        },
+        {
+            "id": 33,
+            "model": "Application-5-Router",
+            "mytag": "router",
+            "label": "Application-5-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 29.999707979876224,
+            "y": 0
+        },
+        {
+            "id": 34,
+            "model": "Application-5-Sensor",
+            "label": "Application-5-Sensor",
+            "IPT": 84000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 29.832850070350567,
+            "y": -40
+        },
+        {
+            "id": 35,
+            "model": "Application-6-Router",
+            "mytag": "router",
+            "label": "Application-6-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 7.3260721099633,
+            "y": 0
+        },
+        {
+            "id": 36,
+            "model": "Application-6-Sensor",
+            "label": "Application-6-Sensor",
+            "IPT": 88000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 8.849528804709058,
+            "y": -40
+        },
+        {
+            "id": 37,
+            "model": "Application-7-Router",
+            "mytag": "router",
+            "label": "Application-7-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 15.774683235723197,
+            "y": 0
+        },
+        {
+            "id": 38,
+            "model": "Application-7-Sensor",
+            "label": "Application-7-Sensor",
+            "IPT": 119000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 15.890446006132278,
+            "y": -40
+        },
+        {
+            "id": 39,
+            "model": "Application-8-Router",
+            "mytag": "router",
+            "label": "Application-8-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 29.93787521999779,
+            "y": 0
+        },
+        {
+            "id": 40,
+            "model": "Application-8-Sensor",
+            "label": "Application-8-Sensor",
+            "IPT": 88000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 28.399589901674197,
+            "y": -40
+        },
+        {
+            "id": 41,
+            "model": "Application-9-Router",
+            "mytag": "router",
+            "label": "Application-9-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 15.544790977499046,
+            "y": 0
+        },
+        {
+            "id": 42,
+            "model": "Application-9-Sensor",
+            "label": "Application-9-Sensor",
+            "IPT": 101000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 16.294779492704368,
+            "y": -40
+        },
+        {
+            "id": 43,
+            "model": "Application-10-Router",
+            "mytag": "router",
+            "label": "Application-10-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 25.11212520698941,
+            "y": 0
+        },
+        {
+            "id": 44,
+            "model": "Application-10-Sensor",
+            "label": "Application-10-Sensor",
+            "IPT": 107000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 23.28847225418561,
+            "y": -40
+        },
+        {
+            "id": 45,
+            "model": "Application-11-Router",
+            "mytag": "router",
+            "label": "Application-11-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 63.71133773013796,
+            "y": 0
+        },
+        {
+            "id": 46,
+            "model": "Application-11-Sensor",
+            "label": "Application-11-Sensor",
+            "IPT": 108000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 64.53400751717793,
+            "y": -40
+        },
+        {
+            "id": 47,
+            "model": "Application-12-Router",
+            "mytag": "router",
+            "label": "Application-12-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 7.524386007376704,
+            "y": 0
+        },
+        {
+            "id": 48,
+            "model": "Application-12-Sensor",
+            "label": "Application-12-Sensor",
+            "IPT": 103000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 7.734486394356695,
+            "y": -40
+        },
+        {
+            "id": 49,
+            "model": "Application-13-Router",
+            "mytag": "router",
+            "label": "Application-13-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 30.825834993013366,
+            "y": 0
+        },
+        {
+            "id": 50,
+            "model": "Application-13-Sensor",
+            "label": "Application-13-Sensor",
+            "IPT": 93000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 29.823953949905064,
+            "y": -40
+        },
+        {
+            "id": 51,
+            "model": "Application-14-Router",
+            "mytag": "router",
+            "label": "Application-14-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 55.98835191438697,
+            "y": 0
+        },
+        {
+            "id": 52,
+            "model": "Application-14-Sensor",
+            "label": "Application-14-Sensor",
+            "IPT": 89000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 57.446774699266825,
+            "y": -40
+        },
+        {
+            "id": 53,
+            "model": "Application-15-Router",
+            "mytag": "router",
+            "label": "Application-15-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 2.4786361898188725,
+            "y": 0
+        },
+        {
+            "id": 54,
+            "model": "Application-15-Sensor",
+            "label": "Application-15-Sensor",
+            "IPT": 106000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 3.93489230331999,
+            "y": -40
+        },
+        {
+            "id": 55,
+            "model": "Application-16-Router",
+            "mytag": "router",
+            "label": "Application-16-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 78.73745091354711,
+            "y": 0
+        },
+        {
+            "id": 56,
+            "model": "Application-16-Sensor",
+            "label": "Application-16-Sensor",
+            "IPT": 82000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 77.62718578372977,
+            "y": -40
+        },
+        {
+            "id": 57,
+            "model": "Application-17-Router",
+            "mytag": "router",
+            "label": "Application-17-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 82.0536380971562,
+            "y": 0
+        },
+        {
+            "id": 58,
+            "model": "Application-17-Sensor",
+            "label": "Application-17-Sensor",
+            "IPT": 92000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 81.36668590194702,
+            "y": -40
+        },
+        {
+            "id": 59,
+            "model": "Application-18-Router",
+            "mytag": "router",
+            "label": "Application-18-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 27.91249927218714,
+            "y": 0
+        },
+        {
+            "id": 60,
+            "model": "Application-18-Sensor",
+            "label": "Application-18-Sensor",
+            "IPT": 114000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 29.669447833486004,
+            "y": -40
+        },
+        {
+            "id": 61,
+            "model": "Application-19-Router",
+            "mytag": "router",
+            "label": "Application-19-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 26.121519639021017,
+            "y": 0
+        },
+        {
+            "id": 62,
+            "model": "Application-19-Sensor",
+            "label": "Application-19-Sensor",
+            "IPT": 118000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 25.504268085740218,
+            "y": -40
+        },
+        {
+            "id": 63,
+            "model": "Application-20-Router",
+            "mytag": "router",
+            "label": "Application-20-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 98.423584931659,
+            "y": 0
+        },
+        {
+            "id": 64,
+            "model": "Application-20-Sensor",
+            "label": "Application-20-Sensor",
+            "IPT": 116000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 97.44247495621332,
+            "y": -40
+        },
+        {
+            "id": 65,
+            "model": "Application-21-Router",
+            "mytag": "router",
+            "label": "Application-21-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 51.99203485665854,
+            "y": 0
+        },
+        {
+            "id": 66,
+            "model": "Application-21-Sensor",
+            "label": "Application-21-Sensor",
+            "IPT": 92000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 51.71722445515849,
+            "y": -40
+        },
+        {
+            "id": 67,
+            "model": "Application-22-Router",
+            "mytag": "router",
+            "label": "Application-22-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 62.31554099464092,
+            "y": 0
+        },
+        {
+            "id": 68,
+            "model": "Application-22-Sensor",
+            "label": "Application-22-Sensor",
+            "IPT": 99000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 61.552679643475535,
+            "y": -40
+        },
+        {
+            "id": 69,
+            "model": "Application-23-Router",
+            "mytag": "router",
+            "label": "Application-23-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 69.7208414194399,
+            "y": 0
+        },
+        {
+            "id": 70,
+            "model": "Application-23-Sensor",
+            "label": "Application-23-Sensor",
+            "IPT": 106000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 71.48229610236064,
+            "y": -40
+        },
+        {
+            "id": 71,
+            "model": "Application-24-Router",
+            "mytag": "router",
+            "label": "Application-24-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 17.402734320994394,
+            "y": 0
+        },
+        {
+            "id": 72,
+            "model": "Application-24-Sensor",
+            "label": "Application-24-Sensor",
+            "IPT": 80000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 16.550389188470103,
+            "y": -40
+        },
+        {
+            "id": 73,
+            "model": "Application-25-Router",
+            "mytag": "router",
+            "label": "Application-25-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 60.66615704797626,
+            "y": 0
+        },
+        {
+            "id": 74,
+            "model": "Application-25-Sensor",
+            "label": "Application-25-Sensor",
+            "IPT": 108000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 59.52096265193266,
+            "y": -40
+        },
+        {
+            "id": 75,
+            "model": "Application-26-Router",
+            "mytag": "router",
+            "label": "Application-26-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 95.98320036830363,
+            "y": 0
+        },
+        {
+            "id": 76,
+            "model": "Application-26-Sensor",
+            "label": "Application-26-Sensor",
+            "IPT": 98000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 96.63861571352362,
+            "y": -40
+        },
+        {
+            "id": 77,
+            "model": "Application-27-Router",
+            "mytag": "router",
+            "label": "Application-27-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 81.84234645366642,
+            "y": 0
+        },
+        {
+            "id": 78,
+            "model": "Application-27-Sensor",
+            "label": "Application-27-Sensor",
+            "IPT": 94000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 80.43176230264952,
+            "y": -40
+        },
+        {
+            "id": 79,
+            "model": "Application-28-Router",
+            "mytag": "router",
+            "label": "Application-28-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 47.51363442188051,
+            "y": 0
+        },
+        {
+            "id": 80,
+            "model": "Application-28-Sensor",
+            "label": "Application-28-Sensor",
+            "IPT": 120000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 46.29137536883935,
+            "y": -40
+        },
+        {
+            "id": 81,
+            "model": "Application-29-Router",
+            "mytag": "router",
+            "label": "Application-29-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 39.96528628765377,
+            "y": 0
+        },
+        {
+            "id": 82,
+            "model": "Application-29-Sensor",
+            "label": "Application-29-Sensor",
+            "IPT": 80000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 41.078967914723066,
+            "y": -40
+        },
+        {
+            "id": 83,
+            "model": "Application-30-Router",
+            "mytag": "router",
+            "label": "Application-30-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 95.79660422795398,
+            "y": 0
+        },
+        {
+            "id": 84,
+            "model": "Application-30-Sensor",
+            "label": "Application-30-Sensor",
+            "IPT": 115000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 97.46648428577573,
+            "y": -40
+        },
+        {
+            "id": 85,
+            "model": "Application-31-Router",
+            "mytag": "router",
+            "label": "Application-31-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 80.14166017222645,
+            "y": 0
+        },
+        {
+            "id": 86,
+            "model": "Application-31-Sensor",
+            "label": "Application-31-Sensor",
+            "IPT": 118000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 81.94181860599907,
+            "y": -40
+        },
+        {
+            "id": 87,
+            "model": "Application-32-Router",
+            "mytag": "router",
+            "label": "Application-32-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 71.92739612759671,
+            "y": 0
+        },
+        {
+            "id": 88,
+            "model": "Application-32-Sensor",
+            "label": "Application-32-Sensor",
+            "IPT": 115000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 73.51622854052975,
+            "y": -40
+        },
+        {
+            "id": 89,
+            "model": "Application-33-Router",
+            "mytag": "router",
+            "label": "Application-33-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 45.00697572469081,
+            "y": 0
+        },
+        {
+            "id": 90,
+            "model": "Application-33-Sensor",
+            "label": "Application-33-Sensor",
+            "IPT": 97000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 44.945363792971875,
+            "y": -40
+        },
+        {
+            "id": 91,
+            "model": "Application-34-Router",
+            "mytag": "router",
+            "label": "Application-34-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 7.748335386473581,
+            "y": 0
+        },
+        {
+            "id": 92,
+            "model": "Application-34-Sensor",
+            "label": "Application-34-Sensor",
+            "IPT": 101000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 9.320442717634847,
+            "y": -40
+        },
+        {
+            "id": 93,
+            "model": "Application-35-Router",
+            "mytag": "router",
+            "label": "Application-35-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 23.12614797281868,
+            "y": 0
+        },
+        {
+            "id": 94,
+            "model": "Application-35-Sensor",
+            "label": "Application-35-Sensor",
+            "IPT": 84000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 22.756545451485025,
+            "y": -40
+        },
+        {
+            "id": 95,
+            "model": "Application-36-Router",
+            "mytag": "router",
+            "label": "Application-36-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 6.226571058358532,
+            "y": 0
+        },
+        {
+            "id": 96,
+            "model": "Application-36-Sensor",
+            "label": "Application-36-Sensor",
+            "IPT": 117000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 7.653499187574269,
+            "y": -40
+        },
+        {
+            "id": 97,
+            "model": "Application-37-Router",
+            "mytag": "router",
+            "label": "Application-37-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 0.5896083583993073,
+            "y": 0
+        },
+        {
+            "id": 98,
+            "model": "Application-37-Sensor",
+            "label": "Application-37-Sensor",
+            "IPT": 104000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 0.7424906288402333,
+            "y": -40
+        },
+        {
+            "id": 99,
+            "model": "Application-38-Router",
+            "mytag": "router",
+            "label": "Application-38-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 60.32525889412413,
+            "y": 0
+        },
+        {
+            "id": 100,
+            "model": "Application-38-Sensor",
+            "label": "Application-38-Sensor",
+            "IPT": 97000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 60.267826869318135,
+            "y": -40
+        },
+        {
+            "id": 101,
+            "model": "Application-39-Router",
+            "mytag": "router",
+            "label": "Application-39-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 67.91418850283497,
+            "y": 0
+        },
+        {
+            "id": 102,
+            "model": "Application-39-Sensor",
+            "label": "Application-39-Sensor",
+            "IPT": 109000000,
+            "RAM": 7,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 69.83707641291066,
+            "y": -40
+        },
+        {
+            "id": 103,
+            "model": "Application-40-Router",
+            "mytag": "router",
+            "label": "Application-40-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 39.402025633970474,
+            "y": 0
+        },
+        {
+            "id": 104,
+            "model": "Application-40-Sensor",
+            "label": "Application-40-Sensor",
+            "IPT": 107000000,
+            "RAM": 7,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 40.869431056351,
+            "y": -40
+        },
+        {
+            "id": 105,
+            "model": "Application-41-Router",
+            "mytag": "router",
+            "label": "Application-41-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 37.91038641881396,
+            "y": 0
+        },
+        {
+            "id": 106,
+            "model": "Application-41-Sensor",
+            "label": "Application-41-Sensor",
+            "IPT": 101000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 37.02341288136918,
+            "y": -40
+        },
+        {
+            "id": 107,
+            "model": "Application-42-Router",
+            "mytag": "router",
+            "label": "Application-42-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 8.190623276164255,
+            "y": 0
+        },
+        {
+            "id": 108,
+            "model": "Application-42-Sensor",
+            "label": "Application-42-Sensor",
+            "IPT": 83000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 7.087511939043248,
+            "y": -40
+        },
+        {
+            "id": 109,
+            "model": "Application-43-Router",
+            "mytag": "router",
+            "label": "Application-43-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 65.17546552438894,
+            "y": 0
+        },
+        {
+            "id": 110,
+            "model": "Application-43-Sensor",
+            "label": "Application-43-Sensor",
+            "IPT": 92000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 65.66080815073357,
+            "y": -40
+        },
+        {
+            "id": 111,
+            "model": "Application-44-Router",
+            "mytag": "router",
+            "label": "Application-44-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 66.94588446199107,
+            "y": 0
+        },
+        {
+            "id": 112,
+            "model": "Application-44-Sensor",
+            "label": "Application-44-Sensor",
+            "IPT": 96000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 65.61704103546228,
+            "y": -40
+        },
+        {
+            "id": 113,
+            "model": "Application-45-Router",
+            "mytag": "router",
+            "label": "Application-45-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 71.83572285960082,
+            "y": 0
+        },
+        {
+            "id": 114,
+            "model": "Application-45-Sensor",
+            "label": "Application-45-Sensor",
+            "IPT": 86000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 69.93843656159069,
+            "y": -40
+        },
+        {
+            "id": 115,
+            "model": "Application-46-Router",
+            "mytag": "router",
+            "label": "Application-46-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 90.80261510474446,
+            "y": 0
+        },
+        {
+            "id": 116,
+            "model": "Application-46-Sensor",
+            "label": "Application-46-Sensor",
+            "IPT": 92000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 91.17100654974386,
+            "y": -40
+        },
+        {
+            "id": 117,
+            "model": "Application-47-Router",
+            "mytag": "router",
+            "label": "Application-47-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 69.71930024957722,
+            "y": 0
+        },
+        {
+            "id": 118,
+            "model": "Application-47-Sensor",
+            "label": "Application-47-Sensor",
+            "IPT": 118000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 70.90420911597806,
+            "y": -40
+        },
+        {
+            "id": 119,
+            "model": "Application-48-Router",
+            "mytag": "router",
+            "label": "Application-48-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 34.7203765308449,
+            "y": 0
+        },
+        {
+            "id": 120,
+            "model": "Application-48-Sensor",
+            "label": "Application-48-Sensor",
+            "IPT": 84000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 35.31054954707212,
+            "y": -40
+        },
+        {
+            "id": 121,
+            "model": "Application-49-Router",
+            "mytag": "router",
+            "label": "Application-49-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 82.23309180900581,
+            "y": 0
+        },
+        {
+            "id": 122,
+            "model": "Application-49-Sensor",
+            "label": "Application-49-Sensor",
+            "IPT": 103000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 83.79939186822622,
+            "y": -40
+        },
+        {
+            "id": 123,
+            "model": "Application-50-Router",
+            "mytag": "router",
+            "label": "Application-50-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 43.5487145007677,
+            "y": 0
+        },
+        {
+            "id": 124,
+            "model": "Application-50-Sensor",
+            "label": "Application-50-Sensor",
+            "IPT": 97000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 44.781511375994725,
+            "y": -40
+        },
+        {
+            "id": 125,
+            "model": "Application-51-Router",
+            "mytag": "router",
+            "label": "Application-51-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 46.48737716345078,
+            "y": 0
+        },
+        {
+            "id": 126,
+            "model": "Application-51-Sensor",
+            "label": "Application-51-Sensor",
+            "IPT": 95000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 45.60309016022066,
+            "y": -40
+        },
+        {
+            "id": 127,
+            "model": "Application-52-Router",
+            "mytag": "router",
+            "label": "Application-52-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 46.470846660323176,
+            "y": 0
+        },
+        {
+            "id": 128,
+            "model": "Application-52-Sensor",
+            "label": "Application-52-Sensor",
+            "IPT": 111000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 45.198206088953945,
+            "y": -40
+        },
+        {
+            "id": 129,
+            "model": "Application-53-Router",
+            "mytag": "router",
+            "label": "Application-53-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 25.835240885867805,
+            "y": 0
+        },
+        {
+            "id": 130,
+            "model": "Application-53-Sensor",
+            "label": "Application-53-Sensor",
+            "IPT": 97000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 23.87584534362251,
+            "y": -40
+        },
+        {
+            "id": 131,
+            "model": "Application-54-Router",
+            "mytag": "router",
+            "label": "Application-54-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 72.00746641041943,
+            "y": 0
+        },
+        {
+            "id": 132,
+            "model": "Application-54-Sensor",
+            "label": "Application-54-Sensor",
+            "IPT": 95000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 72.59107800938324,
+            "y": -40
+        },
+        {
+            "id": 133,
+            "model": "Application-55-Router",
+            "mytag": "router",
+            "label": "Application-55-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 1.7243259348372675,
+            "y": 0
+        },
+        {
+            "id": 134,
+            "model": "Application-55-Sensor",
+            "label": "Application-55-Sensor",
+            "IPT": 95000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 2.3801660212245315,
+            "y": -40
+        },
+        {
+            "id": 135,
+            "model": "Application-56-Router",
+            "mytag": "router",
+            "label": "Application-56-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 53.09219311457678,
+            "y": 0
+        },
+        {
+            "id": 136,
+            "model": "Application-56-Sensor",
+            "label": "Application-56-Sensor",
+            "IPT": 115000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 52.49943522503345,
+            "y": -40
+        },
+        {
+            "id": 137,
+            "model": "Application-57-Router",
+            "mytag": "router",
+            "label": "Application-57-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 25.14036762009415,
+            "y": 0
+        },
+        {
+            "id": 138,
+            "model": "Application-57-Sensor",
+            "label": "Application-57-Sensor",
+            "IPT": 100000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 26.111891874650567,
+            "y": -40
+        },
+        {
+            "id": 139,
+            "model": "Application-58-Router",
+            "mytag": "router",
+            "label": "Application-58-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 21.63846398786057,
+            "y": 0
+        },
+        {
+            "id": 140,
+            "model": "Application-58-Sensor",
+            "label": "Application-58-Sensor",
+            "IPT": 117000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 22.025626949909775,
+            "y": -40
+        },
+        {
+            "id": 141,
+            "model": "Application-59-Router",
+            "mytag": "router",
+            "label": "Application-59-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 29.624646326514448,
+            "y": 0
+        },
+        {
+            "id": 142,
+            "model": "Application-59-Sensor",
+            "label": "Application-59-Sensor",
+            "IPT": 80000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 28.130978165906374,
+            "y": -40
+        },
+        {
+            "id": 143,
+            "model": "Application-60-Router",
+            "mytag": "router",
+            "label": "Application-60-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 55.33589667986083,
+            "y": 0
+        },
+        {
+            "id": 144,
+            "model": "Application-60-Sensor",
+            "label": "Application-60-Sensor",
+            "IPT": 111000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 56.82677561985497,
+            "y": -40
+        },
+        {
+            "id": 145,
+            "model": "Application-61-Router",
+            "mytag": "router",
+            "label": "Application-61-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 47.8714208606398,
+            "y": 0
+        },
+        {
+            "id": 146,
+            "model": "Application-61-Sensor",
+            "label": "Application-61-Sensor",
+            "IPT": 83000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 49.635675247712214,
+            "y": -40
+        },
+        {
+            "id": 147,
+            "model": "Application-62-Router",
+            "mytag": "router",
+            "label": "Application-62-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 6.5343435113932475,
+            "y": 0
+        },
+        {
+            "id": 148,
+            "model": "Application-62-Sensor",
+            "label": "Application-62-Sensor",
+            "IPT": 120000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 4.7487798085633806,
+            "y": -40
+        },
+        {
+            "id": 149,
+            "model": "Application-63-Router",
+            "mytag": "router",
+            "label": "Application-63-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 94.91256423580312,
+            "y": 0
+        },
+        {
+            "id": 150,
+            "model": "Application-63-Sensor",
+            "label": "Application-63-Sensor",
+            "IPT": 87000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 95.97033801710789,
+            "y": -40
+        },
+        {
+            "id": 151,
+            "model": "Application-64-Router",
+            "mytag": "router",
+            "label": "Application-64-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 61.84183524972732,
+            "y": 0
+        },
+        {
+            "id": 152,
+            "model": "Application-64-Sensor",
+            "label": "Application-64-Sensor",
+            "IPT": 108000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 63.282501913032036,
+            "y": -40
+        },
+        {
+            "id": 153,
+            "model": "Application-65-Router",
+            "mytag": "router",
+            "label": "Application-65-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 62.102732107214855,
+            "y": 0
+        },
+        {
+            "id": 154,
+            "model": "Application-65-Sensor",
+            "label": "Application-65-Sensor",
+            "IPT": 93000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 60.946832888436425,
+            "y": -40
+        },
+        {
+            "id": 155,
+            "model": "Application-66-Router",
+            "mytag": "router",
+            "label": "Application-66-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 23.98651776746924,
+            "y": 0
+        },
+        {
+            "id": 156,
+            "model": "Application-66-Sensor",
+            "label": "Application-66-Sensor",
+            "IPT": 80000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 23.78853258594005,
+            "y": -40
+        },
+        {
+            "id": 157,
+            "model": "Application-67-Router",
+            "mytag": "router",
+            "label": "Application-67-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 3.2639855380924288,
+            "y": 0
+        },
+        {
+            "id": 158,
+            "model": "Application-67-Sensor",
+            "label": "Application-67-Sensor",
+            "IPT": 109000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 4.013525218377399,
+            "y": -40
+        },
+        {
+            "id": 159,
+            "model": "Application-68-Router",
+            "mytag": "router",
+            "label": "Application-68-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 62.505800716422186,
+            "y": 0
+        },
+        {
+            "id": 160,
+            "model": "Application-68-Sensor",
+            "label": "Application-68-Sensor",
+            "IPT": 114000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 63.09633961003211,
+            "y": -40
+        },
+        {
+            "id": 161,
+            "model": "Application-69-Router",
+            "mytag": "router",
+            "label": "Application-69-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 7.140983685581414,
+            "y": 0
+        },
+        {
+            "id": 162,
+            "model": "Application-69-Sensor",
+            "label": "Application-69-Sensor",
+            "IPT": 118000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 8.825753801451967,
+            "y": -40
+        },
+        {
+            "id": 163,
+            "model": "Application-70-Router",
+            "mytag": "router",
+            "label": "Application-70-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 68.86779912120937,
+            "y": 0
+        },
+        {
+            "id": 164,
+            "model": "Application-70-Sensor",
+            "label": "Application-70-Sensor",
+            "IPT": 112000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 68.84297999858971,
+            "y": -40
+        },
+        {
+            "id": 165,
+            "model": "Application-71-Router",
+            "mytag": "router",
+            "label": "Application-71-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 88.94228892924536,
+            "y": 0
+        },
+        {
+            "id": 166,
+            "model": "Application-71-Sensor",
+            "label": "Application-71-Sensor",
+            "IPT": 81000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 87.85798659213268,
+            "y": -40
+        },
+        {
+            "id": 167,
+            "model": "Application-72-Router",
+            "mytag": "router",
+            "label": "Application-72-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 57.519910921993045,
+            "y": 0
+        },
+        {
+            "id": 168,
+            "model": "Application-72-Sensor",
+            "label": "Application-72-Sensor",
+            "IPT": 97000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 55.68083761457151,
+            "y": -40
+        },
+        {
+            "id": 169,
+            "model": "Application-73-Router",
+            "mytag": "router",
+            "label": "Application-73-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 65.15094894336863,
+            "y": 0
+        },
+        {
+            "id": 170,
+            "model": "Application-73-Sensor",
+            "label": "Application-73-Sensor",
+            "IPT": 117000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 65.69008782118497,
+            "y": -40
+        },
+        {
+            "id": 171,
+            "model": "Application-74-Router",
+            "mytag": "router",
+            "label": "Application-74-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 47.00103949603517,
+            "y": 0
+        },
+        {
+            "id": 172,
+            "model": "Application-74-Sensor",
+            "label": "Application-74-Sensor",
+            "IPT": 86000000,
+            "RAM": 7,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 46.32025415035103,
+            "y": -40
+        },
+        {
+            "id": 173,
+            "model": "Application-75-Router",
+            "mytag": "router",
+            "label": "Application-75-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 66.25835369914287,
+            "y": 0
+        },
+        {
+            "id": 174,
+            "model": "Application-75-Sensor",
+            "label": "Application-75-Sensor",
+            "IPT": 115000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 66.0776573335498,
+            "y": -40
+        },
+        {
+            "id": 175,
+            "model": "Application-76-Router",
+            "mytag": "router",
+            "label": "Application-76-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 11.592160143095786,
+            "y": 0
+        },
+        {
+            "id": 176,
+            "model": "Application-76-Sensor",
+            "label": "Application-76-Sensor",
+            "IPT": 80000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 13.069630080378396,
+            "y": -40
+        },
+        {
+            "id": 177,
+            "model": "Application-77-Router",
+            "mytag": "router",
+            "label": "Application-77-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 18.758254139452713,
+            "y": 0
+        },
+        {
+            "id": 178,
+            "model": "Application-77-Sensor",
+            "label": "Application-77-Sensor",
+            "IPT": 111000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 18.52641796234176,
+            "y": -40
+        },
+        {
+            "id": 179,
+            "model": "Application-78-Router",
+            "mytag": "router",
+            "label": "Application-78-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 54.921963908533165,
+            "y": 0
+        },
+        {
+            "id": 180,
+            "model": "Application-78-Sensor",
+            "label": "Application-78-Sensor",
+            "IPT": 111000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 53.03744167829982,
+            "y": -40
+        },
+        {
+            "id": 181,
+            "model": "Application-79-Router",
+            "mytag": "router",
+            "label": "Application-79-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 23.929746232765037,
+            "y": 0
+        },
+        {
+            "id": 182,
+            "model": "Application-79-Sensor",
+            "label": "Application-79-Sensor",
+            "IPT": 80000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 23.561708981924646,
+            "y": -40
+        },
+        {
+            "id": 183,
+            "model": "Application-80-Router",
+            "mytag": "router",
+            "label": "Application-80-Router",
+            "IPT": 0,
+            "RAM": 0,
+            "x": 91.2929878484168,
+            "y": 0
+        },
+        {
+            "id": 184,
+            "model": "Application-80-Sensor",
+            "label": "Application-80-Sensor",
+            "IPT": 89000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.1,
+            "x": 93.02360008815322,
+            "y": -40
+        }
+    ],
+    "link": [
+        {
+            "s": 0,
+            "d": 1,
+            "BW": 119,
+            "PR": 11.738776652588323
+        },
+        {
+            "s": 0,
+            "d": 2,
+            "BW": 141,
+            "PR": 22.997688755590463
+        },
+        {
+            "s": 0,
+            "d": 3,
+            "BW": 70,
+            "PR": 23.962787899764535
+        },
+        {
+            "s": 0,
+            "d": 4,
+            "BW": 98,
+            "PR": 11.93432753666928
+        },
+        {
+            "s": 1,
+            "d": 5,
+            "BW": 15,
+            "PR": 10.45702618619504
+        },
+        {
+            "s": 4,
+            "d": 5,
+            "BW": 21,
+            "PR": 8.289824731637605
+        },
+        {
+            "s": 1,
+            "d": 6,
+            "BW": 19,
+            "PR": 4.630401584627665
+        },
+        {
+            "s": 3,
+            "d": 6,
+            "BW": 18,
+            "PR": 8.618817162054096
+        },
+        {
+            "s": 1,
+            "d": 7,
+            "BW": 8,
+            "PR": 9.290106548541681
+        },
+        {
+            "s": 3,
+            "d": 7,
+            "BW": 9,
+            "PR": 10.842541768121176
+        },
+        {
+            "s": 1,
+            "d": 8,
+            "BW": 19,
+            "PR": 6.223788824880737
+        },
+        {
+            "s": 4,
+            "d": 8,
+            "BW": 18,
+            "PR": 5.3012327772486785
+        },
+        {
+            "s": 1,
+            "d": 9,
+            "BW": 15,
+            "PR": 9.61456250766841
+        },
+        {
+            "s": 4,
+            "d": 9,
+            "BW": 9,
+            "PR": 8.873048045335906
+        },
+        {
+            "s": 2,
+            "d": 10,
+            "BW": 14,
+            "PR": 5.307219950095427
+        },
+        {
+            "s": 3,
+            "d": 10,
+            "BW": 15,
+            "PR": 11.916186805092762
+        },
+        {
+            "s": 2,
+            "d": 11,
+            "BW": 14,
+            "PR": 9.476914007918996
+        },
+        {
+            "s": 1,
+            "d": 11,
+            "BW": 14,
+            "PR": 10.574420752054467
+        },
+        {
+            "s": 2,
+            "d": 12,
+            "BW": 19,
+            "PR": 6.141927007805622
+        },
+        {
+            "s": 1,
+            "d": 12,
+            "BW": 17,
+            "PR": 5.701012352433125
+        },
+        {
+            "s": 2,
+            "d": 13,
+            "BW": 21,
+            "PR": 5.142972723536501
+        },
+        {
+            "s": 1,
+            "d": 13,
+            "BW": 14,
+            "PR": 9.959911856732852
+        },
+        {
+            "s": 2,
+            "d": 14,
+            "BW": 20,
+            "PR": 11.182583068819817
+        },
+        {
+            "s": 3,
+            "d": 14,
+            "BW": 18,
+            "PR": 5.754566073258267
+        },
+        {
+            "s": 3,
+            "d": 15,
+            "BW": 22,
+            "PR": 4.727275297390351
+        },
+        {
+            "s": 1,
+            "d": 15,
+            "BW": 10,
+            "PR": 5.2227305547860885
+        },
+        {
+            "s": 3,
+            "d": 16,
+            "BW": 20,
+            "PR": 8.77127224585579
+        },
+        {
+            "s": 2,
+            "d": 16,
+            "BW": 19,
+            "PR": 8.767107426889025
+        },
+        {
+            "s": 3,
+            "d": 17,
+            "BW": 15,
+            "PR": 11.768627020908944
+        },
+        {
+            "s": 1,
+            "d": 17,
+            "BW": 10,
+            "PR": 9.4536829522126
+        },
+        {
+            "s": 3,
+            "d": 18,
+            "BW": 15,
+            "PR": 10.148789861259568
+        },
+        {
+            "s": 2,
+            "d": 18,
+            "BW": 10,
+            "PR": 6.348001029179409
+        },
+        {
+            "s": 3,
+            "d": 19,
+            "BW": 7,
+            "PR": 11.63052742016864
+        },
+        {
+            "s": 4,
+            "d": 19,
+            "BW": 15,
+            "PR": 11.775104790960913
+        },
+        {
+            "s": 4,
+            "d": 20,
+            "BW": 10,
+            "PR": 10.964148558694134
+        },
+        {
+            "s": 2,
+            "d": 20,
+            "BW": 13,
+            "PR": 5.2227141483970785
+        },
+        {
+            "s": 4,
+            "d": 21,
+            "BW": 7,
+            "PR": 8.791556675681832
+        },
+        {
+            "s": 2,
+            "d": 21,
+            "BW": 7,
+            "PR": 4.8949418025671605
+        },
+        {
+            "s": 4,
+            "d": 22,
+            "BW": 16,
+            "PR": 5.91561848270447
+        },
+        {
+            "s": 1,
+            "d": 22,
+            "BW": 9,
+            "PR": 4.68522761654303
+        },
+        {
+            "s": 4,
+            "d": 23,
+            "BW": 9,
+            "PR": 11.823875949418674
+        },
+        {
+            "s": 3,
+            "d": 23,
+            "BW": 11,
+            "PR": 5.027131715998102
+        },
+        {
+            "s": 4,
+            "d": 24,
+            "BW": 12,
+            "PR": 6.120453031520473
+        },
+        {
+            "s": 3,
+            "d": 24,
+            "BW": 20,
+            "PR": 11.714903248059642
+        },
+        {
+            "s": 5,
+            "d": 6,
+            "BW": 12,
+            "PR": 6.276325983179028
+        },
+        {
+            "s": 6,
+            "d": 7,
+            "BW": 7,
+            "PR": 6.064744864095609
+        },
+        {
+            "s": 7,
+            "d": 8,
+            "BW": 10,
+            "PR": 7.475746783304473
+        },
+        {
+            "s": 8,
+            "d": 9,
+            "BW": 9,
+            "PR": 4.690500419572521
+        },
+        {
+            "s": 9,
+            "d": 10,
+            "BW": 12,
+            "PR": 4.757430706955649
+        },
+        {
+            "s": 10,
+            "d": 11,
+            "BW": 7,
+            "PR": 3.6234866851577867
+        },
+        {
+            "s": 11,
+            "d": 12,
+            "BW": 9,
+            "PR": 2.6051713000352943
+        },
+        {
+            "s": 12,
+            "d": 13,
+            "BW": 12,
+            "PR": 3.650573662982885
+        },
+        {
+            "s": 13,
+            "d": 14,
+            "BW": 7,
+            "PR": 2.5359541949254676
+        },
+        {
+            "s": 14,
+            "d": 15,
+            "BW": 4,
+            "PR": 3.644708919055772
+        },
+        {
+            "s": 15,
+            "d": 16,
+            "BW": 4,
+            "PR": 6.798177001268733
+        },
+        {
+            "s": 16,
+            "d": 17,
+            "BW": 5,
+            "PR": 5.070780599042946
+        },
+        {
+            "s": 17,
+            "d": 18,
+            "BW": 8,
+            "PR": 5.8448888914814034
+        },
+        {
+            "s": 18,
+            "d": 19,
+            "BW": 7,
+            "PR": 5.1961696569737725
+        },
+        {
+            "s": 19,
+            "d": 20,
+            "BW": 11,
+            "PR": 3.7149862119786228
+        },
+        {
+            "s": 20,
+            "d": 21,
+            "BW": 11,
+            "PR": 6.537484988833217
+        },
+        {
+            "s": 21,
+            "d": 22,
+            "BW": 7,
+            "PR": 2.971628982459411
+        },
+        {
+            "s": 22,
+            "d": 23,
+            "BW": 10,
+            "PR": 4.271487832947769
+        },
+        {
+            "s": 23,
+            "d": 24,
+            "BW": 10,
+            "PR": 4.835123340183375
+        },
+        {
+            "s": 24,
+            "d": 5,
+            "BW": 4,
+            "PR": 5.866822736466508
+        },
+        {
+            "s": 6,
+            "d": 17,
+            "BW": 9,
+            "PR": 6.502962554308494
+        },
+        {
+            "s": 7,
+            "d": 11,
+            "BW": 7,
+            "PR": 5.181428769551722
+        },
+        {
+            "s": 8,
+            "d": 10,
+            "BW": 8,
+            "PR": 4.813140342004837
+        },
+        {
+            "s": 10,
+            "d": 22,
+            "BW": 5,
+            "PR": 2.7529416476244064
+        },
+        {
+            "s": 16,
+            "d": 20,
+            "BW": 11,
+            "PR": 3.5687364959959083
+        },
+        {
+            "s": 19,
+            "d": 17,
+            "BW": 8,
+            "PR": 7.132590367796666
+        },
+        {
+            "s": 24,
+            "d": 11,
+            "BW": 4,
+            "PR": 5.395901454081281
+        },
+        {
+            "s": 5,
+            "d": 25,
+            "BW": 9,
+            "PR": 2.7858263645374155
+        },
+        {
+            "s": 25,
+            "d": 26,
+            "BW": 3,
+            "PR": 0.6574327279394833
+        },
+        {
+            "s": 5,
+            "d": 27,
+            "BW": 5,
+            "PR": 6.7567127267206075
+        },
+        {
+            "s": 27,
+            "d": 28,
+            "BW": 1,
+            "PR": 0.9037755513182775
+        },
+        {
+            "s": 5,
+            "d": 29,
+            "BW": 7,
+            "PR": 5.3945952875360526
+        },
+        {
+            "s": 29,
+            "d": 30,
+            "BW": 3,
+            "PR": 1.0836722892912247
+        },
+        {
+            "s": 5,
+            "d": 31,
+            "BW": 8,
+            "PR": 3.521295997117682
+        },
+        {
+            "s": 31,
+            "d": 32,
+            "BW": 1,
+            "PR": 1.1716902229599713
+        },
+        {
+            "s": 6,
+            "d": 33,
+            "BW": 9,
+            "PR": 7.145091658527571
+        },
+        {
+            "s": 33,
+            "d": 34,
+            "BW": 3,
+            "PR": 1.4960964478550944
+        },
+        {
+            "s": 6,
+            "d": 35,
+            "BW": 7,
+            "PR": 5.0294234702438265
+        },
+        {
+            "s": 35,
+            "d": 36,
+            "BW": 1,
+            "PR": 0.869527088738884
+        },
+        {
+            "s": 6,
+            "d": 37,
+            "BW": 12,
+            "PR": 6.017699625436855
+        },
+        {
+            "s": 37,
+            "d": 38,
+            "BW": 3,
+            "PR": 1.3171041351154615
+        },
+        {
+            "s": 6,
+            "d": 39,
+            "BW": 5,
+            "PR": 7.194650019635519
+        },
+        {
+            "s": 39,
+            "d": 40,
+            "BW": 1,
+            "PR": 1.2424166839809987
+        },
+        {
+            "s": 7,
+            "d": 41,
+            "BW": 8,
+            "PR": 5.52414913515112
+        },
+        {
+            "s": 41,
+            "d": 42,
+            "BW": 2,
+            "PR": 1.005409058097987
+        },
+        {
+            "s": 7,
+            "d": 43,
+            "BW": 4,
+            "PR": 2.961492338563667
+        },
+        {
+            "s": 43,
+            "d": 44,
+            "BW": 2,
+            "PR": 1.271119223019627
+        },
+        {
+            "s": 7,
+            "d": 45,
+            "BW": 8,
+            "PR": 3.3079098813694308
+        },
+        {
+            "s": 45,
+            "d": 46,
+            "BW": 3,
+            "PR": 0.50966969960834
+        },
+        {
+            "s": 7,
+            "d": 47,
+            "BW": 6,
+            "PR": 5.227951446027612
+        },
+        {
+            "s": 47,
+            "d": 48,
+            "BW": 2,
+            "PR": 0.6274455192821388
+        },
+        {
+            "s": 8,
+            "d": 49,
+            "BW": 4,
+            "PR": 6.994623182632373
+        },
+        {
+            "s": 49,
+            "d": 50,
+            "BW": 1,
+            "PR": 0.8536786346146183
+        },
+        {
+            "s": 8,
+            "d": 51,
+            "BW": 10,
+            "PR": 7.369185113186445
+        },
+        {
+            "s": 51,
+            "d": 52,
+            "BW": 1,
+            "PR": 1.3814162046633243
+        },
+        {
+            "s": 8,
+            "d": 53,
+            "BW": 9,
+            "PR": 6.411932480738159
+        },
+        {
+            "s": 53,
+            "d": 54,
+            "BW": 1,
+            "PR": 0.766805709594472
+        },
+        {
+            "s": 8,
+            "d": 55,
+            "BW": 5,
+            "PR": 4.412708612984671
+        },
+        {
+            "s": 55,
+            "d": 56,
+            "BW": 2,
+            "PR": 0.8496584244459187
+        },
+        {
+            "s": 9,
+            "d": 57,
+            "BW": 7,
+            "PR": 3.614617736029045
+        },
+        {
+            "s": 57,
+            "d": 58,
+            "BW": 1,
+            "PR": 1.4668891040483611
+        },
+        {
+            "s": 9,
+            "d": 59,
+            "BW": 12,
+            "PR": 4.498391921800304
+        },
+        {
+            "s": 59,
+            "d": 60,
+            "BW": 1,
+            "PR": 1.3770384115755603
+        },
+        {
+            "s": 9,
+            "d": 61,
+            "BW": 8,
+            "PR": 2.6912859867663137
+        },
+        {
+            "s": 61,
+            "d": 62,
+            "BW": 2,
+            "PR": 0.936393883870608
+        },
+        {
+            "s": 9,
+            "d": 63,
+            "BW": 5,
+            "PR": 4.425977166723635
+        },
+        {
+            "s": 63,
+            "d": 64,
+            "BW": 3,
+            "PR": 0.9360575154549723
+        },
+        {
+            "s": 10,
+            "d": 65,
+            "BW": 12,
+            "PR": 5.934285734572633
+        },
+        {
+            "s": 65,
+            "d": 66,
+            "BW": 3,
+            "PR": 1.4207708562180401
+        },
+        {
+            "s": 10,
+            "d": 67,
+            "BW": 5,
+            "PR": 6.098771315069751
+        },
+        {
+            "s": 67,
+            "d": 68,
+            "BW": 2,
+            "PR": 0.8261829048573999
+        },
+        {
+            "s": 10,
+            "d": 69,
+            "BW": 12,
+            "PR": 3.136438995295766
+        },
+        {
+            "s": 69,
+            "d": 70,
+            "BW": 3,
+            "PR": 1.24813456015889
+        },
+        {
+            "s": 10,
+            "d": 71,
+            "BW": 8,
+            "PR": 4.530375843790814
+        },
+        {
+            "s": 71,
+            "d": 72,
+            "BW": 2,
+            "PR": 1.2857588274775802
+        },
+        {
+            "s": 11,
+            "d": 73,
+            "BW": 9,
+            "PR": 4.824940951235071
+        },
+        {
+            "s": 73,
+            "d": 74,
+            "BW": 2,
+            "PR": 1.2937353991060019
+        },
+        {
+            "s": 11,
+            "d": 75,
+            "BW": 6,
+            "PR": 5.7942537249921084
+        },
+        {
+            "s": 75,
+            "d": 76,
+            "BW": 3,
+            "PR": 0.8351882554098009
+        },
+        {
+            "s": 11,
+            "d": 77,
+            "BW": 7,
+            "PR": 5.863978352785836
+        },
+        {
+            "s": 77,
+            "d": 78,
+            "BW": 1,
+            "PR": 0.7448425440783502
+        },
+        {
+            "s": 11,
+            "d": 79,
+            "BW": 5,
+            "PR": 4.777080841900446
+        },
+        {
+            "s": 79,
+            "d": 80,
+            "BW": 3,
+            "PR": 0.8839784673927513
+        },
+        {
+            "s": 12,
+            "d": 81,
+            "BW": 6,
+            "PR": 5.78029005555892
+        },
+        {
+            "s": 81,
+            "d": 82,
+            "BW": 1,
+            "PR": 0.6758866817065317
+        },
+        {
+            "s": 12,
+            "d": 83,
+            "BW": 12,
+            "PR": 4.822749422871261
+        },
+        {
+            "s": 83,
+            "d": 84,
+            "BW": 1,
+            "PR": 0.9564618254701726
+        },
+        {
+            "s": 12,
+            "d": 85,
+            "BW": 12,
+            "PR": 7.43946226533224
+        },
+        {
+            "s": 85,
+            "d": 86,
+            "BW": 2,
+            "PR": 1.1126523227617628
+        },
+        {
+            "s": 12,
+            "d": 87,
+            "BW": 12,
+            "PR": 4.633703784293278
+        },
+        {
+            "s": 87,
+            "d": 88,
+            "BW": 3,
+            "PR": 1.3614949097832623
+        },
+        {
+            "s": 13,
+            "d": 89,
+            "BW": 7,
+            "PR": 6.699314439209604
+        },
+        {
+            "s": 89,
+            "d": 90,
+            "BW": 1,
+            "PR": 0.7745974469175383
+        },
+        {
+            "s": 13,
+            "d": 91,
+            "BW": 8,
+            "PR": 3.6724678900731766
+        },
+        {
+            "s": 91,
+            "d": 92,
+            "BW": 1,
+            "PR": 0.6383740615161557
+        },
+        {
+            "s": 13,
+            "d": 93,
+            "BW": 6,
+            "PR": 6.032095708472761
+        },
+        {
+            "s": 93,
+            "d": 94,
+            "BW": 3,
+            "PR": 0.9659243033511506
+        },
+        {
+            "s": 13,
+            "d": 95,
+            "BW": 10,
+            "PR": 4.447384063334706
+        },
+        {
+            "s": 95,
+            "d": 96,
+            "BW": 3,
+            "PR": 0.8803810289277116
+        },
+        {
+            "s": 14,
+            "d": 97,
+            "BW": 9,
+            "PR": 3.9930632618619173
+        },
+        {
+            "s": 97,
+            "d": 98,
+            "BW": 3,
+            "PR": 1.046132309733839
+        },
+        {
+            "s": 14,
+            "d": 99,
+            "BW": 7,
+            "PR": 4.941147387751252
+        },
+        {
+            "s": 99,
+            "d": 100,
+            "BW": 2,
+            "PR": 0.8361295436983824
+        },
+        {
+            "s": 14,
+            "d": 101,
+            "BW": 10,
+            "PR": 6.120906888136444
+        },
+        {
+            "s": 101,
+            "d": 102,
+            "BW": 3,
+            "PR": 0.5269664519051377
+        },
+        {
+            "s": 14,
+            "d": 103,
+            "BW": 4,
+            "PR": 2.9197373108100013
+        },
+        {
+            "s": 103,
+            "d": 104,
+            "BW": 1,
+            "PR": 0.5502846334886276
+        },
+        {
+            "s": 15,
+            "d": 105,
+            "BW": 7,
+            "PR": 4.7734966250824105
+        },
+        {
+            "s": 105,
+            "d": 106,
+            "BW": 2,
+            "PR": 0.7522715317823806
+        },
+        {
+            "s": 15,
+            "d": 107,
+            "BW": 4,
+            "PR": 6.245121305414253
+        },
+        {
+            "s": 107,
+            "d": 108,
+            "BW": 1,
+            "PR": 1.2812330496108948
+        },
+        {
+            "s": 15,
+            "d": 109,
+            "BW": 4,
+            "PR": 7.248058663579944
+        },
+        {
+            "s": 109,
+            "d": 110,
+            "BW": 1,
+            "PR": 0.6262209748742062
+        },
+        {
+            "s": 15,
+            "d": 111,
+            "BW": 7,
+            "PR": 4.825169917176104
+        },
+        {
+            "s": 111,
+            "d": 112,
+            "BW": 3,
+            "PR": 1.4637347441012087
+        },
+        {
+            "s": 16,
+            "d": 113,
+            "BW": 6,
+            "PR": 7.323603865170439
+        },
+        {
+            "s": 113,
+            "d": 114,
+            "BW": 2,
+            "PR": 1.0757967284124141
+        },
+        {
+            "s": 16,
+            "d": 115,
+            "BW": 10,
+            "PR": 4.483272207583137
+        },
+        {
+            "s": 115,
+            "d": 116,
+            "BW": 3,
+            "PR": 0.7428493805371321
+        },
+        {
+            "s": 16,
+            "d": 117,
+            "BW": 8,
+            "PR": 6.751466195443982
+        },
+        {
+            "s": 117,
+            "d": 118,
+            "BW": 3,
+            "PR": 1.2826353463610196
+        },
+        {
+            "s": 16,
+            "d": 119,
+            "BW": 10,
+            "PR": 5.80760670343678
+        },
+        {
+            "s": 119,
+            "d": 120,
+            "BW": 1,
+            "PR": 1.3495756269995773
+        },
+        {
+            "s": 17,
+            "d": 121,
+            "BW": 5,
+            "PR": 4.667617006629242
+        },
+        {
+            "s": 121,
+            "d": 122,
+            "BW": 2,
+            "PR": 1.207308643706077
+        },
+        {
+            "s": 17,
+            "d": 123,
+            "BW": 12,
+            "PR": 7.327368656190388
+        },
+        {
+            "s": 123,
+            "d": 124,
+            "BW": 3,
+            "PR": 1.2746414503715746
+        },
+        {
+            "s": 17,
+            "d": 125,
+            "BW": 8,
+            "PR": 4.111522914905591
+        },
+        {
+            "s": 125,
+            "d": 126,
+            "BW": 2,
+            "PR": 0.743863439190956
+        },
+        {
+            "s": 17,
+            "d": 127,
+            "BW": 10,
+            "PR": 4.181983099456876
+        },
+        {
+            "s": 127,
+            "d": 128,
+            "BW": 1,
+            "PR": 0.8548249661760953
+        },
+        {
+            "s": 18,
+            "d": 129,
+            "BW": 8,
+            "PR": 6.901599898791127
+        },
+        {
+            "s": 129,
+            "d": 130,
+            "BW": 1,
+            "PR": 0.5856129619580213
+        },
+        {
+            "s": 18,
+            "d": 131,
+            "BW": 11,
+            "PR": 5.275881057909304
+        },
+        {
+            "s": 131,
+            "d": 132,
+            "BW": 2,
+            "PR": 0.9481745495865708
+        },
+        {
+            "s": 18,
+            "d": 133,
+            "BW": 8,
+            "PR": 3.6079820023626508
+        },
+        {
+            "s": 133,
+            "d": 134,
+            "BW": 2,
+            "PR": 0.9732604887595248
+        },
+        {
+            "s": 18,
+            "d": 135,
+            "BW": 10,
+            "PR": 7.48315731979666
+        },
+        {
+            "s": 135,
+            "d": 136,
+            "BW": 2,
+            "PR": 0.7709164269761963
+        },
+        {
+            "s": 19,
+            "d": 137,
+            "BW": 5,
+            "PR": 6.1064216566303475
+        },
+        {
+            "s": 137,
+            "d": 138,
+            "BW": 3,
+            "PR": 0.685149842437662
+        },
+        {
+            "s": 19,
+            "d": 139,
+            "BW": 11,
+            "PR": 3.882498134843446
+        },
+        {
+            "s": 139,
+            "d": 140,
+            "BW": 1,
+            "PR": 1.332628363327068
+        },
+        {
+            "s": 19,
+            "d": 141,
+            "BW": 9,
+            "PR": 3.3972077184270164
+        },
+        {
+            "s": 141,
+            "d": 142,
+            "BW": 1,
+            "PR": 1.474294931102738
+        },
+        {
+            "s": 19,
+            "d": 143,
+            "BW": 6,
+            "PR": 5.689348275529637
+        },
+        {
+            "s": 143,
+            "d": 144,
+            "BW": 3,
+            "PR": 0.7843393271371494
+        },
+        {
+            "s": 20,
+            "d": 145,
+            "BW": 9,
+            "PR": 3.4218183519504084
+        },
+        {
+            "s": 145,
+            "d": 146,
+            "BW": 2,
+            "PR": 0.6140871407249245
+        },
+        {
+            "s": 20,
+            "d": 147,
+            "BW": 11,
+            "PR": 2.8704108512781987
+        },
+        {
+            "s": 147,
+            "d": 148,
+            "BW": 1,
+            "PR": 1.3111420762750474
+        },
+        {
+            "s": 20,
+            "d": 149,
+            "BW": 5,
+            "PR": 7.469590613551101
+        },
+        {
+            "s": 149,
+            "d": 150,
+            "BW": 3,
+            "PR": 1.0961268454100253
+        },
+        {
+            "s": 20,
+            "d": 151,
+            "BW": 12,
+            "PR": 4.401890130732747
+        },
+        {
+            "s": 151,
+            "d": 152,
+            "BW": 2,
+            "PR": 0.8053802443193604
+        },
+        {
+            "s": 21,
+            "d": 153,
+            "BW": 5,
+            "PR": 7.2379510016268895
+        },
+        {
+            "s": 153,
+            "d": 154,
+            "BW": 3,
+            "PR": 0.5811874654669843
+        },
+        {
+            "s": 21,
+            "d": 155,
+            "BW": 12,
+            "PR": 2.87532434450584
+        },
+        {
+            "s": 155,
+            "d": 156,
+            "BW": 3,
+            "PR": 0.9699124790076858
+        },
+        {
+            "s": 21,
+            "d": 157,
+            "BW": 8,
+            "PR": 6.034779149395167
+        },
+        {
+            "s": 157,
+            "d": 158,
+            "BW": 2,
+            "PR": 1.2878280266467312
+        },
+        {
+            "s": 21,
+            "d": 159,
+            "BW": 7,
+            "PR": 4.625694830521058
+        },
+        {
+            "s": 159,
+            "d": 160,
+            "BW": 2,
+            "PR": 1.3266311596500597
+        },
+        {
+            "s": 22,
+            "d": 161,
+            "BW": 6,
+            "PR": 6.463142831162058
+        },
+        {
+            "s": 161,
+            "d": 162,
+            "BW": 2,
+            "PR": 0.6243536581747082
+        },
+        {
+            "s": 22,
+            "d": 163,
+            "BW": 10,
+            "PR": 7.213381203720203
+        },
+        {
+            "s": 163,
+            "d": 164,
+            "BW": 1,
+            "PR": 1.0980366620411037
+        },
+        {
+            "s": 22,
+            "d": 165,
+            "BW": 9,
+            "PR": 5.518568204729553
+        },
+        {
+            "s": 165,
+            "d": 166,
+            "BW": 3,
+            "PR": 1.3359586139061812
+        },
+        {
+            "s": 22,
+            "d": 167,
+            "BW": 4,
+            "PR": 7.497862084387257
+        },
+        {
+            "s": 167,
+            "d": 168,
+            "BW": 1,
+            "PR": 0.9705008232516336
+        },
+        {
+            "s": 23,
+            "d": 169,
+            "BW": 8,
+            "PR": 3.40744573611563
+        },
+        {
+            "s": 169,
+            "d": 170,
+            "BW": 2,
+            "PR": 1.4690552360657037
+        },
+        {
+            "s": 23,
+            "d": 171,
+            "BW": 10,
+            "PR": 4.16654196832546
+        },
+        {
+            "s": 171,
+            "d": 172,
+            "BW": 3,
+            "PR": 0.9954690209643378
+        },
+        {
+            "s": 23,
+            "d": 173,
+            "BW": 10,
+            "PR": 6.567830173689863
+        },
+        {
+            "s": 173,
+            "d": 174,
+            "BW": 2,
+            "PR": 0.7523988509422077
+        },
+        {
+            "s": 23,
+            "d": 175,
+            "BW": 10,
+            "PR": 6.8245529202593955
+        },
+        {
+            "s": 175,
+            "d": 176,
+            "BW": 2,
+            "PR": 0.9132475707993215
+        },
+        {
+            "s": 24,
+            "d": 177,
+            "BW": 9,
+            "PR": 5.613169363008557
+        },
+        {
+            "s": 177,
+            "d": 178,
+            "BW": 1,
+            "PR": 0.7035582383502739
+        },
+        {
+            "s": 24,
+            "d": 179,
+            "BW": 8,
+            "PR": 4.690580475361891
+        },
+        {
+            "s": 179,
+            "d": 180,
+            "BW": 3,
+            "PR": 1.108871667081965
+        },
+        {
+            "s": 24,
+            "d": 181,
+            "BW": 6,
+            "PR": 4.053750691966675
+        },
+        {
+            "s": 181,
+            "d": 182,
+            "BW": 1,
+            "PR": 1.4922571393952198
+        },
+        {
+            "s": 24,
+            "d": 183,
+            "BW": 11,
+            "PR": 7.235303711796781
+        },
+        {
+            "s": 183,
+            "d": 184,
+            "BW": 2,
+            "PR": 1.0088720150695116
+        }
+    ]
+}

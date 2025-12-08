@@ -12,7 +12,7 @@ from yafs.population import Statical
 from yafs.distribution import deterministic_distribution
 
 from placement_algorithm import CloudPlacement
-from simpleSelection import MinimunPath
+from selection_algorithm import MinimunPath
 
 def create_application_structure(name: str) -> Application:
     # APLICATION

@@ -104,7 +104,7 @@ def create_random_topology(
             "label": "Cloud",
             "IPT": cloud_ipt,
             "RAM": cloud_ram,
-            "COST": cloud_cost,
+            "COST": float(cloud_cost),
             "WATT": cloud_watt,
             "x": city_width / 2,  # Center the cloud
             "y": cloud_y,
