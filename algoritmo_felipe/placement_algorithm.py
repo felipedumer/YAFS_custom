@@ -116,8 +116,8 @@ class CloudPlacement(Placement):
             min_lat, max_lat = get_min_max('latency')
 
             # Weights (Adjustable)
-            W_LATENCY = 0.5
-            W_IPT = 0.5
+            W_LATENCY = 0.9
+            W_IPT = 0.1
             W_COST = 0.0
             W_WATT = 0.0
 
@@ -240,7 +240,20 @@ class CloudPlacement(Placement):
                              cloud_node["RAM"] -= required_ram
                              deployed_nodes.append(id_cloud)
                              logging.info(f"[CUSTOM] Deployed {module} on Cloud (ID: {id_cloud})")
+                    
+                    if len(deployed_nodes) == 0:
+                        msg = f"[CUSTOM] Failed to deploy {module}. Required RAM: {required_ram}. No suitable node found."
+                        logging.error(msg)
+                        # Register error in a CSV file
+                        error_log_path = "resultados/deployment_errors.csv"
+                        os.makedirs(os.path.dirname(error_log_path), exist_ok=True)
 
+                        file_exists = os.path.isfile(error_log_path)
+                        with open(error_log_path, 'a', newline='') as f:
+                            writer = csv.writer(f)
+                            if not file_exists:
+                                writer.writerow(["App", "Module", "NodeID", "RequiredRAM", "AvailableRAM", "Message"])
+                            writer.writerow([app_name, module, "None", required_ram, "N/A", msg])
                 else:
                     for rep in range(0, self.scaleServices[module]):
                         required_ram = module_specs[module].get("RAM", 0)

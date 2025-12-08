@@ -85,7 +85,8 @@ class Sim:
 
         "Contains the database where all events are recorded"
 
-
+        # DEBUG: Registry for messages currently being processed or in transit (not in queues)
+        self.processing_messages = []
 
         """
         Clear the database
@@ -331,7 +332,16 @@ class Sim:
         Simulates the transfer behavior of a message on a link
         """
         self.network_pump += 1
+        self.processing_messages.append({"type": "Network_Wait", "msg": msg, "until": self.env.now + latency + shift_time})
         yield self.env.timeout(latency + shift_time)
+        # Remove from registry (filtering by object identity or just popping if we are careful, but list remove is safer)
+        # We need to find the exact entry we added.
+        # Since msg object is the same, we can filter by msg.
+        # But multiple entries for same msg? No, a msg is in one place at a time.
+        # However, to be safe and efficient, we might just leave it for post-mortem analysis?
+        # No, we must remove it otherwise it grows indefinitely.
+        self.processing_messages = [x for x in self.processing_messages if x["msg"] is not msg]
+        
         self.network_pump -= 1
         self.network_ctrl_pipe.put(msg)
 
@@ -607,7 +617,10 @@ class Sim:
 
                             service_time = self.__update_node_metrics(app_name, module, msg, ides, type)
 
+                            self.processing_messages.append({"type": "Module_Processing", "msg": msg, "node": ides, "until": self.env.now + service_time})
                             yield self.env.timeout(service_time)
+                            self.processing_messages = [x for x in self.processing_messages if x["msg"] is not msg]
+                            
                             doBefore = True
 
                         """

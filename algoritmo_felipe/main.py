@@ -2,6 +2,7 @@ import time
 import networkx
 import random
 import json
+import csv
 
 from pathlib import Path
 
@@ -136,5 +137,38 @@ if __name__ == "__main__":
         simulator.deploy_app2(app, placement_policy, population, selection_policy)
 
     simulator.run(stop_time)
+
+    # Logic to save unprocessed messages (Queue Buildup)
+    unprocessed_file = results_path + "unprocessed_messages.csv"
+    logging.info(f"Saving unprocessed messages to {unprocessed_file}...")
+    
+    # DEBUG: Print queue sizes
+    logging.info(f"Network Queue Size: {len(simulator.network_ctrl_pipe.items)}")
+    total_consumer_items = sum(len(p.items) for p in simulator.consumer_pipes.values())
+    logging.info(f"Total Consumer Queues Size: {total_consumer_items}")
+    logging.info(f"In-Transit/Processing Messages: {len(simulator.processing_messages)}")
+
+    with open(unprocessed_file, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["QueueType", "App", "Message", "Src", "Dst", "Timestamp", "Path", "CurrentNode", "Until"])
+        
+        # 1. Network Queue (Messages in transit)
+        # simulator.network_ctrl_pipe is a simpy.Store
+        if hasattr(simulator.network_ctrl_pipe, 'items'):
+            for msg in simulator.network_ctrl_pipe.items:
+                writer.writerow(["Network_Queue", msg.app_name, msg.name, msg.src, msg.dst, msg.timestamp, msg.path, msg.dst_int, "N/A"])
+        
+        # 2. Consumer Queues (Messages waiting for processing at nodes)
+        # simulator.consumer_pipes is a dict of simpy.Store
+        for pipe_id, pipe in simulator.consumer_pipes.items():
+            if hasattr(pipe, 'items'):
+                for msg in pipe.items:
+                    writer.writerow(["Processing_Queue", msg.app_name, msg.name, msg.src, msg.dst, msg.timestamp, msg.path, msg.dst_int, "N/A"])
+
+        # 3. Active Processing/Transit (Messages in yield)
+        for entry in simulator.processing_messages:
+            msg = entry["msg"]
+            writer.writerow([entry["type"], msg.app_name, msg.name, msg.src, msg.dst, msg.timestamp, msg.path, msg.dst_int, entry.get("until", "N/A")])
+
 
     logging.info("\n--- %s seconds ---" % (time.time() - start_time))
