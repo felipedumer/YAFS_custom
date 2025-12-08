@@ -191,48 +191,99 @@ class CloudPlacement(Placement):
                      continue
 
             if module in self.scaleServices:
-                for rep in range(0, self.scaleServices[module]):
+                # CUSTOM STRATEGY: Force 2 replicas on different ISPs
+                if self.strategy == 'custom_proposed_by_felipe':
                     required_ram = module_specs[module].get("RAM", 0)
-                    deployed = False
+                    target_replicas = 2
+                    deployed_nodes = []
+                    used_isps = set()
 
-                    # 1. Try Fog Nodes
+                    # Pass 1: Try to find nodes with different ISPs
                     for id_fog in id_fog_list:
+                        if len(deployed_nodes) >= target_replicas:
+                            break
+                        
                         fog_node = sim.topology.get_node(id_fog)
                         available_ram = fog_node.get("RAM", 0)
-                        
-                        if available_ram >= required_ram:
+                        node_isp = fog_node.get("ISP")
+
+                        if available_ram >= required_ram and node_isp not in used_isps:
                             sim.deploy_module(app_name, module, services[module], [id_fog])
                             fog_node["RAM"] -= required_ram
-                            logging.info(f"Deployed {module} on {fog_node.get('label')} (ID: {id_fog}). Remaining RAM: {fog_node['RAM']}")
-                            deployed = True
-                            break
-                    
-                    if deployed:
-                        continue
+                            deployed_nodes.append(id_fog)
+                            used_isps.add(node_isp)
+                            logging.info(f"[CUSTOM] Deployed {module} on {fog_node.get('label')} (ID: {id_fog}, ISP: {node_isp})")
 
-                    # 2. Try Cloud Node
-                    if cloud_node:
-                        available_ram = cloud_node.get("RAM", 0)
-                        if available_ram >= required_ram:
-                            sim.deploy_module(app_name, module, services[module], [id_cloud])
-                            cloud_node["RAM"] -= required_ram
-                            logging.info(f"Deployed {module} on Cloud (ID: {id_cloud}). Remaining RAM: {cloud_node['RAM']}")
-                            deployed = True
-                    
-                    if not deployed:
-                        msg = f"Not enough RAM on Fog nodes or Cloud for {module}. Required: {required_ram}"
-                        logging.error(msg)
+                    # Pass 2: Fill remaining replicas with any available Fog node (ignoring ISP)
+                    if len(deployed_nodes) < target_replicas:
+                        for id_fog in id_fog_list:
+                            if len(deployed_nodes) >= target_replicas:
+                                break
+                            
+                            if id_fog in deployed_nodes:
+                                continue
+
+                            fog_node = sim.topology.get_node(id_fog)
+                            available_ram = fog_node.get("RAM", 0)
+                            
+                            if available_ram >= required_ram:
+                                sim.deploy_module(app_name, module, services[module], [id_fog])
+                                fog_node["RAM"] -= required_ram
+                                deployed_nodes.append(id_fog)
+                                logging.info(f"[CUSTOM] Deployed {module} on {fog_node.get('label')} (ID: {id_fog}) - ISP constraint relaxed")
+
+                    # Pass 3: Cloud fallback
+                    if len(deployed_nodes) < target_replicas and cloud_node:
+                         available_ram = cloud_node.get("RAM", 0)
+                         while len(deployed_nodes) < target_replicas and available_ram >= required_ram:
+                             sim.deploy_module(app_name, module, services[module], [id_cloud])
+                             cloud_node["RAM"] -= required_ram
+                             deployed_nodes.append(id_cloud)
+                             logging.info(f"[CUSTOM] Deployed {module} on Cloud (ID: {id_cloud})")
+
+                else:
+                    for rep in range(0, self.scaleServices[module]):
+                        required_ram = module_specs[module].get("RAM", 0)
+                        deployed = False
+
+                        # 1. Try Fog Nodes
+                        for id_fog in id_fog_list:
+                            fog_node = sim.topology.get_node(id_fog)
+                            available_ram = fog_node.get("RAM", 0)
+                            
+                            if available_ram >= required_ram:
+                                sim.deploy_module(app_name, module, services[module], [id_fog])
+                                fog_node["RAM"] -= required_ram
+                                logging.info(f"Deployed {module} on {fog_node.get('label')} (ID: {id_fog}). Remaining RAM: {fog_node['RAM']}")
+                                deployed = True
+                                break
                         
-                        # Register error in a CSV file
-                        error_log_path = "resultados/deployment_errors.csv"
-                        os.makedirs(os.path.dirname(error_log_path), exist_ok=True)
+                        if deployed:
+                            continue
 
-                        file_exists = os.path.isfile(error_log_path)
-                        with open(error_log_path, 'a', newline='') as f:
-                            writer = csv.writer(f)
-                            if not file_exists:
-                                writer.writerow(["App", "Module", "NodeID", "RequiredRAM", "AvailableRAM", "Message"])
-                            writer.writerow([app_name, module, "None", required_ram, "N/A", msg])
+                        # 2. Try Cloud Node
+                        if cloud_node:
+                            available_ram = cloud_node.get("RAM", 0)
+                            if available_ram >= required_ram:
+                                sim.deploy_module(app_name, module, services[module], [id_cloud])
+                                cloud_node["RAM"] -= required_ram
+                                logging.info(f"Deployed {module} on Cloud (ID: {id_cloud}). Remaining RAM: {cloud_node['RAM']}")
+                                deployed = True
+                        
+                        if not deployed:
+                            msg = f"Not enough RAM on Fog nodes or Cloud for {module}. Required: {required_ram}"
+                            logging.error(msg)
+                            
+                            # Register error in a CSV file
+                            error_log_path = "resultados/deployment_errors.csv"
+                            os.makedirs(os.path.dirname(error_log_path), exist_ok=True)
+
+                            file_exists = os.path.isfile(error_log_path)
+                            with open(error_log_path, 'a', newline='') as f:
+                                writer = csv.writer(f)
+                                if not file_exists:
+                                    writer.writerow(["App", "Module", "NodeID", "RequiredRAM", "AvailableRAM", "Message"])
+                                writer.writerow([app_name, module, "None", required_ram, "N/A", msg])
     
     def run(self, sim):
         """
