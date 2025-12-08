@@ -16,14 +16,14 @@ def create_random_topology(
     fog_ram=500,
     fog_cost=2,
     fog_watt=10.0,
-    link_bw_cloud=100,
-    link_pr_cloud=20,
-    link_bw_fog=15,
-    link_pr_fog=8,
-    link_bw_aggregation=8,
-    link_pr_aggregation=5,
-    link_bw_edge=2,
-    link_pr_edge=1,
+    link_bw_cloud=10000,
+    link_pr_cloud=2000,
+    link_bw_fog=1500,
+    link_pr_fog=100,
+    link_bw_aggregation=1000,
+    link_pr_aggregation=100,
+    link_bw_edge=200,
+    link_pr_edge=100,
     city_width=100,
     layer_gap=40,
 ):
@@ -65,8 +65,8 @@ def create_random_topology(
         random.seed(random_seed)
 
     # Automatically determine topology structure
-    aggregation_nodes_per_fog = random.randint(3, 5)
-    edge_nodes_per_aggregation = random.randint(4, 6)
+    aggregation_nodes_per_fog = random.randint(10, 15)
+    edge_nodes_per_aggregation = random.randint(20, 30)
     sensors_per_edge_node = 1
 
     topology_json = {"entity": [], "link": []}
@@ -121,8 +121,8 @@ def create_random_topology(
                 "model": f"fog",
                 "mytag": "fog",
                 "label": f"Fog-{i}",
-                "IPT": random.randint(800, 1200) * 10**6,
-                "RAM": random.randint(400, 600),
+                "IPT": random.randint(10000, 20000) * 10**6,
+                "RAM": random.randint(1500, 3000),
                 "COST": random.uniform(1.0, 3.0),
                 "WATT": random.uniform(8.0, 12.0),
                 "ISP": random.choice(["ISP-A", "ISP-B", "ISP-C", "ISP-D"]),
@@ -261,7 +261,7 @@ def main():
     topology_file = os.path.join(results_path, "random_topology.json")
 
     # Create topology
-    num_fog_nodes = 4
+    num_fog_nodes = 5
     print(f"Generating topology with {num_fog_nodes} fog nodes...")
     topology_json = create_random_topology(
         num_fog_nodes=num_fog_nodes,

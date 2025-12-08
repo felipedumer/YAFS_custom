@@ -14,6 +14,7 @@ class CloudPlacement(Placement):
     - 'hops': Minimize number of network hops.
     - 'cost': Minimize infrastructure cost (COST attribute).
     - 'ipt': Maximize processing power (IPT attribute).
+    - 'roundRobin': Distribute apps cyclically across nodes.
     - 'custom_proposed_by_felipe': Weighted score of Latency, IPT, COST, and WATT.
     """
     def __init__(self, name, activation_dist=None, logger=None, strategy='latency'):
@@ -66,6 +67,21 @@ class CloudPlacement(Placement):
             # Sort by IPT (descending - higher is better)
             return sorted(id_fog_list, key=lambda x: sim.topology.get_node(x).get('IPT', 0), reverse=True)
 
+        elif self.strategy == 'roundRobin':
+            # Sort by ID first to ensure deterministic order before rotation
+            sorted_list = sorted(id_fog_list)
+            try:
+                # Extract App ID (e.g., "Application-1" -> 1)
+                app_id = int(app_name.split("-")[1])
+                # Rotate list: start at (app_id % len)
+                start_index = app_id % len(sorted_list)
+                rotated_list = sorted_list[start_index:] + sorted_list[:start_index]
+                logging.info(f"[ROUND_ROBIN] App {app_name} (ID {app_id}) starting at node index {start_index} (Node ID {rotated_list[0]})")
+                return rotated_list
+            except (IndexError, ValueError):
+                logging.warning(f"Could not parse App ID from {app_name} for Round Robin. Using default sort.")
+                return sorted_list
+
         elif self.strategy == 'custom_proposed_by_felipe':
             # 1. Identify Sensor for Latency Calculation
             sensor_model = f"{app_name}-Sensor"
@@ -116,8 +132,8 @@ class CloudPlacement(Placement):
             min_lat, max_lat = get_min_max('latency')
 
             # Weights (Adjustable)
-            W_LATENCY = 0.95
-            W_IPT = 0.05
+            W_LATENCY = 0.50
+            W_IPT = 0.50
             W_COST = 0.0
             W_WATT = 0.0
 
@@ -194,7 +210,7 @@ class CloudPlacement(Placement):
                 # CUSTOM STRATEGY: Force 2 replicas on different ISPs
                 if self.strategy == 'custom_proposed_by_felipe':
                     required_ram = module_specs[module].get("RAM", 0)
-                    target_replicas = 2
+                    target_replicas = 1
                     deployed_nodes = []
                     used_isps = set()
 
@@ -234,12 +250,14 @@ class CloudPlacement(Placement):
 
                     # Pass 3: Cloud fallback
                     if len(deployed_nodes) < target_replicas and cloud_node:
-                         available_ram = cloud_node.get("RAM", 0)
-                         while len(deployed_nodes) < target_replicas and available_ram >= required_ram:
-                             sim.deploy_module(app_name, module, services[module], [id_cloud])
-                             cloud_node["RAM"] -= required_ram
-                             deployed_nodes.append(id_cloud)
-                             logging.info(f"[CUSTOM] Deployed {module} on Cloud (ID: {id_cloud})")
+                         # Only allow 1 replica on Cloud to avoid redundancy on the same node
+                         if id_cloud not in deployed_nodes:
+                             available_ram = cloud_node.get("RAM", 0)
+                             if available_ram >= required_ram:
+                                 sim.deploy_module(app_name, module, services[module], [id_cloud])
+                                 cloud_node["RAM"] -= required_ram
+                                 deployed_nodes.append(id_cloud)
+                                 logging.info(f"[CUSTOM] Deployed {module} on Cloud (ID: {id_cloud})")
                     
                     if len(deployed_nodes) == 0:
                         msg = f"[CUSTOM] Failed to deploy {module}. Required RAM: {required_ram}. No suitable node found."
@@ -298,119 +316,122 @@ class CloudPlacement(Placement):
                                     writer.writerow(["App", "Module", "NodeID", "RequiredRAM", "AvailableRAM", "Message"])
                                 writer.writerow([app_name, module, "None", required_ram, "N/A", msg])
     
-    # def run(self, sim):
-    #     """
-    #     This method is invoked periodically by the simulator to reallocate services.
-    #     Strategy:
-    #     - Time < 2000: Migrate Fog -> Cloud.
-    #     - Time >= 2000: Migrate Cloud -> Fog.
-    #     """
-    #     current_time = sim.env.now
-    #     logging.info(f"Running Reallocation Strategy for {self.name} at time {current_time}")
+    def run(self, sim):
+        """
+        This method is invoked periodically by the simulator to reallocate services.
+        It checks if there are better nodes available for the services based on the current strategy.
+        """
+        current_time = sim.env.now
+        logging.info(f"Running Reallocation Strategy for {self.name} at time {current_time}")
         
-    #     # We need to iterate over the applications managed by this placement policy
-    #     # Since we create one policy per app, we can extract the app name from the policy name
-    #     # Policy name format: "CloudPlacement-{app_id}" -> App name: "Application-{app_id}"
-    #     try:
-    #         app_id = self.name.split("-")[1]
-    #         app_name = f"Application-{app_id}"
-    #     except IndexError:
-    #         logging.error(f"Could not parse app ID from placement policy name: {self.name}")
-    #         return
+        # Parse app_name from policy name
+        try:
+            app_id = self.name.split("-")[1]
+            app_name = f"Application-{app_id}"
+        except IndexError:
+            logging.error(f"Could not parse app ID from placement policy name: {self.name}")
+            return
 
-    #     if app_name not in sim.apps:
-    #         return
+        if app_name not in sim.apps:
+            return
 
-    #     app = sim.apps[app_name]
-    #     services = app.services
+        app = sim.apps[app_name]
+        services = app.services
         
-    #     # Get Cloud Node ID
-    #     value_cloud = {"mytag": "cloud"}
-    #     id_cloud_list = sim.topology.find_IDs(value_cloud)
-    #     if not id_cloud_list:
-    #         return
-    #     id_cloud = id_cloud_list[0]
+        # Get Fog Nodes
+        value_fog = {"mytag": "fog"}
+        id_fog_list = sim.topology.find_IDs(value_fog)
 
-    #     # Get Fog Nodes
-    #     value_fog = {"mytag": "fog"}
-    #     id_fog_list = sim.topology.find_IDs(value_fog)
+        # Sort Fog Nodes based on Strategy (Best first)
+        sorted_fog_nodes = self._sort_fog_nodes(sim, app_name, id_fog_list)
+        
+        # Iterate over services
+        for module in services:
+            # Skip Sensor modules (Fixed placement)
+            if module.endswith("-Sensor"):
+                continue
 
-    #     # Iterate over services
-    #     for module in services:
-    #         # Skip Sensor modules (Fixed placement)
-    #         if module.endswith("-Sensor"):
-    #             continue
-
-    #         # Check where the module is currently deployed
-    #         # sim.alloc_module[app_name][module] returns a list of DES IDs (not Node IDs)
-    #         des_ids = sim.alloc_module[app_name].get(module, [])
+            # Get current deployments
+            # sim.alloc_module[app_name][module] -> list of DES IDs
+            # We iterate over a copy because we might modify the list during migration
+            des_ids = list(sim.alloc_module[app_name].get(module, []))
             
-    #         for des_id in des_ids:
-    #             # Get the actual Node ID from the DES ID
-    #             current_node_id = sim.alloc_DES[des_id]
+            # Get required RAM
+            required_ram = 0
+            for item in app.data:
+                if module in item:
+                    required_ram = item[module].get("RAM", 0)
+                    break
+            
+            # For each current deployment, check if we can improve it
+            for des_id in des_ids:
+                current_node_id = sim.alloc_DES[des_id]
+                current_node = sim.topology.get_node(current_node_id)
                 
-    #             # Get required RAM
-    #             required_ram = 0
-    #             for item in app.data:
-    #                 if module in item:
-    #                     required_ram = item[module].get("RAM", 0)
-    #                     break
+                best_node_id = None
+                
+                # Special handling for Custom Strategy (ISP constraint)
+                if self.strategy == 'custom_proposed_by_felipe':
+                    # Gather all current locations of this module to check ISP diversity
+                    # Note: We use the current state of deployments. 
+                    # If we just moved a replica, it will be reflected in sim.alloc_module if we query it again,
+                    # but here we are using the snapshot 'des_ids'. 
+                    # However, for ISP check, we should look at *other* replicas.
+                    
+                    current_allocations = sim.alloc_module[app_name].get(module, [])
+                    other_locs = [sim.alloc_DES[d] for d in current_allocations if d != des_id]
+                    used_isps = {sim.topology.get_node(l).get("ISP") for l in other_locs}
+                    
+                    current_rank = -1
+                    if current_node_id in sorted_fog_nodes:
+                        current_rank = sorted_fog_nodes.index(current_node_id)
+                    else:
+                        current_rank = float('inf') # Current node is not in fog list (e.g. Cloud)
 
-    #             # Strategy 1: Fog -> Cloud (Time < 2000)
-    #             if current_time < 2000:
-    #                 if current_node_id != id_cloud:
-    #                     logging.info(f"Time < 2000: Service {module} is on Fog (ID: {current_node_id}). Migrating to Cloud...")
+                    # Search for a better node
+                    for i, candidate_id in enumerate(sorted_fog_nodes):
+                        # If candidate is the current node, we are already at best possible position
+                        if candidate_id == current_node_id:
+                            break 
                         
-    #                     cloud_node = sim.topology.get_node(id_cloud)
-    #                     available_ram = cloud_node.get("RAM", 0)
+                        # If we found a candidate that is better ranked than current
+                        if i < current_rank:
+                            candidate_node = sim.topology.get_node(candidate_id)
+                            available_ram = candidate_node.get("RAM", 0)
+                            
+                            if available_ram >= required_ram:
+                                # Check ISP constraint
+                                if candidate_node.get("ISP") not in used_isps:
+                                    best_node_id = candidate_id
+                                    break
+                
+                else:
+                    # Standard strategies
+                    current_rank = sorted_fog_nodes.index(current_node_id) if current_node_id in sorted_fog_nodes else float('inf')
+                    
+                    for i, candidate_id in enumerate(sorted_fog_nodes):
+                        if candidate_id == current_node_id:
+                            break
                         
-    #                     if available_ram >= required_ram:
-    #                         # Perform Migration
-    #                         logging.info(f"Migrating {module} from Fog (ID: {current_node_id}) to Cloud (ID: {id_cloud})")
-                            
-    #                         # 1. Undeploy from Fog
-    #                         sim.undeploy_module(app_name, module, des_id)
-    #                         fog_node = sim.topology.get_node(current_node_id)
-                            
-    #                         if "RAM" in fog_node:
-    #                             fog_node["RAM"] += required_ram
-    #                         else:
-    #                             logging.warning(f"Node {current_node_id} ({fog_node.get('label')}) has no 'RAM' attribute. Cannot restore RAM.")
+                        if i < current_rank:
+                            candidate_node = sim.topology.get_node(candidate_id)
+                            if candidate_node.get("RAM", 0) >= required_ram:
+                                best_node_id = candidate_id
+                                break
+                
+                # Perform Migration if a better node was found
+                if best_node_id:
+                    target_node = sim.topology.get_node(best_node_id)
+                    logging.info(f"Migrating {module} from {current_node.get('label')} (ID: {current_node_id}) to {target_node.get('label')} (ID: {best_node_id})")
+                    
+                    # 1. Undeploy from current node
+                    sim.undeploy_module(app_name, module, des_id)
+                    if "RAM" in current_node:
+                        current_node["RAM"] += required_ram
+                    else:
+                        # If it was cloud or some node without RAM tracking (unlikely given the code)
+                        pass
 
-    #                         # 2. Deploy to Cloud
-    #                         sim.deploy_module(app_name, module, services[module], [id_cloud])
-    #                         cloud_node["RAM"] -= required_ram
-                            
-    #                     else:
-    #                         logging.info(f"Could not migrate {module} to Cloud. Cloud has not enough RAM.")
-
-    #             # Strategy 2: Cloud -> Fog (Time >= 2000)
-    #             else:
-    #                 if current_node_id == id_cloud:
-    #                     logging.info(f"Time >= 2000: Service {module} is on Cloud. Migrating to Fog...")
-                        
-    #                     # Sort Fog Nodes based on Strategy
-    #                     target_fog_list = self._sort_fog_nodes(sim, app_name, id_fog_list)
-                        
-    #                     migrated = False
-    #                     for id_fog in target_fog_list:
-    #                         fog_node = sim.topology.get_node(id_fog)
-    #                         available_ram = fog_node.get("RAM", 0)
-                            
-    #                         if available_ram >= required_ram:
-    #                             logging.info(f"Migrating {module} from Cloud to {fog_node.get('label')} (ID: {id_fog})")
-                                
-    #                             # 1. Undeploy from Cloud
-    #                             sim.undeploy_module(app_name, module, des_id)
-    #                             cloud_node = sim.topology.get_node(id_cloud)
-    #                             cloud_node["RAM"] += required_ram
-                                
-    #                             # 2. Deploy to Fog
-    #                             sim.deploy_module(app_name, module, services[module], [id_fog])
-    #                             fog_node["RAM"] -= required_ram
-                                
-    #                             migrated = True
-    #                             break
-                        
-    #                     if not migrated:
-    #                         logging.info(f"Could not migrate {module} from Cloud. No Fog node has enough RAM.")
+                    # 2. Deploy to new node
+                    sim.deploy_module(app_name, module, services[module], [best_node_id])
+                    target_node["RAM"] -= required_ram

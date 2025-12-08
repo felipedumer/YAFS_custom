@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # 'MinimunPath' routes the message to the nearest instance (shortest network path).
     selection_policy = MinimunPath()
 
-    stop_time = 10000
+    stop_time = 1000
 
     # Load topology from file
     topology_path = os.path.join(script_dir, "topologia/random_topology.json")
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     logging.info(f"Deploying {len(sorted_app_ids)} applications...")
 
     # Define the placement strategy here
-    # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe'
-    PLACEMENT_STRATEGY = 'custom_proposed_by_felipe'
+    # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
+    PLACEMENT_STRATEGY = 'latency'
 
     # Pattern: {numberOfFogNodes}-{placementStrategy}
     sim_trace_path = results_path + f"{num_fog_nodes}-{PLACEMENT_STRATEGY}-sim_trace"
