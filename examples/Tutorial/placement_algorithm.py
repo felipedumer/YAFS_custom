@@ -116,10 +116,10 @@ class CloudPlacement(Placement):
             min_lat, max_lat = get_min_max('latency')
 
             # Weights (Adjustable)
-            W_LATENCY = 0.1
+            W_LATENCY = 0.5
             W_IPT = 0.5
-            W_COST = 0.2
-            W_WATT = 0.2
+            W_COST = 0.0
+            W_WATT = 0.0
 
             scored_nodes = []
             for m in node_metrics:
