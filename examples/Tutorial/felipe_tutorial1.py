@@ -73,8 +73,8 @@ def create_random_topology(
         random.seed(random_seed)
 
     # Automatically determine topology structure
-    aggregation_nodes_per_fog = random.randint(2, 3)
-    edge_nodes_per_aggregation = random.randint(2, 3)
+    aggregation_nodes_per_fog = random.randint(3, 5)
+    edge_nodes_per_aggregation = random.randint(4, 6)
     sensors_per_edge_node = 1
     actuators_per_edge_node = 1
 
@@ -363,7 +363,7 @@ if __name__ == "__main__":
 
     stop_time = 10000
 
-    simulator = Sim(topology, default_results_path=results_path + "sim_trace")
+    # simulator = Sim(topology, default_results_path=results_path + "sim_trace")
     
     # Identify all applications from the topology entities
     app_ids = set()
@@ -380,6 +380,10 @@ if __name__ == "__main__":
     # Define the placement strategy here
     # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe'
     PLACEMENT_STRATEGY = 'custom_proposed_by_felipe'
+
+    # Pattern: {numberOfFogNodes}-{placementStrategy}
+    sim_trace_path = results_path + f"{num_fog_nodes}-{PLACEMENT_STRATEGY}-sim_trace"
+    simulator = Sim(topology, default_results_path=sim_trace_path)
 
     for app_id in sorted_app_ids:
         app_name = f"Application-{app_id}"
