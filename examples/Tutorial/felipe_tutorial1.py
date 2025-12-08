@@ -78,12 +78,12 @@ if __name__ == "__main__":
 
     # Load topology from file
     topology_path = os.path.join(script_dir, "topologia/random_topology.json")
-    print(f"Loading topology from {topology_path}...")
+    logging.info(f"Loading topology from {topology_path}...")
     with open(topology_path, "r") as f:
         topology_json = json.load(f)
     
     topology = Topology()
-    topology.load(topology_json)
+    topology.load_all_node_attr(topology_json)
 
     # Calculate num_fog_nodes from topology
     num_fog_nodes = sum(1 for entity in topology_json["entity"] if entity["model"] == "fog")
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 app_ids.add(int(parts[1]))
     
     sorted_app_ids = sorted(list(app_ids))
-    print(f"Deploying {len(sorted_app_ids)} applications...")
+    logging.info(f"Deploying {len(sorted_app_ids)} applications...")
 
     # Define the placement strategy here
     # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe'
@@ -137,4 +137,4 @@ if __name__ == "__main__":
 
     simulator.run(stop_time)
 
-    print("\n--- %s seconds ---" % (time.time() - start_time))
+    logging.info("\n--- %s seconds ---" % (time.time() - start_time))

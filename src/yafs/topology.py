@@ -71,7 +71,7 @@ class Topology:
         Returns:
             list: a list of node features
         """
-        return self.G.node[key]
+        return self.G.nodes[key]
 
 
     def get_info(self):
@@ -151,11 +151,17 @@ class Topology:
         for edge in data["link"]:
             self.G.add_edge(edge["s"], edge["d"], BW=edge[self.LINK_BW], PR=edge[self.LINK_PR])
 
-        dc = {str(x): {} for x in data["entity"][0].keys()}
+        # Collect all unique keys from all entities
+        all_keys = set()
+        for ent in data["entity"]:
+            all_keys.update(ent.keys())
+
+        dc = {str(x): {} for x in all_keys}
         for ent in data["entity"]:
             for key in ent.keys():
                 dc[key][ent["id"]] = ent[key]
-        for x in data["entity"][0].keys():
+        
+        for x in all_keys:
             nx.set_node_attributes(self.G, values=dc[x], name=str(x))
 
         for node in data["entity"]:
