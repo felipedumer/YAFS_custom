@@ -12,7 +12,7 @@ def create_random_topology(
     cloud_ram=64000, # 64 GB
     cloud_cost=10,
     cloud_watt=100.0,
-    fog_ipt=10 * 10**9, # 10 GIPS
+    fog_ipt=1 * 10**9, # 1 GIPS
     fog_ram=16000, # 16 GB
     fog_cost=2,
     fog_watt=10.0,
@@ -121,10 +121,10 @@ def create_random_topology(
                 "model": f"fog",
                 "mytag": "fog",
                 "label": f"Fog-{i}",
-                "IPT": int(fog_ipt * random.uniform(0.8, 1.2)),
-                "RAM": int(fog_ram * random.uniform(0.8, 1.2)),
-                "COST": fog_cost * random.uniform(0.8, 1.2),
-                "WATT": fog_watt * random.uniform(0.8, 1.2),
+                "IPT": int(fog_ipt * random.uniform(0.2, 4.0)),
+                "RAM": int(fog_ram * random.uniform(0.2, 4.0)),
+                "COST": fog_cost * random.uniform(0.5, 2.0),
+                "WATT": fog_watt * random.uniform(0.2, 4.0),
                 "ISP": random.choice(["ISP-A", "ISP-B", "ISP-C", "ISP-D"]),
                 "x": random_x(),
                 "y": fog_y,
@@ -265,7 +265,7 @@ def main():
     os.makedirs(results_path, exist_ok=True)
     
     # Create topology
-    num_fog_nodes = 8
+    num_fog_nodes = 20
     print(f"Generating topology with {num_fog_nodes} fog nodes...")
     topology_json, n_fog, n_middle, n_edge = create_random_topology(
         num_fog_nodes=num_fog_nodes,

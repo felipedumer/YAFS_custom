@@ -25,6 +25,12 @@ class RandomMessage(Message):
         new_msg = RandomMessage(self.name, self.src, self.dst, self.inst_range, self.bytes_range, self.broadcasting)
         new_msg.inst = random.randint(self.inst_range[0], self.inst_range[1])
         new_msg.bytes = random.randint(self.bytes_range[0], self.bytes_range[1])
+        
+        # Copy internal attributes from the parent Message class
+        new_msg.timestamp = self.timestamp
+        new_msg.id = self.id
+        new_msg.original_DES_src = self.original_DES_src
+        
         return new_msg
 
 def create_application_structure(name: str) -> Application:
@@ -94,7 +100,7 @@ if __name__ == "__main__":
 
     # Load topology from file
 
-    file_to_load = "fog3-middle37-end942"
+    file_to_load = "fog20-middle195-end2439"
     topology_path = os.path.join(script_dir, f"topologia/{file_to_load}.json")
     logging.info(f"Loading topology from {topology_path}...")
     with open(topology_path, "r") as f:
@@ -120,7 +126,7 @@ if __name__ == "__main__":
 
     # Define the placement strategy here
     # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
-    PLACEMENT_STRATEGY = 'custom_proposed_by_felipe'
+    PLACEMENT_STRATEGY = 'latency'
 
     # Pattern: {numberOfFogNodes}-{placementStrategy}
     sim_trace_path = results_path + f"{file_to_load}-{PLACEMENT_STRATEGY}-sim_trace"
