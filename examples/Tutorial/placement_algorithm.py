@@ -14,6 +14,7 @@ class CloudPlacement(Placement):
     - 'hops': Minimize number of network hops.
     - 'cost': Minimize infrastructure cost (COST attribute).
     - 'ipt': Maximize processing power (IPT attribute).
+    - 'custom_proposed_by_felipe': Weighted score of Latency, IPT, COST, and WATT.
     """
     def __init__(self, name, activation_dist=None, logger=None, strategy='latency'):
         super(CloudPlacement, self).__init__(name, activation_dist, logger)
@@ -64,6 +65,92 @@ class CloudPlacement(Placement):
         elif self.strategy == 'ipt':
             # Sort by IPT (descending - higher is better)
             return sorted(id_fog_list, key=lambda x: sim.topology.get_node(x).get('IPT', 0), reverse=True)
+
+        elif self.strategy == 'custom_proposed_by_felipe':
+            # 1. Identify Sensor for Latency Calculation
+            sensor_model = f"{app_name}-Sensor"
+            sensor_nodes = sim.topology.find_IDs({"model": sensor_model})
+            sensor_id = sensor_nodes[0] if sensor_nodes else None
+
+            # 2. Collect Metrics for all Fog Nodes
+            node_metrics = []
+            for fog_id in id_fog_list:
+                node = sim.topology.get_node(fog_id)
+                
+                # Attributes
+                ipt = node.get('IPT', 0)
+                cost = node.get('COST', float('inf'))
+                watt = node.get('WATT', float('inf'))
+                
+                # Latency (Dijkstra)
+                latency = float('inf')
+                if sensor_id is not None:
+                    try:
+                        latency = nx.shortest_path_length(sim.topology.G, source=sensor_id, target=fog_id, weight='PR')
+                    except nx.NetworkXNoPath:
+                        pass
+                
+                node_metrics.append({
+                    'id': fog_id,
+                    'ipt': ipt,
+                    'cost': cost,
+                    'watt': watt,
+                    'latency': latency
+                })
+
+            # 3. Normalize and Score
+            # Filter valid nodes for min/max calculation
+            valid_metrics = [m for m in node_metrics if m['latency'] != float('inf')]
+            
+            if not valid_metrics:
+                return sorted(id_fog_list) # Fallback
+
+            # Helper to safely get min/max
+            def get_min_max(key):
+                vals = [m[key] for m in valid_metrics]
+                return min(vals), max(vals)
+
+            min_ipt, max_ipt = get_min_max('ipt')
+            min_cost, max_cost = get_min_max('cost')
+            min_watt, max_watt = get_min_max('watt')
+            min_lat, max_lat = get_min_max('latency')
+
+            # Weights (Adjustable)
+            W_LATENCY = 0.4
+            W_IPT = 0.2
+            W_COST = 0.2
+            W_WATT = 0.2
+
+            scored_nodes = []
+            for m in node_metrics:
+                if m['latency'] == float('inf'):
+                    score = -1.0 # Penalize unreachable nodes
+                else:
+                    # Normalize (0 to 1)
+                    # Higher is better for IPT
+                    norm_ipt = (m['ipt'] - min_ipt) / (max_ipt - min_ipt) if max_ipt > min_ipt else 0.0
+                    
+                    # Lower is better for Cost, Watt, Latency (Invert: 1 - norm)
+                    norm_cost = (m['cost'] - min_cost) / (max_cost - min_cost) if max_cost > min_cost else 0.0
+                    norm_watt = (m['watt'] - min_watt) / (max_watt - min_watt) if max_watt > min_watt else 0.0
+                    norm_lat = (m['latency'] - min_lat) / (max_lat - min_lat) if max_lat > min_lat else 0.0
+                    
+                    # Score Calculation (Higher score is better)
+                    score = (W_IPT * norm_ipt) + \
+                            (W_COST * (1 - norm_cost)) + \
+                            (W_WATT * (1 - norm_watt)) + \
+                            (W_LATENCY * (1 - norm_lat))
+                
+                scored_nodes.append((m['id'], score))
+
+            # Sort by Score (Descending)
+            scored_nodes.sort(key=lambda x: x[1], reverse=True)
+            
+            # Log the ranking
+            ranking_str = ", ".join([f"{sim.topology.get_node(nid).get('label', nid)}: {score:.2f}" for nid, score in scored_nodes])
+            logging.info(f"[CUSTOM] App {app_name} Ranking: {ranking_str}")
+
+            return [x[0] for x in scored_nodes]
             
         else:
             logging.warning(f"Unknown strategy '{self.strategy}'. Defaulting to simple sort.")

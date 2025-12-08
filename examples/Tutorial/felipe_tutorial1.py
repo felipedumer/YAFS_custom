@@ -128,6 +128,7 @@ def create_random_topology(
                 "RAM": fog_ram,
                 "COST": fog_cost,
                 "WATT": fog_watt,
+                "ISP": random.choice(["ISP-A", "ISP-B", "ISP-C", "ISP-D"]),
                 "x": random_x(),
                 "y": fog_y,
             }
@@ -353,8 +354,11 @@ if __name__ == "__main__":
 
     distribution = deterministic_distribution(name="Deterministic", time=100)
 
-    # Their "selector" is actually the shortest way, there is not type of orchestration algorithm.
-    # This implementation is already created in selector.class,called: First_ShortestPath
+    # SELECTION POLICY
+    # The Selection Policy determines how messages are routed between service modules.
+    # When a module (e.g., Sensor) sends a message to another module (e.g., Service),
+    # this policy decides which specific instance of the destination module receives it.
+    # 'MinimunPath' routes the message to the nearest instance (shortest network path).
     selection_policy = MinimunPath()
 
     stop_time = 10000
@@ -374,8 +378,8 @@ if __name__ == "__main__":
     print(f"Deploying {len(sorted_app_ids)} applications...")
 
     # Define the placement strategy here
-    # Options: 'latency', 'hops', 'cost', 'ipt'
-    PLACEMENT_STRATEGY = 'latency'
+    # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe'
+    PLACEMENT_STRATEGY = 'custom_proposed_by_felipe'
 
     for app_id in sorted_app_ids:
         app_name = f"Application-{app_id}"
