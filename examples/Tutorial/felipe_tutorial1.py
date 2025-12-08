@@ -76,7 +76,6 @@ def create_random_topology(
     aggregation_nodes_per_fog = random.randint(3, 5)
     edge_nodes_per_aggregation = random.randint(4, 6)
     sensors_per_edge_node = 1
-    actuators_per_edge_node = 1
 
     topology_json = {"entity": [], "link": []}
     node_id = 0
@@ -89,6 +88,12 @@ def create_random_topology(
 
     def random_x():
         return random.uniform(0, city_width)
+
+    def get_random_bw(base):
+        return max(1, random.randint(int(base * 0.5), int(base * 1.5)))
+
+    def get_random_pr(base):
+        return max(0.1, random.uniform(base * 0.5, base * 1.5))
 
     # Predefined y positions so NetworkX layouts show clear layers
     cloud_y = layer_gap * 3
@@ -124,10 +129,10 @@ def create_random_topology(
                 "model": f"fog",
                 "mytag": "fog",
                 "label": f"Fog-{i}",
-                "IPT": fog_ipt,
-                "RAM": fog_ram,
-                "COST": fog_cost,
-                "WATT": fog_watt,
+                "IPT": random.randint(800, 1200) * 10**6,
+                "RAM": random.randint(400, 600),
+                "COST": random.uniform(1.0, 3.0),
+                "WATT": random.uniform(8.0, 12.0),
                 "ISP": random.choice(["ISP-A", "ISP-B", "ISP-C", "ISP-D"]),
                 "x": random_x(),
                 "y": fog_y,
@@ -135,7 +140,7 @@ def create_random_topology(
         )
         # Connect Fog to Cloud
         topology_json["link"].append(
-            {"s": cloud_id, "d": fog_id, "BW": link_bw_cloud, "PR": link_pr_cloud}
+            {"s": cloud_id, "d": fog_id, "BW": get_random_bw(link_bw_cloud), "PR": get_random_pr(link_pr_cloud)}
         )
         fog_ids.append(fog_id)
 
@@ -158,7 +163,7 @@ def create_random_topology(
             )
             # Connect Aggregation to Fog (Primary Link)
             topology_json["link"].append(
-                {"s": fog_id, "d": agg_id, "BW": link_bw_fog, "PR": link_pr_fog}
+                {"s": fog_id, "d": agg_id, "BW": get_random_bw(link_bw_fog), "PR": get_random_pr(link_pr_fog)}
             )
             
             connected_fogs = {fog_id}
@@ -171,7 +176,7 @@ def create_random_topology(
                 if other_fogs:
                     extra_fog = random.choice(other_fogs)
                     topology_json["link"].append(
-                        {"s": extra_fog, "d": agg_id, "BW": link_bw_fog, "PR": link_pr_fog}
+                        {"s": extra_fog, "d": agg_id, "BW": get_random_bw(link_bw_fog), "PR": get_random_pr(link_pr_fog)}
                     )
                     connected_fogs.add(extra_fog)
 
@@ -191,7 +196,7 @@ def create_random_topology(
             link_pair = tuple(sorted((u, v)))
             if link_pair not in existing_horizontal_links:
                 topology_json["link"].append(
-                    {"s": u, "d": v, "BW": link_bw_aggregation, "PR": link_pr_aggregation}
+                    {"s": u, "d": v, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
                 )
                 existing_horizontal_links.add(link_pair)
 
@@ -203,7 +208,7 @@ def create_random_topology(
                     link_pair = tuple(sorted((agg_id, neighbor)))
                     if link_pair not in existing_horizontal_links:
                         topology_json["link"].append(
-                            {"s": agg_id, "d": neighbor, "BW": link_bw_aggregation, "PR": link_pr_aggregation}
+                            {"s": agg_id, "d": neighbor, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
                         )
                         existing_horizontal_links.add(link_pair)
 
@@ -230,7 +235,7 @@ def create_random_topology(
             )
             # Connect Home Router to Aggregation Node
             topology_json["link"].append(
-                {"s": agg_id, "d": edge_node_id, "BW": link_bw_aggregation, "PR": link_pr_aggregation}
+                {"s": agg_id, "d": edge_node_id, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
             )
 
             # Sensors
@@ -241,8 +246,8 @@ def create_random_topology(
                         "id": sensor_id,
                         "model": f"Application-{app_id}-Sensor",
                         "label": f"Application-{app_id}-Sensor",
-                        "IPT": 100 * 10**6,
-                        "RAM": 10,
+                        "IPT": random.randint(80, 120) * 10**6,
+                        "RAM": random.randint(5, 15),
                         "COST": 1,
                         "WATT": 0.1,
                         "x": edge_node_x + random.uniform(-2, 2),
@@ -250,27 +255,7 @@ def create_random_topology(
                     }
                 )
                 topology_json["link"].append(
-                    {"s": edge_node_id, "d": sensor_id, "BW": link_bw_edge, "PR": link_pr_edge}
-                )
-
-            # Actuators
-            for actuator_idx in range(actuators_per_edge_node):
-                actuator_id = next_id()
-                topology_json["entity"].append(
-                    {
-                        "id": actuator_id,
-                        "model": f"Application-{app_id}-Actuator",
-                        "label": f"Application-{app_id}-Actuator",
-                        "IPT": 100 * 10**6,
-                        "RAM": 10,
-                        "COST": 1,
-                        "WATT": 0.1,
-                        "x": edge_node_x + random.uniform(-2, 2),
-                        "y": device_y,
-                    }
-                )
-                topology_json["link"].append(
-                    {"s": edge_node_id, "d": actuator_id, "BW": link_bw_edge, "PR": link_pr_edge}
+                    {"s": edge_node_id, "d": sensor_id, "BW": get_random_bw(link_bw_edge), "PR": get_random_pr(link_pr_edge)}
                 )
 
     return topology_json
@@ -283,14 +268,14 @@ def create_application_structure(name: str) -> Application:
     # Sensor is both Source (generator) and Module (consumer of response)
     app.set_modules([
         {f"{name}-Sensor": {"Type": Application.TYPE_MODULE}},
-        {f"{name}-Service": {"RAM": 10, "Type": Application.TYPE_MODULE}}
+        {f"{name}-Service": {"RAM": random.randint(8, 15), "Type": Application.TYPE_MODULE}}
     ])
 
     """
     Messages among MODULES
     """
-    msg_req = Message("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=20*10**6, bytes=1000)
-    msg_resp = Message("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=30*10**6, bytes=500)
+    msg_req = Message("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=random.randint(15, 25)*10**6, bytes=random.randint(800, 1200))
+    msg_resp = Message("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=random.randint(25, 35)*10**6, bytes=random.randint(400, 600))
 
     """
     Defining which messages will be dynamically generated
