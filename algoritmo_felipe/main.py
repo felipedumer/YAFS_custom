@@ -15,6 +15,18 @@ from yafs.distribution import deterministic_distribution
 from placement_algorithm import CloudPlacement
 from selection_algorithm import MinimunPath
 
+class RandomMessage(Message):
+    def __init__(self, name, src, dst, instructions=0, bytes=0, broadcasting=False):
+        super(RandomMessage, self).__init__(name, src, dst, instructions, bytes, broadcasting)
+        self.inst_range = instructions if isinstance(instructions, (list, tuple)) else (instructions, instructions)
+        self.bytes_range = bytes if isinstance(bytes, (list, tuple)) else (bytes, bytes)
+
+    def __copy__(self):
+        new_msg = RandomMessage(self.name, self.src, self.dst, self.inst_range, self.bytes_range, self.broadcasting)
+        new_msg.inst = random.randint(self.inst_range[0], self.inst_range[1])
+        new_msg.bytes = random.randint(self.bytes_range[0], self.bytes_range[1])
+        return new_msg
+
 def create_application_structure(name: str) -> Application:
     # APLICATION
     app = Application(name)
@@ -29,8 +41,8 @@ def create_application_structure(name: str) -> Application:
     """
     Messages among MODULES
     """
-    msg_req = Message("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=random.randint(15, 25)*10**6, bytes=random.randint(800, 1200))
-    msg_resp = Message("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=random.randint(25, 35)*10**6, bytes=random.randint(400, 600))
+    msg_req = RandomMessage("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=(15*10**6, 25*10**6), bytes=(800, 1200))
+    msg_resp = RandomMessage("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=(25*10**6, 35*10**6), bytes=(400, 600))
 
     """
     Defining which messages will be dynamically generated
