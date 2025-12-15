@@ -17,12 +17,44 @@ class MinimunPath(Selection):
         # Skip if src node was removed
         if not sim.topology.G.has_node(node_src):
             logging.warning("FAILURE: source node %s not in topology for %s", node_src, app_name)
+            try:
+                src_label = sim.topology.get_node(node_src).get('label', node_src) if sim.topology.G.has_node(node_src) else ""
+                sim.metrics.insert_failure({
+                    "id": getattr(message, "id", None),
+                    "app": app_name,
+                    "message": message.name,
+                    "reason": "missing_source",
+                    "TOPO.src": node_src,
+                    "TOPO.dst": message.dst,
+                    "TOPO.srcLabel": src_label,
+                    "TOPO.dstLabel": message.dst,
+                    "ctime": sim.env.now,
+                })
+                sim.metrics.flush()
+            except Exception:
+                logging.exception("Failed to record failure metric")
             return [], []
 
         # Filter destinations whose node still exists
         DES_dst = [des for des in alloc_module[app_name][message.dst] if sim.topology.G.has_node(alloc_DES[des])]
         if not DES_dst:
             logging.warning("FAILURE: no reachable destination nodes for %s (module %s)", app_name, message.dst)
+            try:
+                src_label = sim.topology.get_node(node_src).get('label', node_src) if sim.topology.G.has_node(node_src) else ""
+                sim.metrics.insert_failure({
+                    "id": getattr(message, "id", None),
+                    "app": app_name,
+                    "message": message.name,
+                    "reason": "missing_destination",
+                    "TOPO.src": node_src,
+                    "TOPO.dst": message.dst,
+                    "TOPO.srcLabel": src_label,
+                    "TOPO.dstLabel": message.dst,
+                    "ctime": sim.env.now,
+                })
+                sim.metrics.flush()
+            except Exception:
+                logging.exception("Failed to record failure metric")
             return [], []
 
         print(("GET PATH"))
@@ -41,9 +73,43 @@ class MinimunPath(Selection):
                 path = list(nx.shortest_path(sim.topology.G, source=node_src, target=dst_node))
             except nx.NodeNotFound:
                 logging.warning("FAILURE: path not found because node missing (src=%s dst=%s)", node_src, dst_node)
+                try:
+                    src_label = sim.topology.get_node(node_src).get('label', node_src) if sim.topology.G.has_node(node_src) else ""
+                    dst_label = sim.topology.get_node(dst_node).get('label', dst_node) if sim.topology.G.has_node(dst_node) else ""
+                    sim.metrics.insert_failure({
+                        "id": getattr(message, "id", None),
+                        "app": app_name,
+                        "message": message.name,
+                        "reason": "node_not_found",
+                        "TOPO.src": node_src,
+                        "TOPO.dst": dst_node,
+                        "TOPO.srcLabel": src_label,
+                        "TOPO.dstLabel": dst_label,
+                        "ctime": sim.env.now,
+                    })
+                    sim.metrics.flush()
+                except Exception:
+                    logging.exception("Failed to record failure metric")
                 continue
             except nx.NetworkXNoPath:
                 logging.warning("FAILURE: no path between %s and %s", node_src, dst_node)
+                try:
+                    src_label = sim.topology.get_node(node_src).get('label', node_src) if sim.topology.G.has_node(node_src) else ""
+                    dst_label = sim.topology.get_node(dst_node).get('label', dst_node) if sim.topology.G.has_node(dst_node) else ""
+                    sim.metrics.insert_failure({
+                        "id": getattr(message, "id", None),
+                        "app": app_name,
+                        "message": message.name,
+                        "reason": "no_path",
+                        "TOPO.src": node_src,
+                        "TOPO.dst": dst_node,
+                        "TOPO.srcLabel": src_label,
+                        "TOPO.dstLabel": dst_label,
+                        "ctime": sim.env.now,
+                    })
+                    sim.metrics.flush()
+                except Exception:
+                    logging.exception("Failed to record failure metric")
                 continue
 
             # custom
@@ -64,6 +130,22 @@ class MinimunPath(Selection):
 
         if not bestPath:
             logging.warning("FAILURE: no valid path found for %s to %s", node_src, message.dst)
+            try:
+                src_label = sim.topology.get_node(node_src).get('label', node_src) if sim.topology.G.has_node(node_src) else ""
+                sim.metrics.insert_failure({
+                    "id": getattr(message, "id", None),
+                    "app": app_name,
+                    "message": message.name,
+                    "reason": "no_path",
+                    "TOPO.src": node_src,
+                    "TOPO.dst": message.dst,
+                    "TOPO.srcLabel": src_label,
+                    "TOPO.dstLabel": message.dst,
+                    "ctime": sim.env.now,
+                })
+                sim.metrics.flush()
+            except Exception:
+                logging.exception("Failed to record failure metric")
             return [], []
 
         return [bestPath], bestDES

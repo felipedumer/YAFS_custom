@@ -182,6 +182,27 @@ class Sim:
         try:
             paths,DES_dst = self.selector_path[app_name].get_path(self,app_name, message, self.alloc_DES[idDES], self.alloc_DES, self.alloc_module, self.last_busy_time,from_des=idDES)
 
+            if not paths or not DES_dst:
+                self.logger.warning("FAILURE: no path for message %s (app %s) from DES %s", message.name, app_name, idDES)
+                try:
+                    src_node = self.alloc_DES.get(idDES, "")
+                    src_label = self.topology.get_node(src_node).get('label', src_node) if src_node in self.topology.G else ""
+                    self.metrics.insert_failure({
+                        "id": getattr(message, "id", None),
+                        "app": app_name,
+                        "message": message.name,
+                        "reason": "no_path",
+                        "TOPO.src": src_node,
+                        "TOPO.dst": "",
+                        "TOPO.srcLabel": src_label,
+                        "TOPO.dstLabel": "",
+                        "ctime": self.env.now,
+                    })
+                    self.metrics.flush()
+                except Exception:
+                    self.logger.exception("Failed to record failure metric")
+                return
+
             if DES_dst == [None] or DES_dst==[[]]:
                 self.logger.warning(
                     "(#DES:%i)\t--- Unreacheable DST:\t%s: PATH:%s " % (idDES, message.name, paths))
@@ -306,17 +327,33 @@ class Sim:
 
                     self.last_busy_time[link] = last_used
                     self.env.process(self.__wait_message(message, latency_msg_link, shift_time))
-                except:
+                except Exception:
                     #This fact is produced when a node or edge the topology is changed or disappeared
-                    self.logger.warning("The initial path assigned is unreachabled. Link: (%i,%i). Routing a new one. %i"%(link[0],link[1],self.env.now))
+                    self.logger.warning("The initial path assigned is unreachable. Link: (%i,%i). Routing a new one. %i"%(link[0],link[1],self.env.now))
 
                     paths, DES_dst = self.selector_path[message.app_name].get_path_from_failure(self, message, link, self.alloc_DES,self.alloc_module, self.last_busy_time,self.env.now,from_des=message.idDES)
 
                     if DES_dst == [] and paths==[]:
                         #Message communication ending:
                         #The message have arrived to the destination node but it is unavailable.
-                        None
                         self.logger.debug("\t No path given. Message is lost")
+                        try:
+                            src_label = self.topology.get_node(link[0]).get('label', link[0]) if self.topology.G.has_node(link[0]) else ""
+                            dst_label = self.topology.get_node(link[1]).get('label', link[1]) if self.topology.G.has_node(link[1]) else ""
+                            self.metrics.insert_failure({
+                                "id": getattr(message, "id", None),
+                                "app": message.app_name,
+                                "message": message.name,
+                                "reason": "unreachable_after_failure",
+                                "TOPO.src": link[0],
+                                "TOPO.dst": link[1],
+                                "TOPO.srcLabel": src_label,
+                                "TOPO.dstLabel": dst_label,
+                                "ctime": self.env.now,
+                            })
+                            self.metrics.flush()
+                        except Exception:
+                            self.logger.exception("Failed to record failure metric")
                     else:
 
                         message.path = copy.copy(paths[0])
@@ -715,7 +752,7 @@ class Sim:
 
 
     def __add_consumer_service_pipe(self,app_name,module,idDES):
-        self.logger.debug("Creating PIPE: %s%s%i "%(app_name,module,idDES))
+        self.logger.debug("Creating PIPE: AppName: %s, Module: %s, Id_DES: %i "%(app_name,module,idDES))
 
         self.consumer_pipes["%s%s%i"%(app_name,module,idDES)] = simpy.Store(self.env)
 
