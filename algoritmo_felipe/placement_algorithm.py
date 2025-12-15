@@ -25,6 +25,9 @@ class CloudPlacement(Placement):
         """
         Sorts the list of Fog nodes based on the selected strategy.
         """
+        # Filter out nodes that might have been removed dynamically
+        id_fog_list = [nid for nid in id_fog_list if sim.topology.G.has_node(nid)]
+
         if not id_fog_list:
             return []
 
@@ -53,7 +56,11 @@ class CloudPlacement(Placement):
             
             # Logging for debugging
             sensor_label = sim.topology.get_node(sensor_id).get('label', sensor_id)
-            formatted_distances = [f"{sim.topology.get_node(fid).get('label', fid)}: {dist}" for fid, dist in fog_distances]
+            formatted_distances = []
+            for fid, dist in fog_distances:
+                node = sim.topology.get_node(fid) if sim.topology.G.has_node(fid) else {}
+                node_label = node.get('label', fid)
+                formatted_distances.append(f"{node_label}: {dist}")
             logging.info(f"[{self.strategy.upper()}] App {app_name}: Distances from {sensor_label} to Fog: {', '.join(formatted_distances)}")
             
             return [x[0] for x in fog_distances]

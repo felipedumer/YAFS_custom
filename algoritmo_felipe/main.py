@@ -144,7 +144,7 @@ def destroy_application(simulator: Sim, app_ctx: dict):
     logging.debug("Destroy %s: removing %d sources", app_name, len(sources_to_remove))
     for des in sources_to_remove:
         node_id = simulator.alloc_DES.get(des)
-        node_label = simulator.topology.get_node(node_id).get("label", node_id) if node_id is not None else "?"
+        node_label = simulator.topology.get_node(node_id).get("label", node_id) if node_id is not None and simulator.topology.G.has_node(node_id) else "?"
         logging.info("Destroy %s: stopping source DES=%s at node %s", app_name, des, node_label)
         simulator.undeploy_source(des)
 
@@ -154,7 +154,7 @@ def destroy_application(simulator: Sim, app_ctx: dict):
             logging.debug("Destroy %s: removing %d deployments of module %s", app_name, len(des_list), module)
             for des in list(des_list):
                 node_id = simulator.alloc_DES.get(des)
-                node_label = simulator.topology.get_node(node_id).get("label", node_id) if node_id is not None else "?"
+                node_label = simulator.topology.get_node(node_id).get("label", node_id) if node_id is not None and simulator.topology.G.has_node(node_id) else "?"
                 logging.info("Destroy %s: undeploying module %s DES=%s at node %s", app_name, module, des, node_label)
                 simulator.undeploy_module(app_name, module, des)
         simulator.alloc_module.pop(app_name, None)
@@ -181,6 +181,41 @@ def destroy_application(simulator: Sim, app_ctx: dict):
     _stop_policy_process(simulator, population_name, simulator.population_policy)
     logging.info("Destroyed application %s", app_name)
 
+
+def schedule_random_fog_removals(simulator: Sim, interval: int, max_removals: int):
+    """Remove a random fog node every `interval` simulation time units.
+
+    This uses the existing `Sim.remove_node` (no core changes). If no fog nodes
+    remain, the process stops early.
+    """
+
+    def current_fog_nodes():
+        fog_ids = []
+        for node_id in simulator.topology.G.nodes():
+            node = simulator.topology.get_node(node_id)
+            model_tag = node.get("model") or node.get("mytag")
+            if model_tag == "fog":
+                fog_ids.append(node_id)
+        return fog_ids
+
+    def _loop():
+        removals = 0
+        while removals < max_removals:
+            yield simulator.env.timeout(interval)
+            candidates = current_fog_nodes()
+            if not candidates:
+                logging.info("No fog nodes left to remove at t=%s", simulator.env.now)
+                return
+
+            node_id = random.choice(candidates)
+            node = simulator.topology.get_node(node_id)
+            node_label = node.get("label", node_id)
+            logging.info("Removing fog node %s (id=%s) at t=%s", node_label, node_id, simulator.env.now)
+            simulator.remove_node(node_id)
+            removals += 1
+
+    simulator.env.process(_loop())
+
 if __name__ == "__main__":
     import logging.config
     import os
@@ -206,6 +241,9 @@ if __name__ == "__main__":
     reallocation_period = 1000
     app_creation_interval = 200
     app_lifetime = 600
+    # Fog removal parameters
+    fog_removal_interval = 300
+    max_fog_removals = 2
 
     # SELECTION POLICY
     # The Selection Policy determines how messages are routed between service modules.
@@ -249,6 +287,9 @@ if __name__ == "__main__":
     # Pattern: {numberOfFogNodes}-{placementStrategy}
     sim_trace_path = results_path + f"{file_to_load}-{PLACEMENT_STRATEGY}-sim_trace"
     simulator = Sim(topology, default_results_path=sim_trace_path)
+
+    # Remove random fog nodes periodically (uses existing Sim.remove_node)
+    schedule_random_fog_removals(simulator, fog_removal_interval, max_fog_removals)
 
     def teardown_after(app_ctx: dict, lifetime: float):
         yield simulator.env.timeout(lifetime)

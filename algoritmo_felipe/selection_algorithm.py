@@ -1,6 +1,7 @@
 
 from yafs.selection import Selection
 import networkx as nx
+import logging
 
 class MinimunPath(Selection):
 
@@ -12,7 +13,17 @@ class MinimunPath(Selection):
         Return the path and the identifier of the module deployed in the last element of that path
         """
         node_src = topology_src
-        DES_dst = alloc_module[app_name][message.dst]
+
+        # Skip if src node was removed
+        if not sim.topology.G.has_node(node_src):
+            logging.warning("FAILURE: source node %s not in topology for %s", node_src, app_name)
+            return [], []
+
+        # Filter destinations whose node still exists
+        DES_dst = [des for des in alloc_module[app_name][message.dst] if sim.topology.G.has_node(alloc_DES[des])]
+        if not DES_dst:
+            logging.warning("FAILURE: no reachable destination nodes for %s (module %s)", app_name, message.dst)
+            return [], []
 
         print(("GET PATH"))
         print(("\tNode _ src (id_topology): %i" %node_src))
@@ -26,7 +37,14 @@ class MinimunPath(Selection):
             dst_node = alloc_DES[des]
             print(("\t\t Looking the path to id_node: %i" %dst_node))
 
-            path = list(nx.shortest_path(sim.topology.G, source=node_src, target=dst_node))
+            try:
+                path = list(nx.shortest_path(sim.topology.G, source=node_src, target=dst_node))
+            except nx.NodeNotFound:
+                logging.warning("FAILURE: path not found because node missing (src=%s dst=%s)", node_src, dst_node)
+                continue
+            except nx.NetworkXNoPath:
+                logging.warning("FAILURE: no path between %s and %s", node_src, dst_node)
+                continue
 
             # custom
             # if bestPath is empty array
@@ -43,6 +61,10 @@ class MinimunPath(Selection):
             # original 
             # bestPath = [path]
             # bestDES = [des]
+
+        if not bestPath:
+            logging.warning("FAILURE: no valid path found for %s to %s", node_src, message.dst)
+            return [], []
 
         return [bestPath], bestDES
 
