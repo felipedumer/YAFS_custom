@@ -34,7 +34,7 @@ def create_random_topology(
     Layer 0 (Cloud): Single cloud node (high capacity).
     Layer 1 (Fog): Computational nodes connected to the cloud.
     Layer 2 (Aggregation): Communication-only nodes (routers/switches) connected to Fog nodes.
-    Layer 3 (Edge): Home routers connected to Aggregation nodes, with sensors/actuators attached.
+    Layer 3 (Edge): End devices (sensors/actuators) connected directly to Aggregation nodes.
 
     Parameters:
         num_fog_nodes (int): Number of Fog nodes connected to the single Cloud node.
@@ -140,7 +140,7 @@ def create_random_topology(
     aggregation_node_ids = []
     num_middle_nodes = 0
     for fog_idx, fog_id in enumerate(fog_ids):
-        aggregation_nodes_per_fog = random.randint(7, 12)
+        aggregation_nodes_per_fog = random.randint(2, 3)
         for agg_idx in range(aggregation_nodes_per_fog):
             num_middle_nodes += 1
             agg_id = next_id()
@@ -179,82 +179,60 @@ def create_random_topology(
 
     # Redundancy: Horizontal connections between Aggregation nodes
     # Connect each aggregation node to at least one other aggregation node (Ring-like + Random)
-    all_aggregation_nodes = [agg_id for _, agg_id in aggregation_node_ids]
-    existing_horizontal_links = set()
+    # all_aggregation_nodes = [agg_id for _, agg_id in aggregation_node_ids]
+    # existing_horizontal_links = set()
     
-    if len(all_aggregation_nodes) > 1:
-        # 1. Create a ring to ensure all are connected horizontally
-        for i in range(len(all_aggregation_nodes)):
-            u = all_aggregation_nodes[i]
-            v = all_aggregation_nodes[(i + 1) % len(all_aggregation_nodes)] # Next node (circular)
+    # if len(all_aggregation_nodes) > 1:
+    #     # 1. Create a ring to ensure all are connected horizontally
+    #     for i in range(len(all_aggregation_nodes)):
+    #         u = all_aggregation_nodes[i]
+    #         v = all_aggregation_nodes[(i + 1) % len(all_aggregation_nodes)] # Next node (circular)
             
-            link_pair = tuple(sorted((u, v)))
-            if link_pair not in existing_horizontal_links:
-                topology_json["link"].append(
-                    {"s": u, "d": v, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
-                )
-                existing_horizontal_links.add(link_pair)
+    #         link_pair = tuple(sorted((u, v)))
+    #         if link_pair not in existing_horizontal_links:
+    #             topology_json["link"].append(
+    #                 {"s": u, "d": v, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
+    #             )
+    #             existing_horizontal_links.add(link_pair)
 
-        # 2. Add random cross-links for extra redundancy
-        for agg_id in all_aggregation_nodes:
-            if random.random() < 0.3: # 30% chance for an extra link
-                neighbor = random.choice(all_aggregation_nodes)
-                if neighbor != agg_id:
-                    link_pair = tuple(sorted((agg_id, neighbor)))
-                    if link_pair not in existing_horizontal_links:
-                        topology_json["link"].append(
-                            {"s": agg_id, "d": neighbor, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
-                        )
-                        existing_horizontal_links.add(link_pair)
+    #     # 2. Add random cross-links for extra redundancy
+    #     for agg_id in all_aggregation_nodes:
+    #         if random.random() < 0.3: # 30% chance for an extra link
+    #             neighbor = random.choice(all_aggregation_nodes)
+    #             if neighbor != agg_id:
+    #                 link_pair = tuple(sorted((agg_id, neighbor)))
+    #                 if link_pair not in existing_horizontal_links:
+    #                     topology_json["link"].append(
+    #                         {"s": agg_id, "d": neighbor, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
+    #                     )
+    #                     existing_horizontal_links.add(link_pair)
 
-    # 4. Edge Layer (Home Routers + Devices)
-    edge_node_global_idx = 0
+    # 4. Edge Layer (Devices only)
     num_edge_nodes = 0
+    sensor_global_idx = 0
     for _, agg_id in aggregation_node_ids:
-        edge_nodes_per_aggregation = random.randint(10, 15)
-        for edge_idx in range(edge_nodes_per_aggregation):
+        sensors_per_aggregation = random.randint(2, 3)
+        for _ in range(sensors_per_aggregation):
             num_edge_nodes += 1
-            edge_node_global_idx += 1
-            app_id = edge_node_global_idx
-
-            edge_node_id = next_id()
-            edge_node_x = random_x()
+            sensor_global_idx += 1
+            sensor_id = next_id()
+            sensor_x = random_x()
             topology_json["entity"].append(
                 {
-                    "id": edge_node_id,
-                    "model": f"Application-{app_id}-Router",
-                    "mytag": "router",
-                    "label": f"Application-{app_id}-Router",
-                    "IPT": 0,
-                    "RAM": 0,
-                    "x": edge_node_x,
-                    "y": edge_y,
+                    "id": sensor_id,
+                    "model": f"Application-{sensor_global_idx}-Sensor",
+                    "label": f"Application-{sensor_global_idx}-Sensor",
+                    "IPT": random.randint(80, 120) * 10**6,
+                    "RAM": random.randint(5, 15),
+                    "COST": 1,
+                    "WATT": 0.1,
+                    "x": sensor_x,
+                    "y": device_y,
                 }
             )
-            # Connect Home Router to Aggregation Node
             topology_json["link"].append(
-                {"s": agg_id, "d": edge_node_id, "BW": get_random_bw(link_bw_aggregation), "PR": get_random_pr(link_pr_aggregation)}
+                {"s": agg_id, "d": sensor_id, "BW": get_random_bw(link_bw_edge), "PR": get_random_pr(link_pr_edge)}
             )
-
-            # Sensors
-            for sensor_idx in range(sensors_per_edge_node):
-                sensor_id = next_id()
-                topology_json["entity"].append(
-                    {
-                        "id": sensor_id,
-                        "model": f"Application-{app_id}-Sensor",
-                        "label": f"Application-{app_id}-Sensor",
-                        "IPT": random.randint(80, 120) * 10**6,
-                        "RAM": random.randint(5, 15),
-                        "COST": 1,
-                        "WATT": 0.1,
-                        "x": edge_node_x + random.uniform(-2, 2),
-                        "y": device_y,
-                    }
-                )
-                topology_json["link"].append(
-                    {"s": edge_node_id, "d": sensor_id, "BW": get_random_bw(link_bw_edge), "PR": get_random_pr(link_pr_edge)}
-                )
 
     return topology_json, num_fog_nodes, num_middle_nodes, num_edge_nodes
 
@@ -265,7 +243,7 @@ def main():
     os.makedirs(results_path, exist_ok=True)
     
     # Create topology
-    num_fog_nodes = 20
+    num_fog_nodes = 2
     print(f"Generating topology with {num_fog_nodes} fog nodes...")
     topology_json, n_fog, n_middle, n_edge = create_random_topology(
         num_fog_nodes=num_fog_nodes,
