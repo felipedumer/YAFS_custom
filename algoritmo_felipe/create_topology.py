@@ -5,25 +5,26 @@ from pathlib import Path
 import os
 import json
 
+
 def create_random_topology(
     num_fog_nodes=2,
     random_seed=None,
-    cloud_ipt=100 * 10**9, # 100 GIPS
-    cloud_ram=64000, # 64 GB
+    cloud_ipt=100 * 10**9,  # 100 GIPS
+    cloud_ram=64000,  # 64 GB
     cloud_cost=10,
     cloud_watt=100.0,
-    fog_ipt=1 * 10**9, # 1 GIPS
-    fog_ram=16000, # 16 GB
+    fog_ipt=1 * 10**9,  # 1 GIPS
+    fog_ram=16000,  # 16 GB
     fog_cost=2,
     fog_watt=10.0,
-    link_bw_cloud=125000000, # 1 Gbps
-    link_pr_cloud=100, # 100 ms
-    link_bw_fog=125000000, # 1 Gbps
-    link_pr_fog=5, # 5 ms
-    link_bw_aggregation=125000000, # 1 Gbps
-    link_pr_aggregation=5, # 5 ms
-    link_bw_edge=12500000, # 100 Mbps
-    link_pr_edge=10, # 10 ms
+    link_bw_cloud=125000000,  # 1 Gbps
+    link_pr_cloud=100,  # 100 ms
+    link_bw_fog=125000000,  # 1 Gbps
+    link_pr_fog=5,  # 5 ms
+    link_bw_aggregation=125000000,  # 1 Gbps
+    link_pr_aggregation=5,  # 5 ms
+    link_bw_edge=12500000,  # 100 Mbps
+    link_pr_edge=10,  # 10 ms
     city_width=100,
     layer_gap=40,
 ):
@@ -132,7 +133,12 @@ def create_random_topology(
         )
         # Connect Fog to Cloud
         topology_json["link"].append(
-            {"s": cloud_id, "d": fog_id, "BW": get_random_bw(link_bw_cloud), "PR": get_random_pr(link_pr_cloud)}
+            {
+                "s": cloud_id,
+                "d": fog_id,
+                "BW": get_random_bw(link_bw_cloud),
+                "PR": get_random_pr(link_pr_cloud),
+            }
         )
         fog_ids.append(fog_id)
 
@@ -148,9 +154,9 @@ def create_random_topology(
                 {
                     "id": agg_id,
                     "model": f"middle",
-                    "mytag": "router", # Tagged as router since it's comm-only
+                    "mytag": "router",  # Tagged as router since it's comm-only
                     "label": f"Middle-{fog_idx}-{agg_idx}",
-                    "IPT": 0, # No computational power
+                    "IPT": 0,  # No computational power
                     "RAM": 0,
                     "x": random_x(),
                     "y": aggregation_y,
@@ -158,9 +164,14 @@ def create_random_topology(
             )
             # Connect Aggregation to Fog (Primary Link)
             topology_json["link"].append(
-                {"s": fog_id, "d": agg_id, "BW": get_random_bw(link_bw_fog), "PR": get_random_pr(link_pr_fog)}
+                {
+                    "s": fog_id,
+                    "d": agg_id,
+                    "BW": get_random_bw(link_bw_fog),
+                    "PR": get_random_pr(link_pr_fog),
+                }
             )
-            
+
             connected_fogs = {fog_id}
 
             # Redundancy: Connect to other Fog nodes (Mesh-like)
@@ -171,7 +182,12 @@ def create_random_topology(
                 if other_fogs:
                     extra_fog = random.choice(other_fogs)
                     topology_json["link"].append(
-                        {"s": extra_fog, "d": agg_id, "BW": get_random_bw(link_bw_fog), "PR": get_random_pr(link_pr_fog)}
+                        {
+                            "s": extra_fog,
+                            "d": agg_id,
+                            "BW": get_random_bw(link_bw_fog),
+                            "PR": get_random_pr(link_pr_fog),
+                        }
                     )
                     connected_fogs.add(extra_fog)
 
@@ -181,13 +197,13 @@ def create_random_topology(
     # Connect each aggregation node to at least one other aggregation node (Ring-like + Random)
     # all_aggregation_nodes = [agg_id for _, agg_id in aggregation_node_ids]
     # existing_horizontal_links = set()
-    
+
     # if len(all_aggregation_nodes) > 1:
     #     # 1. Create a ring to ensure all are connected horizontally
     #     for i in range(len(all_aggregation_nodes)):
     #         u = all_aggregation_nodes[i]
     #         v = all_aggregation_nodes[(i + 1) % len(all_aggregation_nodes)] # Next node (circular)
-            
+
     #         link_pair = tuple(sorted((u, v)))
     #         if link_pair not in existing_horizontal_links:
     #             topology_json["link"].append(
@@ -231,17 +247,23 @@ def create_random_topology(
                 }
             )
             topology_json["link"].append(
-                {"s": agg_id, "d": sensor_id, "BW": get_random_bw(link_bw_edge), "PR": get_random_pr(link_pr_edge)}
+                {
+                    "s": agg_id,
+                    "d": sensor_id,
+                    "BW": get_random_bw(link_bw_edge),
+                    "PR": get_random_pr(link_pr_edge),
+                }
             )
 
     return topology_json, num_fog_nodes, num_middle_nodes, num_edge_nodes
+
 
 def main():
     # Define path
     script_dir = os.path.dirname(os.path.abspath(__file__))
     results_path = os.path.join(script_dir, "topologia/")
     os.makedirs(results_path, exist_ok=True)
-    
+
     # Create topology
     num_fog_nodes = 2
     print(f"Generating topology with {num_fog_nodes} fog nodes...")
@@ -286,10 +308,11 @@ def main():
         for key, value in list(topology.G.edges[u, v].items()):
             if isinstance(value, tuple):
                 topology.G.edges[u, v][key] = str(value)
-    
+
     gexf_path = os.path.join(results_path, f"{filename}.gexf")
     print(f"Saving GEXF to {gexf_path}...")
     networkx.write_gexf(topology.G, gexf_path)
+
 
 if __name__ == "__main__":
     main()
