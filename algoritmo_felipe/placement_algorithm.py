@@ -217,7 +217,8 @@ class CloudPlacement(Placement):
                 # CUSTOM STRATEGY: Force 2 replicas on different ISPs
                 if self.strategy == 'custom_proposed_by_felipe':
                     required_ram = module_specs[module].get("RAM", 0)
-                    target_replicas = 1
+                    # Deploy the service on two nodes when using the custom strategy
+                    target_replicas = 2
                     deployed_nodes = []
                     used_isps = set()
 
@@ -230,7 +231,8 @@ class CloudPlacement(Placement):
                         available_ram = fog_node.get("RAM", 0)
                         node_isp = fog_node.get("ISP")
 
-                        if available_ram >= required_ram and node_isp not in used_isps:
+                        #if available_ram >= required_ram and node_isp not in used_isps:
+                        if available_ram >= required_ram:
                             sim.deploy_module(app_name, module, services[module], [id_fog])
                             fog_node["RAM"] -= required_ram
                             deployed_nodes.append(id_fog)
