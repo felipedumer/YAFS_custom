@@ -16,23 +16,38 @@ from yafs.distribution import deterministic_distribution
 from placement_algorithm import CloudPlacement
 from selection_algorithm import MinimunPath
 
+
 class RandomMessage(Message):
     def __init__(self, name, src, dst, instructions=0, bytes=0, broadcasting=False):
-        super(RandomMessage, self).__init__(name, src, dst, instructions, bytes, broadcasting)
-        self.inst_range = instructions if isinstance(instructions, (list, tuple)) else (instructions, instructions)
+        super(RandomMessage, self).__init__(
+            name, src, dst, instructions, bytes, broadcasting
+        )
+        self.inst_range = (
+            instructions
+            if isinstance(instructions, (list, tuple))
+            else (instructions, instructions)
+        )
         self.bytes_range = bytes if isinstance(bytes, (list, tuple)) else (bytes, bytes)
 
     def __copy__(self):
-        new_msg = RandomMessage(self.name, self.src, self.dst, self.inst_range, self.bytes_range, self.broadcasting)
+        new_msg = RandomMessage(
+            self.name,
+            self.src,
+            self.dst,
+            self.inst_range,
+            self.bytes_range,
+            self.broadcasting,
+        )
         new_msg.inst = random.randint(self.inst_range[0], self.inst_range[1])
         new_msg.bytes = random.randint(self.bytes_range[0], self.bytes_range[1])
-        
+
         # Copy internal attributes from the parent Message class
         new_msg.timestamp = self.timestamp
         new_msg.id = self.id
         new_msg.original_DES_src = self.original_DES_src
-        
+
         return new_msg
+
 
 def create_application_structure(name: str) -> Application:
     # APLICATION
@@ -40,19 +55,38 @@ def create_application_structure(name: str) -> Application:
 
     # (Sensor) --> (Service) --> (Sensor)
     # Sensor is both Source (generator) and Module (consumer of response)
-    app.set_modules([
-        {f"{name}-Sensor": {"Type": Application.TYPE_MODULE}},
-        {f"{name}-Service": {"RAM": random.randint(50, 100), "Type": Application.TYPE_MODULE}}
-    ])
+    app.set_modules(
+        [
+            {f"{name}-Sensor": {"Type": Application.TYPE_MODULE}},
+            {
+                f"{name}-Service": {
+                    "RAM": random.randint(50, 100),
+                    "Type": Application.TYPE_MODULE,
+                }
+            },
+        ]
+    )
 
     """
     Messages among MODULES
     """
     # M_Req: Sensor -> Service. High instructions (Service workload), Medium size.
-    msg_req = RandomMessage("M_Req", f"{name}-Sensor", f"{name}-Service", instructions=(200*10**6, 500*10**6), bytes=(1000, 2000))
-    
+    msg_req = RandomMessage(
+        "M_Req",
+        f"{name}-Sensor",
+        f"{name}-Service",
+        instructions=(200 * 10**6, 500 * 10**6),
+        bytes=(1000, 2000),
+    )
+
     # M_Resp: Service -> Sensor. Low instructions (Sensor logging), Medium size.
-    msg_resp = RandomMessage("M_Resp", f"{name}-Service", f"{name}-Sensor", instructions=(1*10**6, 2*10**6), bytes=(1000, 2000))
+    msg_resp = RandomMessage(
+        "M_Resp",
+        f"{name}-Service",
+        f"{name}-Sensor",
+        instructions=(1 * 10**6, 2 * 10**6),
+        bytes=(1000, 2000),
+    )
 
     """
     Defining which messages will be dynamically generated
@@ -63,43 +97,53 @@ def create_application_structure(name: str) -> Application:
     MODULES/SERVICES
     """
     # Sensor -> Service (Request) -> Service -> Sensor (Response)
-    app.add_service_module(f"{name}-Service", msg_req, msg_resp, fractional_selectivity, threshold=1.0)
-    
+    app.add_service_module(
+        f"{name}-Service", msg_req, msg_resp, fractional_selectivity, threshold=1.0
+    )
+
     # Sensor receives Response (Sink behavior)
     app.add_service_module(f"{name}-Sensor", msg_resp)
 
     return app
 
 
-def register_application(simulator: Sim,
-                         app_id: int,
-                         selection_policy: MinimunPath,
-                         source_period: int,
-                         placement_strategy: str,
-                         reallocation_period: int,
-                         allocate_now: bool = False) -> dict:
+def register_application(
+    simulator: Sim,
+    app_id: int,
+    selection_policy: MinimunPath,
+    source_period: int,
+    placement_strategy: str,
+    reallocation_period: int,
+    allocate_now: bool = False,
+) -> dict:
     app_name = f"Application-{app_id}"
     app = create_application_structure(app_name)
 
     # Create per-app distributions so later deployments are not coupled through shared state
-    reallocation_dist = deterministic_distribution(name=f"Reallocation-{app_id}", time=reallocation_period)
-    src_distribution = deterministic_distribution(name=f"Deterministic-{app_id}", time=source_period)
+    reallocation_dist = deterministic_distribution(
+        name=f"Reallocation-{app_id}", time=reallocation_period
+    )
+    src_distribution = deterministic_distribution(
+        name=f"Deterministic-{app_id}", time=source_period
+    )
 
     placement_policy = CloudPlacement(
         f"CloudPlacement-{app_id}",
         activation_dist=reallocation_dist,
-        strategy=placement_strategy
+        strategy=placement_strategy,
     )
     placement_policy.scaleService({f"{app_name}-Service": 1, f"{app_name}-Sensor": 1})
 
     population = Statical(f"Statical-{app_id}")
-    population.set_src_control({
-        "model": f"{app_name}-Sensor",
-        "number": 1,
-        "message": app.get_message("M_Req"),
-        "distribution": src_distribution,
-        "param": {"time_shift": 100}
-    })
+    population.set_src_control(
+        {
+            "model": f"{app_name}-Sensor",
+            "number": 1,
+            "message": app.get_message("M_Req"),
+            "distribution": src_distribution,
+            "param": {"time_shift": 100},
+        }
+    )
 
     simulator.deploy_app2(app, placement_policy, population, selection_policy)
     logging.debug(
@@ -140,22 +184,47 @@ def destroy_application(simulator: Sim, app_ctx: dict):
     population_name = app_ctx["population_name"]
 
     # Stop and remove sources
-    sources_to_remove = [des for des, meta in list(simulator.alloc_source.items()) if meta.get("app") == app_name]
+    sources_to_remove = [
+        des
+        for des, meta in list(simulator.alloc_source.items())
+        if meta.get("app") == app_name
+    ]
     logging.debug("Destroy %s: removing %d sources", app_name, len(sources_to_remove))
     for des in sources_to_remove:
         node_id = simulator.alloc_DES.get(des)
-        node_label = simulator.topology.get_node(node_id).get("label", node_id) if node_id is not None and simulator.topology.G.has_node(node_id) else "?"
-        logging.info("Destroy %s: stopping source DES=%s at node %s", app_name, des, node_label)
+        node_label = (
+            simulator.topology.get_node(node_id).get("label", node_id)
+            if node_id is not None and simulator.topology.G.has_node(node_id)
+            else "?"
+        )
+        logging.info(
+            "Destroy %s: stopping source DES=%s at node %s", app_name, des, node_label
+        )
         simulator.undeploy_source(des)
 
     # Stop and remove deployed modules (service + sensor consumers)
     if app_name in simulator.alloc_module:
         for module, des_list in list(simulator.alloc_module[app_name].items()):
-            logging.debug("Destroy %s: removing %d deployments of module %s", app_name, len(des_list), module)
+            logging.debug(
+                "Destroy %s: removing %d deployments of module %s",
+                app_name,
+                len(des_list),
+                module,
+            )
             for des in list(des_list):
                 node_id = simulator.alloc_DES.get(des)
-                node_label = simulator.topology.get_node(node_id).get("label", node_id) if node_id is not None and simulator.topology.G.has_node(node_id) else "?"
-                logging.info("Destroy %s: undeploying module %s DES=%s at node %s", app_name, module, des, node_label)
+                node_label = (
+                    simulator.topology.get_node(node_id).get("label", node_id)
+                    if node_id is not None and simulator.topology.G.has_node(node_id)
+                    else "?"
+                )
+                logging.info(
+                    "Destroy %s: undeploying module %s DES=%s at node %s",
+                    app_name,
+                    module,
+                    des,
+                    node_label,
+                )
                 simulator.undeploy_module(app_name, module, des)
         simulator.alloc_module.pop(app_name, None)
 
@@ -203,18 +272,29 @@ def schedule_random_fog_removals(simulator: Sim, interval: int, max_removals: in
         while removals < max_removals:
             yield simulator.env.timeout(interval)
             candidates = current_fog_nodes()
-            if not candidates:
-                logging.info("No fog nodes left to remove at t=%s", simulator.env.now)
+            # Never remove the last remaining fog node to keep the topology alive
+            if len(candidates) <= 1:
+                logging.info(
+                    "Stopping removals: only %d fog node left at t=%s",
+                    len(candidates),
+                    simulator.env.now,
+                )
                 return
 
             node_id = random.choice(candidates)
             node = simulator.topology.get_node(node_id)
             node_label = node.get("label", node_id)
-            logging.info("Removing fog node %s (id=%s) at t=%s", node_label, node_id, simulator.env.now)
+            logging.info(
+                "Removing fog node %s (id=%s) at t=%s",
+                node_label,
+                node_id,
+                simulator.env.now,
+            )
             simulator.remove_node(node_id)
             removals += 1
 
     simulator.env.process(_loop())
+
 
 if __name__ == "__main__":
     import logging.config
@@ -222,11 +302,13 @@ if __name__ == "__main__":
 
     # Get the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Define the log file path
-    log_file_path = os.path.join(script_dir, 'execution.log')
 
-    logging.config.fileConfig(os.path.join(script_dir, "logging.ini"), defaults={'logfilename': log_file_path})
+    # Define the log file path
+    log_file_path = os.path.join(script_dir, "execution.log")
+
+    logging.config.fileConfig(
+        os.path.join(script_dir, "logging.ini"), defaults={"logfilename": log_file_path}
+    )
     logging.getLogger().setLevel(logging.DEBUG)
     logging.debug("Verbose logging enabled")
 
@@ -261,12 +343,14 @@ if __name__ == "__main__":
     logging.info(f"Loading topology from {topology_path}...")
     with open(topology_path, "r") as f:
         topology_json = json.load(f)
-    
+
     topology = Topology()
     topology.load_all_node_attr(topology_json)
 
     # Calculate num_fog_nodes from topology
-    num_fog_nodes = sum(1 for entity in topology_json["entity"] if entity["model"] == "fog")
+    num_fog_nodes = sum(
+        1 for entity in topology_json["entity"] if entity["model"] == "fog"
+    )
 
     # Identify all applications from the topology entities
     app_ids = set()
@@ -276,13 +360,13 @@ if __name__ == "__main__":
             parts = entity["model"].split("-")
             if len(parts) >= 2 and parts[1].isdigit():
                 app_ids.add(int(parts[1]))
-    
+
     sorted_app_ids = sorted(list(app_ids))
     logging.info(f"Deploying {len(sorted_app_ids)} applications...")
 
     # Define the placement strategy here
     # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
-    PLACEMENT_STRATEGY = 'latency'
+    PLACEMENT_STRATEGY = "custom_proposed_by_felipe"
 
     # Pattern: {numberOfFogNodes}-{placementStrategy}
     sim_trace_path = results_path + f"{file_to_load}-{PLACEMENT_STRATEGY}-sim_trace"
@@ -320,34 +404,83 @@ if __name__ == "__main__":
     # Logic to save unprocessed messages (Queue Buildup)
     unprocessed_file = results_path + "unprocessed_messages.csv"
     logging.info(f"Saving unprocessed messages to {unprocessed_file}...")
-    
+
     # DEBUG: Print queue sizes
     logging.info(f"Network Queue Size: {len(simulator.network_ctrl_pipe.items)}")
     total_consumer_items = sum(len(p.items) for p in simulator.consumer_pipes.values())
     logging.info(f"Total Consumer Queues Size: {total_consumer_items}")
-    logging.info(f"In-Transit/Processing Messages: {len(simulator.processing_messages)}")
+    logging.info(
+        f"In-Transit/Processing Messages: {len(simulator.processing_messages)}"
+    )
 
-    with open(unprocessed_file, 'w', newline='') as f:
+    with open(unprocessed_file, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["QueueType", "App", "Message", "Src", "Dst", "Timestamp", "Path", "CurrentNode", "Until"])
-        
+        writer.writerow(
+            [
+                "QueueType",
+                "App",
+                "Message",
+                "Src",
+                "Dst",
+                "Timestamp",
+                "Path",
+                "CurrentNode",
+                "Until",
+            ]
+        )
+
         # 1. Network Queue (Messages in transit)
         # simulator.network_ctrl_pipe is a simpy.Store
-        if hasattr(simulator.network_ctrl_pipe, 'items'):
+        if hasattr(simulator.network_ctrl_pipe, "items"):
             for msg in simulator.network_ctrl_pipe.items:
-                writer.writerow(["Network_Queue", msg.app_name, msg.name, msg.src, msg.dst, msg.timestamp, msg.path, msg.dst_int, "N/A"])
-        
+                writer.writerow(
+                    [
+                        "Network_Queue",
+                        msg.app_name,
+                        msg.name,
+                        msg.src,
+                        msg.dst,
+                        msg.timestamp,
+                        msg.path,
+                        msg.dst_int,
+                        "N/A",
+                    ]
+                )
+
         # 2. Consumer Queues (Messages waiting for processing at nodes)
         # simulator.consumer_pipes is a dict of simpy.Store
         for pipe_id, pipe in simulator.consumer_pipes.items():
-            if hasattr(pipe, 'items'):
+            if hasattr(pipe, "items"):
                 for msg in pipe.items:
-                    writer.writerow(["Processing_Queue", msg.app_name, msg.name, msg.src, msg.dst, msg.timestamp, msg.path, msg.dst_int, "N/A"])
+                    writer.writerow(
+                        [
+                            "Processing_Queue",
+                            msg.app_name,
+                            msg.name,
+                            msg.src,
+                            msg.dst,
+                            msg.timestamp,
+                            msg.path,
+                            msg.dst_int,
+                            "N/A",
+                        ]
+                    )
 
         # 3. Active Processing/Transit (Messages in yield)
         for entry in simulator.processing_messages:
             msg = entry["msg"]
-            writer.writerow([entry["type"], msg.app_name, msg.name, msg.src, msg.dst, msg.timestamp, msg.path, msg.dst_int, entry.get("until", "N/A")])
-
+            writer.writerow(
+                [
+                    entry["type"],
+                    msg.app_name,
+                    msg.name,
+                    msg.src,
+                    msg.dst,
+                    msg.timestamp,
+                    msg.path,
+                    msg.dst_int,
+                    entry.get("until", "N/A"),
+                ]
+            )
 
     logging.info("\n--- %s seconds ---" % (time.time() - start_time))
