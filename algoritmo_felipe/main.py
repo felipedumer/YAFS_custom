@@ -296,6 +296,46 @@ def schedule_random_fog_removals(simulator: Sim, interval: int, max_removals: in
     simulator.env.process(_loop())
 
 
+def start_node_count_monitor(simulator: Sim, interval: int):
+    """Sample the number of active nodes over simulation time and return the log list."""
+
+    records = []
+    tracked_models = ["fog", "proxy", "cloud", "end"]
+
+    def snapshot():
+        model_counts = {model: 0 for model in tracked_models}
+        other_nodes = 0
+
+        for node_id in simulator.topology.G.nodes():
+            node = simulator.topology.get_node(node_id)
+            model = node.get("model") or node.get("mytag") or "unknown"
+            if model in model_counts:
+                model_counts[model] += 1
+            else:
+                other_nodes += 1
+
+        records.append(
+            {
+                "time": simulator.env.now,
+                "total_nodes": len(simulator.topology.G.nodes()),
+                "cloud_nodes": model_counts["cloud"],
+                "proxy_nodes": model_counts["proxy"],
+                "fog_nodes": model_counts["fog"],
+                "end_nodes": model_counts["end"],
+                "other_nodes": other_nodes,
+            }
+        )
+
+    def _loop():
+        snapshot()
+        while True:
+            yield simulator.env.timeout(interval)
+            snapshot()
+
+    simulator.env.process(_loop())
+    return records
+
+
 if __name__ == "__main__":
     import logging.config
     import os
@@ -326,6 +366,7 @@ if __name__ == "__main__":
     # Fog removal parameters
     fog_removal_interval = 300
     max_fog_removals = 2
+    node_count_interval = 50
 
     # SELECTION POLICY
     # The Selection Policy determines how messages are routed between service modules.
@@ -375,6 +416,8 @@ if __name__ == "__main__":
     # Remove random fog nodes periodically (uses existing Sim.remove_node)
     schedule_random_fog_removals(simulator, fog_removal_interval, max_fog_removals)
 
+    node_count_records = start_node_count_monitor(simulator, node_count_interval)
+
     def teardown_after(app_ctx: dict, lifetime: float):
         yield simulator.env.timeout(lifetime)
         destroy_application(simulator, app_ctx)
@@ -400,6 +443,22 @@ if __name__ == "__main__":
     simulator.env.process(dynamic_app_manager())
 
     simulator.run(stop_time)
+
+    node_counts_file = sim_trace_path + "_node_counts.csv"
+    with open(node_counts_file, "w", newline="") as f:
+        fieldnames = [
+            "time",
+            "total_nodes",
+            "cloud_nodes",
+            "proxy_nodes",
+            "fog_nodes",
+            "end_nodes",
+            "other_nodes",
+        ]
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(node_count_records)
+    logging.info("Saved node count samples to %s", node_counts_file)
 
     # Logic to save unprocessed messages (Queue Buildup)
     unprocessed_file = results_path + "unprocessed_messages.csv"
