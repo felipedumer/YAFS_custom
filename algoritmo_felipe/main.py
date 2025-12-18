@@ -4,6 +4,8 @@ import random
 import json
 import csv
 import logging
+import logging.config
+import os
 
 from pathlib import Path
 
@@ -15,6 +17,37 @@ from yafs.distribution import deterministic_distribution
 
 from placement_algorithm import CloudPlacement
 from selection_algorithm import MinimunPath
+
+## Configuration Parameters
+
+TOPOLOGY_FILE = "cloud1-gateway12-fog12-end48"
+# Define the placement strategy here
+# Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
+PLACEMENT_STRATEGY = "custom_proposed_by_felipe"
+SOURCE_PERIOD = 100 # simulation time units
+REALLOCATION_PERIOD = 1000 # simulation time units
+APP_CREATION_INTERVAL = 200 # simulation time units
+APP_LIFETIME = 600 # simulation time units
+FOG_REMOVAL_INTERVAL = 300 # simulation time units
+MAX_FOG_REMOVALS = 9
+NODE_COUNT_INTERVAL = 50 # simulation time units
+STOP_TIME = 1000 # simulation time units
+RESULTS_FOLDER = "resultados/" 
+
+# Optional: tweak per-message payloads/instructions
+class MessageProfile:
+    class Request:
+        name = "M_Req"
+        instructions = (200 * 10**6, 500 * 10**6)
+        bytes = (1000, 2000)
+    
+    class Response:
+        name = "M_Resp"
+        instructions = (1 * 10**6, 2 * 10**6)
+        bytes = (1000, 2000)
+
+MESSAGE_PROFILE = MessageProfile()
+
 
 
 class RandomMessage(Message):
@@ -48,19 +81,25 @@ class RandomMessage(Message):
 
         return new_msg
 
-
 def create_application_structure(name: str) -> Application:
     # APLICATION
     app = Application(name)
 
-    # (Sensor) --> (Service) --> (Sensor)
-    # Sensor is both Source (generator) and Module (consumer of response)
+    # Names of modules/services
+    EndDeviceApplicationName = f"{name}-EndDevice"
+    ServiceApplicationName = f"{name}-Service"
+
+    """
+    Creating Modules/Services
+    (EndDevice) --> (Service) --> (EndDevice)
+    EndDevice is both Source (generator) and Module (consumer of response), because it needs to receive an answer from the server, and do something.
+    """
     app.set_modules(
         [
-            {f"{name}-Sensor": {"Type": Application.TYPE_MODULE}},
+            {EndDeviceApplicationName: {"Type": Application.TYPE_MODULE}},
             {
-                f"{name}-Service": {
-                    "RAM": random.randint(50, 100),
+                ServiceApplicationName: {
+                    "RAM": random.randint(512, 2048),
                     "Type": Application.TYPE_MODULE,
                 }
             },
@@ -68,24 +107,24 @@ def create_application_structure(name: str) -> Application:
     )
 
     """
-    Messages among MODULES
+    Creating Messages among MODULES
     """
-    # M_Req: Sensor -> Service. High instructions (Service workload), Medium size.
+    # MESSAGE_REQUEST: EndDevice -> Service. High instructions (Service workload), High size.
     msg_req = RandomMessage(
-        "M_Req",
-        f"{name}-Sensor",
-        f"{name}-Service",
-        instructions=(200 * 10**6, 500 * 10**6),
-        bytes=(1000, 2000),
+        MESSAGE_PROFILE.Request.name,
+        EndDeviceApplicationName,
+        ServiceApplicationName,
+        instructions=MESSAGE_PROFILE.Request.instructions,
+        bytes=MESSAGE_PROFILE.Request.bytes,
     )
 
-    # M_Resp: Service -> Sensor. Low instructions (Sensor logging), Medium size.
+    # MESSAGE_RESPONSE: Service -> EndDevice. Low instructions (EndDevice answer), Medium size.
     msg_resp = RandomMessage(
-        "M_Resp",
-        f"{name}-Service",
-        f"{name}-Sensor",
-        instructions=(1 * 10**6, 2 * 10**6),
-        bytes=(1000, 2000),
+        MESSAGE_PROFILE.Response.name,
+        ServiceApplicationName,
+        EndDeviceApplicationName,
+        instructions=MESSAGE_PROFILE.Response.instructions,
+        bytes=MESSAGE_PROFILE.Response.bytes,
     )
 
     """
@@ -94,17 +133,17 @@ def create_application_structure(name: str) -> Application:
     app.add_source_messages(msg_req)
 
     """
-    MODULES/SERVICES
+    Adds MODULES/SERVICES
     """
-    # Sensor -> Service (Request) -> Service -> Sensor (Response)
+    # EndDevice -> Service (Request) -> Service -> EndDevice (Response)
     app.add_service_module(
-        f"{name}-Service", msg_req, msg_resp, fractional_selectivity, threshold=1.0
+        ServiceApplicationName, msg_req, msg_resp, fractional_selectivity, threshold=1.0
     )
 
-    # Sensor receives Response (Sink behavior)
-    app.add_service_module(f"{name}-Sensor", msg_resp)
+    # Service (Response) -> EndDevice
+    app.add_service_module(EndDeviceApplicationName, msg_resp)
 
-    return app
+    return app, EndDeviceApplicationName, ServiceApplicationName
 
 
 def register_application(
@@ -117,7 +156,7 @@ def register_application(
     allocate_now: bool = False,
 ) -> dict:
     app_name = f"Application-{app_id}"
-    app = create_application_structure(app_name)
+    app, EndDeviceApplicationName, ServiceApplicationName = create_application_structure(app_name)
 
     # Create per-app distributions so later deployments are not coupled through shared state
     reallocation_dist = deterministic_distribution(
@@ -132,21 +171,21 @@ def register_application(
         activation_dist=reallocation_dist,
         strategy=placement_strategy,
     )
-    placement_policy.scaleService({f"{app_name}-Service": 1, f"{app_name}-Sensor": 1})
+    placement_policy.scaleService({EndDeviceApplicationName: 1, ServiceApplicationName: 1})
 
     population = Statical(f"Statical-{app_id}")
     population.set_src_control(
         {
-            "model": f"{app_name}-Sensor",
+            "model": f"EndDevice-{app_id}",
             "number": 1,
-            "message": app.get_message("M_Req"),
+            "message": app.get_message(MESSAGE_PROFILE.Request.name),
             "distribution": src_distribution,
             "param": {"time_shift": 100},
         }
     )
 
     simulator.deploy_app2(app, placement_policy, population, selection_policy)
-    logging.debug(
+    logging.info(
         "Registered app %s with placement %s, population %s | src_period=%s realloc_period=%s",
         app_name,
         placement_policy.name,
@@ -157,7 +196,7 @@ def register_application(
 
     # When apps are injected mid-simulation, we need to do the initial allocation manually
     if allocate_now:
-        logging.debug("Triggering immediate allocations for %s", app_name)
+        logging.info("Triggering immediate allocations for %s", app_name)
         population.initial_allocation(simulator, app_name)
         placement_policy.initial_allocation(simulator, app_name)
 
@@ -335,16 +374,40 @@ def start_node_count_monitor(simulator: Sim, interval: int):
     simulator.env.process(_loop())
     return records
 
+def teardown_after(app_ctx: dict, lifetime: float):
+    yield simulator.env.timeout(lifetime)
+    destroy_application(simulator, app_ctx) 
+    logging.info(f"Destroyed {app_ctx['app_name']} at t={simulator.env.now}")
+
+def dynamic_app_manager():
+    for idx, app_id in enumerate(sorted_app_ids):
+        if idx > 0:
+            yield simulator.env.timeout(APP_CREATION_INTERVAL)
+        app_ctx = register_application(
+            simulator,
+            app_id,
+            selection_policy,
+            SOURCE_PERIOD,
+            PLACEMENT_STRATEGY,
+            REALLOCATION_PERIOD,
+            allocate_now=True,
+        )
+        logging.info(f"Deployed {app_ctx['app_name']} at t={simulator.env.now}")
+        if APP_LIFETIME > 0:
+            simulator.env.process(teardown_after(app_ctx, APP_LIFETIME))
 
 if __name__ == "__main__":
-    import logging.config
-    import os
 
     # Get the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Define the log file path
     log_file_path = os.path.join(script_dir, "execution.log")
+
+    # Create folder for results
+    results_path = Path(RESULTS_FOLDER)
+    results_path.mkdir(parents=True, exist_ok=True)
+    results_path = str(results_path) + "/"
 
     logging.config.fileConfig(
         os.path.join(script_dir, "logging.ini"), defaults={"logfilename": log_file_path}
@@ -354,20 +417,6 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-    results_path = Path("resultados/")
-    results_path.mkdir(parents=True, exist_ok=True)
-    results_path = str(results_path) + "/"
-
-    # Dynamic lifecycle parameters
-    source_period = 100
-    reallocation_period = 1000
-    app_creation_interval = 200
-    app_lifetime = 600
-    # Fog removal parameters
-    fog_removal_interval = 300
-    max_fog_removals = 2
-    node_count_interval = 50
-
     # SELECTION POLICY
     # The Selection Policy determines how messages are routed between service modules.
     # When a module (e.g., Sensor) sends a message to another module (e.g., Service),
@@ -375,12 +424,11 @@ if __name__ == "__main__":
     # 'MinimunPath' routes the message to the nearest instance (shortest network path).
     selection_policy = MinimunPath()
 
-    stop_time = 1000
+    stop_time = STOP_TIME
 
     # Load topology from file
 
-    file_to_load = "fog2-middle8-end31"
-    topology_path = os.path.join(script_dir, f"topologia/{file_to_load}.json")
+    topology_path = os.path.join(script_dir, f"topologia/{TOPOLOGY_FILE}.json")
     logging.info(f"Loading topology from {topology_path}...")
     with open(topology_path, "r") as f:
         topology_json = json.load(f)
@@ -393,54 +441,48 @@ if __name__ == "__main__":
         1 for entity in topology_json["entity"] if entity["model"] == "fog"
     )
 
+    logging.info(f"Topology has {num_fog_nodes} fog nodes.")
+
+    sim_trace_path = results_path + f"{TOPOLOGY_FILE}-{PLACEMENT_STRATEGY}-sim_trace" # {nodes}-{PLACEMENT_STRATEGY}
+
+    simulator = Sim(topology, default_results_path=sim_trace_path)
+
     # Identify all applications from the topology entities
     app_ids = set()
     for entity in topology_json["entity"]:
-        if "model" in entity and entity["model"].startswith("Application-"):
-            # Format: Application-{id}-DeviceType
+        if "model" in entity and entity["model"].startswith("EndDevice-"):
+            # Format: model: EndDevice-{id}
             parts = entity["model"].split("-")
             if len(parts) >= 2 and parts[1].isdigit():
                 app_ids.add(int(parts[1]))
 
+
     sorted_app_ids = sorted(list(app_ids))
     logging.info(f"Deploying {len(sorted_app_ids)} applications...")
-
-    # Define the placement strategy here
-    # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
-    PLACEMENT_STRATEGY = "custom_proposed_by_felipe"
-
-    # Pattern: {numberOfFogNodes}-{placementStrategy}
-    sim_trace_path = results_path + f"{file_to_load}-{PLACEMENT_STRATEGY}-sim_trace"
-    simulator = Sim(topology, default_results_path=sim_trace_path)
-
-    # Remove random fog nodes periodically (uses existing Sim.remove_node)
-    schedule_random_fog_removals(simulator, fog_removal_interval, max_fog_removals)
-
-    node_count_records = start_node_count_monitor(simulator, node_count_interval)
-
-    def teardown_after(app_ctx: dict, lifetime: float):
-        yield simulator.env.timeout(lifetime)
-        destroy_application(simulator, app_ctx)
-        logging.info(f"Destroyed {app_ctx['app_name']} at t={simulator.env.now}")
 
     def dynamic_app_manager():
         for idx, app_id in enumerate(sorted_app_ids):
             if idx > 0:
-                yield simulator.env.timeout(app_creation_interval)
+                yield simulator.env.timeout(APP_CREATION_INTERVAL)
             app_ctx = register_application(
                 simulator,
                 app_id,
                 selection_policy,
-                source_period,
+                SOURCE_PERIOD,
                 PLACEMENT_STRATEGY,
-                reallocation_period,
+                REALLOCATION_PERIOD,
                 allocate_now=True,
             )
             logging.info(f"Deployed {app_ctx['app_name']} at t={simulator.env.now}")
-            if app_lifetime > 0:
-                simulator.env.process(teardown_after(app_ctx, app_lifetime))
+            if APP_LIFETIME > 0:
+                simulator.env.process(teardown_after(app_ctx, APP_LIFETIME))
 
     simulator.env.process(dynamic_app_manager())
+
+    # Remove random fog nodes periodically (uses existing Sim.remove_node)
+    schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, MAX_FOG_REMOVALS)
+
+    node_count_records = start_node_count_monitor(simulator, NODE_COUNT_INTERVAL)
 
     simulator.run(stop_time)
 
