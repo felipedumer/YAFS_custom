@@ -43,3 +43,9 @@ htmlcov/
 
 # OS generated files
 Thumbs.db
+
+# Simulation results (.csv)
+**/*.csv
+
+# Generated Images (.png)
+**/*.png
