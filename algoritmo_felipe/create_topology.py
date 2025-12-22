@@ -16,6 +16,10 @@ def create_random_topology(
     proxy_ram=8000,    # MB
     proxy_cost=4,      # arbitrary cost units
     proxy_watt=40.0,   # watts
+    gateway_ipt=0,      # gateways are forwarding-only; set IPT to 0
+    gateway_ram=0,      # gateways are forwarding-only; set RAM to 0
+    gateway_cost=0,     # minimal cost for gateways
+    gateway_watt=0.0,   # minimal wattage for gateways
     edge_nodes=12,
     devices_per_edge=4,
     edge_small_ipt=6750,     # instructions per time unit
@@ -36,10 +40,13 @@ def create_random_topology(
     Create a fixed 3-layer topology:
       - Cloud (1)
       - Proxy server (1)
-            - Fog nodes (12)
-            - End devices (48 total, devices_per_edge each)
+            - Gateway nodes (1 per fog)
+                - Fog nodes (12)
+                - End devices (48 total, devices_per_edge each)
 
-        The structure is Cloud -> Proxy -> Fog -> End devices.
+        The structure is Cloud -> Proxy -> Gateway -> Fog -> End devices.
+        Each fog has a dedicated gateway; end devices attach to the gateway,
+        so if a fog is removed the gateway can still forward upstream.
     """
     if random_seed is not None:
         random.seed(random_seed)
@@ -93,10 +100,40 @@ def create_random_topology(
         }
     )
 
-    # 3) Fog nodes (half small, half big)
+    # Gateway-fog link intentionally matches proxy-edge characteristics
+    link_bw_gateway_fog = link_bw_proxy_edge
+    link_pr_gateway_fog = link_pr_proxy_edge
+
+    # 3) Gateway + Fog nodes (half small, half big)
+    gateway_ids = []
     edge_ids = []
     small_count = edge_nodes // 2
     for i in range(edge_nodes):
+        # 3a) Gateway (unique per fog)
+        gateway_id = next_id()
+        topology_json["entity"].append(
+            {
+                "id": gateway_id,
+                "model": "gateway",
+                "mytag": "gateway",
+                "label": f"Gateway-{i+1}",
+                "IPT": gateway_ipt,
+                "RAM": gateway_ram,
+                "COST": float(gateway_cost),
+                "WATT": gateway_watt,
+            }
+        )
+        topology_json["link"].append(
+            {
+                "s": proxy_id,
+                "d": gateway_id,
+                "BW": link_bw_proxy_edge,
+                "PR": link_pr_proxy_edge,
+            }
+        )
+        gateway_ids.append(gateway_id)
+
+        # 3b) Fog behind this gateway
         edge_id = next_id()
         is_small = i < small_count
         ipt_val = edge_small_ipt if is_small else edge_big_ipt
@@ -115,25 +152,26 @@ def create_random_topology(
         )
         topology_json["link"].append(
             {
-                "s": proxy_id,
+                "s": gateway_id,
                 "d": edge_id,
-                "BW": link_bw_proxy_edge,
-                "PR": link_pr_proxy_edge,
+                "BW": link_bw_gateway_fog,
+                "PR": link_pr_gateway_fog,
             }
         )
         edge_ids.append(edge_id)
 
-    # 4) End devices
+    # 4) End devices (attach to corresponding gateway, not fog)
     device_count = 0
-    for edge_id in edge_ids:
+    for gw_id in gateway_ids:
         for _ in range(devices_per_edge):
             device_count += 1
             dev_id = next_id()
+            label = f"EndDevice-{device_count}"
             topology_json["entity"].append(
                 {
                     "id": dev_id,
-                    "model": "end_device",
-                    "label": f"End-{device_count}",
+                    "model": label,
+                    "label": label,
                     "IPT": random.randint(50, 120) * 10**6,  # instructions/time unit
                     "RAM": random.randint(4, 16),            # MB
                     "COST": 1,
@@ -142,7 +180,7 @@ def create_random_topology(
             )
             topology_json["link"].append(
                 {
-                    "s": edge_id,
+                    "s": gw_id,
                     "d": dev_id,
                     "BW": link_bw_edge_device,
                     "PR": link_pr_edge_device,
@@ -164,7 +202,7 @@ def main():
         random_seed=42,
     )
 
-    filename = f"cloud{n_cloud}-fog{n_edge}-end{n_devices}"
+    filename = f"cloud{n_cloud}-gateway{n_edge}-fog{n_edge}-end{n_devices}"
     topology_file = os.path.join(results_path, f"{filename}.json")
 
     # Save to JSON
