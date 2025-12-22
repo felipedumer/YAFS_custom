@@ -1,0 +1,253 @@
+import random
+import logging
+
+from yafs.application import Application, fractional_selectivity
+from yafs.core import Sim
+from yafs.population import Statical
+from yafs.distribution import deterministic_distribution
+
+from modules.messages import MessageProfile, RandomMessage
+from modules.selections import MinimunPath
+from modules.allocations import CloudPlacement
+
+MESSAGE_PROFILE = MessageProfile()
+
+logger = logging.getLogger(__name__)
+
+def create_application_structure(name: str) -> Application:
+    # APLICATION
+    app = Application(name)
+
+    # Names of modules/services
+    endDeviceApplicationName = f"{name}-EndDevice"
+    serviceApplicationName = f"{name}-Service"
+
+    """
+    Creating Modules/Services
+    (EndDevice) --> (Service) --> (EndDevice)
+    EndDevice is both Source (generator) and Module (consumer of response), because it needs to receive an answer from the server, and do something.
+    """
+    app.set_modules(
+        [
+            {endDeviceApplicationName: {"Type": Application.TYPE_MODULE}},
+            {
+                serviceApplicationName: {
+                    "RAM": random.randint(512, 2048),
+                    "Type": Application.TYPE_MODULE,
+                }
+            },
+        ]
+    )
+
+    """
+    Creating Messages among MODULES
+    """
+    # MESSAGE_REQUEST: EndDevice -> Service. High instructions (Service workload), High size.
+    msg_req = RandomMessage(
+        MESSAGE_PROFILE.Request.name,
+        endDeviceApplicationName,
+        serviceApplicationName,
+        instructions=MESSAGE_PROFILE.Request.instructions,
+        bytes=MESSAGE_PROFILE.Request.bytes,
+    )
+
+    # MESSAGE_RESPONSE: Service -> EndDevice. Low instructions (EndDevice answer), Medium size.
+    msg_resp = RandomMessage(
+        MESSAGE_PROFILE.Response.name,
+        serviceApplicationName,
+        endDeviceApplicationName,
+        instructions=MESSAGE_PROFILE.Response.instructions,
+        bytes=MESSAGE_PROFILE.Response.bytes,
+    )
+
+    """
+    Defining which messages will be dynamically generated
+    """
+    app.add_source_messages(msg_req)
+
+    """
+    Adds MODULES/SERVICES
+    """
+    # EndDevice -> Service (Request) -> Service -> EndDevice (Response)
+    app.add_service_module(
+        serviceApplicationName, msg_req, msg_resp, fractional_selectivity, threshold=1.0
+    )
+
+    # Service (Response) -> EndDevice
+    app.add_service_module(endDeviceApplicationName, msg_resp)
+
+    return app, endDeviceApplicationName, serviceApplicationName
+
+def register_application(
+    simulator: Sim,
+    app_id: int,
+    selection_policy: MinimunPath,
+    source_period: int,
+    placement_strategy: str,
+    reallocation_period: int,
+    allocate_now: bool = False,
+) -> dict:
+    app_name = f"Application-{app_id}"
+    app, endDeviceApplicationName, serviceApplicationName = create_application_structure(app_name)
+
+    # Create per-app distributions so later deployments are not coupled through shared state
+    reallocation_dist = deterministic_distribution(
+        name=f"Reallocation-{app_id}", time=reallocation_period
+    )
+    src_distribution = deterministic_distribution(
+        name=f"Deterministic-{app_id}", time=source_period
+    )
+
+    placement_policy = CloudPlacement(
+        f"CloudPlacement-{app_id}",
+        activation_dist=reallocation_dist,
+        strategy=placement_strategy,
+    )
+    placement_policy.scaleService({endDeviceApplicationName: 1, serviceApplicationName: 1})
+
+    population = Statical(f"Statical-{app_id}")
+    population.set_src_control(
+        {
+            "model": f"EndDevice-{app_id}",
+            "number": 1,
+            "message": app.get_message(MESSAGE_PROFILE.Request.name),
+            "distribution": src_distribution,
+            "param": {"time_shift": 100},
+        }
+    )
+
+    simulator.deploy_app2(app, placement_policy, population, selection_policy)
+    logger.info(
+        "Registered app %s with placement %s, population %s | src_period=%s realloc_period=%s",
+        app_name,
+        placement_policy.name,
+        population.name,
+        source_period,
+        reallocation_period,
+    )
+
+    # When apps are injected mid-simulation, we need to do the initial allocation manually
+    if allocate_now:
+        logger.info("Triggering immediate allocations for %s", app_name)
+        population.initial_allocation(simulator, app_name)
+        placement_policy.initial_allocation(simulator, app_name)
+
+    return {
+        "app_name": app_name,
+        "placement_name": placement_policy.name,
+        "population_name": population.name,
+    }
+
+
+def _stop_policy_process(simulator: Sim, policy_name: str, registry: dict):
+    policy_entry = registry.get(policy_name)
+    if policy_entry and not policy_entry["apps"]:
+        process_id = simulator.des_control_process.get(policy_name)
+        if process_id is not None:
+            simulator.des_process_running[process_id] = False
+            simulator.des_control_process.pop(policy_name, None)
+        registry.pop(policy_name, None)
+
+def destroy_application(simulator: Sim, app_ctx: dict):
+    app_name = app_ctx["app_name"]
+    placement_name = app_ctx["placement_name"]
+    population_name = app_ctx["population_name"]
+
+    # Stop and remove sources
+    sources_to_remove = [
+        des
+        for des, meta in list(simulator.alloc_source.items())
+        if meta.get("app") == app_name
+    ]
+    logging.debug("Destroy %s: removing %d sources", app_name, len(sources_to_remove))
+    for des in sources_to_remove:
+        node_id = simulator.alloc_DES.get(des)
+        node_label = (
+            simulator.topology.get_node(node_id).get("label", node_id)
+            if node_id is not None and simulator.topology.G.has_node(node_id)
+            else "?"
+        )
+        logging.info(
+            "Destroy %s: stopping source DES=%s at node %s", app_name, des, node_label
+        )
+        simulator.undeploy_source(des)
+
+    # Stop and remove deployed modules (service + sensor consumers)
+    if app_name in simulator.alloc_module:
+        for module, des_list in list(simulator.alloc_module[app_name].items()):
+            logging.debug(
+                "Destroy %s: removing %d deployments of module %s",
+                app_name,
+                len(des_list),
+                module,
+            )
+            for des in list(des_list):
+                node_id = simulator.alloc_DES.get(des)
+                node_label = (
+                    simulator.topology.get_node(node_id).get("label", node_id)
+                    if node_id is not None and simulator.topology.G.has_node(node_id)
+                    else "?"
+                )
+                logging.info(
+                    "Destroy %s: undeploying module %s DES=%s at node %s",
+                    app_name,
+                    module,
+                    des,
+                    node_label,
+                )
+                simulator.undeploy_module(app_name, module, des)
+        simulator.alloc_module.pop(app_name, None)
+
+    # Drop pending consumer pipes for this app to avoid leaks
+    for pipe_key in list(simulator.consumer_pipes.keys()):
+        if pipe_key.startswith(app_name):
+            simulator.consumer_pipes.pop(pipe_key, None)
+    logging.debug("Destroy %s: cleaned consumer pipes", app_name)
+
+    # Clean routing and app registry
+    simulator.selector_path.pop(app_name, None)
+    simulator.apps.pop(app_name, None)
+
+    # Detach from policies
+    for policy in simulator.population_policy.values():
+        if app_name in policy["apps"]:
+            policy["apps"].remove(app_name)
+    for policy in simulator.placement_policy.values():
+        if app_name in policy["apps"]:
+            policy["apps"].remove(app_name)
+
+    _stop_policy_process(simulator, placement_name, simulator.placement_policy)
+    _stop_policy_process(simulator, population_name, simulator.population_policy)
+    logging.info("Destroyed application %s", app_name)
+
+def teardown_after(simulator: Sim, app_ctx: dict, lifetime: float):
+    yield simulator.env.timeout(lifetime)
+    destroy_application(simulator, app_ctx)
+    logging.info(f"Destroyed {app_ctx['app_name']} at t={simulator.env.now}")
+
+
+def dynamic_app_manager(
+    sorted_app_ids: list,
+    simulator: Sim,
+    selection_policy: MinimunPath,
+    source_period: int,
+    placement_strategy: str,
+    reallocation_period: int,
+    app_creation_interval: int,
+    app_lifetime: int,
+):
+    for idx, app_id in enumerate(sorted_app_ids):
+        if idx > 0:
+            yield simulator.env.timeout(app_creation_interval)
+        app_ctx = register_application(
+            simulator,
+            app_id,
+            selection_policy,
+            source_period,
+            placement_strategy,
+            reallocation_period,
+            allocate_now=True,
+        )
+        logging.info(f"Deployed {app_ctx['app_name']} at t={simulator.env.now}")
+        if app_lifetime > 0:
+            simulator.env.process(teardown_after(simulator, app_ctx, app_lifetime))
