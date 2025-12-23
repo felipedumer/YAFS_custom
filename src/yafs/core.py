@@ -266,8 +266,18 @@ class Sim:
                 pipe_id = "%s%s%i" %(message.app_name,message.dst,message.idDES)  # app_name + module_name (dst) + idDES
                 # Timestamp reception message in the module
                 message.timestamp_rec = self.env.now
-                # The message is sent to the module.pipe
-                self.consumer_pipes[pipe_id].put(message)
+                # If the pipe was removed (app teardown), drop the message safely
+                if pipe_id in self.consumer_pipes:
+                    self.consumer_pipes[pipe_id].put(message)
+                else:
+                    self.logger.warning(
+                        "Dropping in-flight message %s for missing pipe %s (app=%s dst=%s des=%s)",
+                        message.name,
+                        pipe_id,
+                        message.app_name,
+                        message.dst,
+                        message.idDES,
+                    )
             else:
                 # The message is sent at first time or it sent more times.
                 # if message.dst_int < 0:
