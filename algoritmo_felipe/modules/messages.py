@@ -3,8 +3,8 @@ from yafs.application import Message
 
 BYTES_MAX = 2000
 BYTES_MIN = 1000
-INSTRUCTIONS_MAX = 500 * 10**6
-INSTRUCTIONS_MIN = 200 * 10**6
+INSTRUCTIONS_MAX = 500
+INSTRUCTIONS_MIN = 200
 
 class MessageProfile:
     class Request:
