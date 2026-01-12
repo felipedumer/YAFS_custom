@@ -4,6 +4,64 @@ import csv
 import os
 import networkx as nx
 
+logger = logging.getLogger(__name__)
+
+class CustomPlacement(Placement):
+    """
+    This implementation locates the services of the application in the cheapest cloud regardless of where the sources or sinks are located.
+
+    It only runs once, in the initialization.
+
+    """
+    def __init__(self, name, activation_dist=None, logger=None, strategy=None):
+        # strategy accepted for API compatibility; ignored
+        super(CustomPlacement, self).__init__(name, activation_dist, logger)
+        self.strategy = strategy
+
+    def _deploy_end_devices(self, sim, app_name, services, id_cluster):
+        """
+        Deploy EndDevice modules on their corresponding sensor nodes; fallback to cloud.
+        Returns the set of modules deployed here so callers can skip them.
+        """
+        deployed = set()
+        try:
+            app_id = int(app_name.split("-")[1])
+        except (IndexError, ValueError):
+            logging.warning("Could not parse app id from %s; sensor allocation skipped", app_name)
+            return deployed
+
+        sensor_nodes = sim.topology.find_IDs({"model": f"EndDevice-{app_id}"})
+        if not sensor_nodes:
+            logging.warning("No sensor nodes found for app %s; placing sensor modules on cloud", app_name)
+
+        for module in services:
+            if module.endswith("EndDevice") and module in self.scaleServices:
+                target_nodes = sensor_nodes if sensor_nodes else id_cluster
+                for _ in range(0, self.scaleServices[module]):
+                    sim.deploy_module(app_name, module, services[module], target_nodes)
+                deployed.add(module)
+        return deployed
+
+    def initial_allocation(self, sim, app_name):
+        #We find the ID-nodo/resource
+        value = {"mytag": "cloud"} # or whatever tag
+
+        id_cluster = sim.topology.find_IDs(value)
+        app = sim.apps[app_name]
+        services = app.services
+
+        deployed_end_devices = self._deploy_end_devices(sim, app_name, services, id_cluster)
+
+        for module in services:
+            if module in deployed_end_devices:
+                continue
+
+            if module in self.scaleServices:
+                for rep in range(0, self.scaleServices[module]):
+                    idDES = sim.deploy_module(app_name,module,services[module],id_cluster)
+
+    #end function
+
 
 class CloudPlacement(Placement):
     """
@@ -258,8 +316,10 @@ class CloudPlacement(Placement):
 
         for module in services:
             # Handle Sensor Placement (Fixed on the Sensor Node)
-            if module.startswith("EndDevice-"):
-                sensor_nodes = sim.topology.find_IDs({"model": module})
+            # Get APP Id
+            app_id = int(app_name.split("-")[-1])
+            if module.endswith("EndDevice"):
+                sensor_nodes = sim.topology.find_IDs({"model": f"EndDevice-{app_id}"})
                 if sensor_nodes:
                     sim.deploy_module(app_name, module, services[module], sensor_nodes)
                     logging.info(
