@@ -25,11 +25,11 @@ PLACEMENT_STRATEGY = "custom_proposed_by_felipe"
 SOURCE_PERIOD = 100 # simulation time units
 REALLOCATION_PERIOD = 1000 # simulation time units
 APP_CREATION_INTERVAL = 200 # simulation time units
-APP_LIFETIME = 600 # simulation time units
+APP_LIFETIME = 2000 # simulation time units
 FOG_REMOVAL_INTERVAL = 300 # simulation time units
 MAX_FOG_REMOVALS = 9
 NODE_COUNT_INTERVAL = 50 # simulation time units
-STOP_TIME = 1000 # simulation time units
+STOP_TIME = 100000 # simulation time units
 RESULTS_FOLDER = "resultados" 
 
 def main():
