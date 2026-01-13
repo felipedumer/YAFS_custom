@@ -28,13 +28,13 @@ def create_random_topology(
     edge_big_ram=2000,       # MB
     # 10000 Mbps ≈ 1_250_000_000 bytes per second
     link_bw_cloud_proxy=1250000000,  # bytes per second
-    link_pr_cloud_proxy=100,         # milliseconds
+    link_pr_cloud_proxy=0.1,         # Simulator is broken, it's serializing each message, so every message has to wait this simulation time, bandwidth doesn't exist.
     # 10000 Mbps ≈ 1_250_000_000 bytes per second
     link_bw_proxy_edge=1250000000,   # bytes per second
-    link_pr_proxy_edge=2,            # milliseconds
+    link_pr_proxy_edge=2,            # Simulator is broken, it's serializing each message, so every message has to wait this simulation time, bandwidth doesn't exist.
     # 0.65 Mbps ≈ 81_250 bytes per second
     link_bw_edge_device=81250,       # bytes per second
-    link_pr_edge_device=100,         # milliseconds
+    link_pr_edge_device=1,         # Simulator is broken, it's serializing each message, so every message has to wait this simulation time, bandwidth doesn't exist.
 ):
     """
     Create a fixed 3-layer topology:
