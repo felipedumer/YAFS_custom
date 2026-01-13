@@ -3,6 +3,9 @@ from yafs.selection import Selection
 import networkx as nx
 import logging
 
+logger = logging.getLogger(__name__)
+
+
 class MinimunPath(Selection):
 
     def get_path(self, sim, app_name, message, topology_src, alloc_DES, alloc_module, traffic,from_des):

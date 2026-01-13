@@ -225,7 +225,7 @@ class Sim:
                     dst_node_id = self.alloc_DES[dst_des]
                     dst_labels.append(self.topology.get_node(dst_node_id).get('label', dst_node_id))
 
-                self.logger.debug("(#DES:%i)\t--- SENDING Message:\t%s: PATH:%s  DES:%s | SRC: %s -> DST: %s" % (idDES, message.name,paths,DES_dst, src_label, dst_labels))
+                self.logger.debug("(#DES:%i)\t--- SENDING Message:\t%s: PATH:%s  DES:%s | SRC: %s -> DST: %s | T:%s" % (idDES, message.name,paths,DES_dst, src_label, dst_labels, self.env.now))
 
                 # print "MESSAGES"
                 #May be, the selector of path decides broadcasting multiples paths
@@ -421,7 +421,7 @@ class Sim:
         self.des_process_running[myId] = True
         self.des_control_process[placement.name]=myId
 
-        self.logger.debug("Added_Process - Placement Algorithm\t#DES:%i" % myId)
+        self.logger.debug("Added_Process - Placement Algorithm\t#DES:%i | T:%s" % (myId, self.env.now))
         while not self.stop and self.des_process_running[myId]:
             yield self.env.timeout(placement.get_next_activation())
             placement.run(self)
@@ -436,7 +436,7 @@ class Sim:
         self.des_process_running[myId] = True
         self.des_control_process[population.name] = myId
 
-        self.logger.debug("Added_Process - Population Algorithm\t#DES:%i" % myId)
+        self.logger.debug("Added_Process - Population Algorithm\t#DES:%i | T:%s" % (myId, self.env.now))
         while not self.stop and self.des_process_running[myId]:
             yield self.env.timeout(population.get_next_activation())
             self.logger.debug("(DES:%i) %7.4f Run - Population Policy: %s " % (myId, self.env.now, self.stop))  # REWRITE
@@ -451,7 +451,7 @@ class Sim:
         """
         A DES-process who controls the invocation of several Pure Source Modules
         """
-        self.logger.debug("Added_Process - Module Pure Source\t#DES:%i" % idDES)
+        self.logger.debug("Added_Process - Module Pure Source\t#DES:%i | T:%s" % (idDES, self.env.now))
         while not self.stop and self.des_process_running[idDES]:
             nextTime = distribution.next()
             yield self.env.timeout(nextTime)
@@ -601,7 +601,7 @@ class Sim:
         """
         It generates a DES process associated to a compute module for the generation of messages
         """
-        self.logger.debug("Added_Process - Module Source: %s\t#DES:%i" % (module, idDES))
+        self.logger.debug("Added_Process - Module Source: %s\t#DES:%i | T:%s" % (module, idDES, self.env.now))
         while (not self.stop) and self.des_process_running[idDES]:
             yield self.env.timeout(distribution.next())
             if self.des_process_running[idDES]:
@@ -620,7 +620,7 @@ class Sim:
         """
         It generates a DES process associated to a compute module
         """
-        self.logger.debug("Added_Process - Module Consumer: %s\t#DES:%i" % (module, ides))
+        self.logger.debug("Added_Process - Module Consumer: %s\t#DES:%i | T:%s" % (module, ides, self.env.now))
         while not self.stop and self.des_process_running[ides]:
             if self.des_process_running[ides]:
                 msg = yield self.consumer_pipes["%s%s%i"%(app_name,module,ides)].get()
@@ -720,7 +720,7 @@ class Sim:
         """
         It generates a DES process associated to a SINK module
         """
-        self.logger.debug("Added_Process - Module Pure Sink: %s\t#DES:%i" % (module, ides))
+        self.logger.debug("Added_Process - Module Pure Sink: %s\t#DES:%i | T:%s" % (module, ides, self.env.now))
         while not self.stop and self.des_process_running[ides]:
             msg = yield self.consumer_pipes["%s%s%i" % (app_name, module, ides)].get()
             """
@@ -739,7 +739,7 @@ class Sim:
         Add a DES process for Stop/Progress bar monitor
         """
         myId = self.__get_id_process()
-        self.logger.debug("Added_Process - Internal Monitor: %s\t#DES:%i" % (name,myId))
+        self.logger.debug("Added_Process - Internal Monitor: %s\t#DES:%i | T:%s" % (name,myId, self.env.now))
         if show_progress_monitor:
             # self.pbar = tqdm(total=self.until)
             pass
@@ -753,7 +753,7 @@ class Sim:
         """
         Add a DES process for user purpose
         """
-        self.logger.debug("Added_Process - Internal Monitor: %s\t#DES:%i" % (name, idDES))
+        self.logger.debug("Added_Process - Internal Monitor: %s\t#DES:%i | T:%s" % (name, idDES, self.env.now))
         while not self.stop and self.des_process_running[idDES]:
             yield self.env.timeout(distribution.next())
             function(**param)

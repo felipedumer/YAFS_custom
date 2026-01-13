@@ -8,11 +8,12 @@ from yafs.distribution import deterministic_distribution
 
 from modules.messages import MessageProfile, RandomMessage
 from modules.selections import MinimunPath
-from modules.allocations import CloudPlacement
+from modules.allocations import CloudPlacement, CustomPlacement
 
 MESSAGE_PROFILE = MessageProfile()
 
 logger = logging.getLogger(__name__)
+
 
 def create_application_structure(name: str) -> Application:
     # APLICATION
@@ -65,6 +66,8 @@ def create_application_structure(name: str) -> Application:
     """
     app.add_source_messages(msg_req)
 
+    app.add_source_messages(msg_resp)
+
     """
     Adds MODULES/SERVICES
     """
@@ -98,7 +101,7 @@ def register_application(
         name=f"Deterministic-{app_id}", time=source_period
     )
 
-    placement_policy = CloudPlacement(
+    placement_policy = CustomPlacement(
         f"CloudPlacement-{app_id}",
         activation_dist=reallocation_dist,
         strategy=placement_strategy,
@@ -159,7 +162,7 @@ def destroy_application(simulator: Sim, app_ctx: dict):
         for des, meta in list(simulator.alloc_source.items())
         if meta.get("app") == app_name
     ]
-    logging.debug("Destroy %s: removing %d sources", app_name, len(sources_to_remove))
+    logging.debug("Destroy %s: removing %d sources | T:%s", app_name, len(sources_to_remove), simulator.env.now)
     for des in sources_to_remove:
         node_id = simulator.alloc_DES.get(des)
         node_label = (
@@ -168,7 +171,11 @@ def destroy_application(simulator: Sim, app_ctx: dict):
             else "?"
         )
         logging.info(
-            "Destroy %s: stopping source DES=%s at node %s", app_name, des, node_label
+            "Destroy %s: stopping source DES=%s at node %s | T:%s",
+            app_name,
+            des,
+            node_label,
+            simulator.env.now,
         )
         simulator.undeploy_source(des)
 
@@ -176,10 +183,11 @@ def destroy_application(simulator: Sim, app_ctx: dict):
     if app_name in simulator.alloc_module:
         for module, des_list in list(simulator.alloc_module[app_name].items()):
             logging.debug(
-                "Destroy %s: removing %d deployments of module %s",
+                "Destroy %s: removing %d deployments of module %s | T:%s",
                 app_name,
                 len(des_list),
                 module,
+                simulator.env.now,
             )
             for des in list(des_list):
                 node_id = simulator.alloc_DES.get(des)
@@ -189,11 +197,12 @@ def destroy_application(simulator: Sim, app_ctx: dict):
                     else "?"
                 )
                 logging.info(
-                    "Destroy %s: undeploying module %s DES=%s at node %s",
+                    "Destroy %s: undeploying module %s DES=%s at node %s | T:%s",
                     app_name,
                     module,
                     des,
                     node_label,
+                    simulator.env.now,
                 )
                 simulator.undeploy_module(app_name, module, des)
         simulator.alloc_module.pop(app_name, None)
@@ -202,7 +211,7 @@ def destroy_application(simulator: Sim, app_ctx: dict):
     for pipe_key in list(simulator.consumer_pipes.keys()):
         if pipe_key.startswith(app_name):
             simulator.consumer_pipes.pop(pipe_key, None)
-    logging.debug("Destroy %s: cleaned consumer pipes", app_name)
+    logging.debug("Destroy %s: cleaned consumer pipes | T:%s", app_name, simulator.env.now)
 
     # Clean routing and app registry
     simulator.selector_path.pop(app_name, None)
@@ -218,7 +227,7 @@ def destroy_application(simulator: Sim, app_ctx: dict):
 
     _stop_policy_process(simulator, placement_name, simulator.placement_policy)
     _stop_policy_process(simulator, population_name, simulator.population_policy)
-    logging.info("Destroyed application %s", app_name)
+    logging.info("Destroyed application %s | T:%s", app_name, simulator.env.now)
 
 def teardown_after(simulator: Sim, app_ctx: dict, lifetime: float):
     yield simulator.env.timeout(lifetime)

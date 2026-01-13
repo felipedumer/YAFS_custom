@@ -41,7 +41,9 @@ def main():
     results_path = str(results_path) + "/"
 
     logging.config.fileConfig(
-        os.path.join(root_path, "logging.ini"), defaults={"logfilename": log_file_path}
+        os.path.join(root_path, "logging.ini"),
+        defaults={"logfilename": log_file_path},
+        disable_existing_loggers=False,  # keep pre-imported module loggers enabled
     )
     logging.getLogger().setLevel(logging.DEBUG)
     logging.debug("Verbose logging enabled")

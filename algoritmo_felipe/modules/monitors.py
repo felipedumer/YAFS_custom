@@ -5,6 +5,7 @@ from yafs.core import Sim
 
 logger = logging.getLogger(__name__)
 
+
 def schedule_random_fog_removals(simulator: Sim, interval: int, max_removals: int):
     """Remove a random fog node every `interval` simulation time units.
 
