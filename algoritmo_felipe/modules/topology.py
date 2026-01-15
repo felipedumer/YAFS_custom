@@ -13,7 +13,7 @@ def load_topology(script_dir: str, topology_file: str) -> Tuple[Topology, Any, i
 
     Returns (topology, topology_json, num_fog_nodes, topology_path).
     """
-    topology_path = os.path.join(script_dir, f"topologia/{topology_file}.json")
+    topology_path = os.path.join(script_dir, f"topologies/{topology_file}.json")
     logger.info("Loading topology from %s...", topology_path)
 
     with open(topology_path, "r") as f:

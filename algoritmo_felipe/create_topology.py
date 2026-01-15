@@ -193,7 +193,7 @@ def create_random_topology(
 def main():
     # Define path
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    results_path = os.path.join(script_dir, "topologia/")
+    results_path = os.path.join(script_dir, "topologies/")
     os.makedirs(results_path, exist_ok=True)
 
     # Create topology (fixed: 1 cloud, 1 proxy, 12 fog nodes, 48 end devices)
