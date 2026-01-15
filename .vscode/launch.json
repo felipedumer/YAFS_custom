@@ -12,6 +12,15 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "cwd": "${fileDirname}"
+        },
+        {
+            "name": "Python: algoritmo_felipe main",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/algoritmo_felipe/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/algoritmo_felipe"
         }
     ]
 }
