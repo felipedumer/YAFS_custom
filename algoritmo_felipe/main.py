@@ -21,13 +21,13 @@ MESSAGE_PROFILE = MessageProfile()
 TOPOLOGY_FILE = "cloud1-gateway12-fog12-end48"
 # Define the placement strategy here
 # Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
-PLACEMENT_STRATEGY = "roundrobin"
+PLACEMENT_STRATEGY = "custom"
 SOURCE_PERIOD = 100 # simulation time units
 REALLOCATION_PERIOD = 1000 # simulation time units
 APP_CREATION_INTERVAL = 200 # simulation time units
 APP_LIFETIME = 2000 # simulation time units
 FOG_REMOVAL_INTERVAL = 300 # simulation time units
-MAX_FOG_REMOVALS = 9
+MAX_FOG_REMOVALS = 10
 NODE_COUNT_INTERVAL = 50 # simulation time units
 STOP_TIME = 100000 # simulation time units
 RESULTS_FOLDER = "resultados" 
@@ -92,7 +92,7 @@ def main():
     )
 
     # Optional: Schedule random fog node removals
-    # schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, MAX_FOG_REMOVALS)
+    schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, MAX_FOG_REMOVALS)
 
     node_count_records = start_node_count_monitor(simulator, NODE_COUNT_INTERVAL)
 
