@@ -1,0 +1,1136 @@
+{
+    "entity": [
+        {
+            "id": 0,
+            "model": "cloud",
+            "mytag": "cloud",
+            "label": "Cloud",
+            "IPT": 120000,
+            "RAM": 64000,
+            "COST": 10.0,
+            "WATT": 100.0
+        },
+        {
+            "id": 1,
+            "model": "proxy",
+            "mytag": "proxy",
+            "label": "Proxy",
+            "IPT": 60000,
+            "RAM": 8000,
+            "COST": 4.0,
+            "WATT": 40.0
+        },
+        {
+            "id": 2,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-1",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 3,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-1",
+            "IPT": 6750,
+            "RAM": 1000,
+            "COST": 4.5577071938315346,
+            "WATT": 21.00043020890668
+        },
+        {
+            "id": 4,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-2",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 5,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-2",
+            "IPT": 6750,
+            "RAM": 1000,
+            "COST": 3.100117273476477,
+            "WATT": 28.92842952595291
+        },
+        {
+            "id": 6,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-3",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 7,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-3",
+            "IPT": 6750,
+            "RAM": 1000,
+            "COST": 4.94588485665605,
+            "WATT": 47.06797949691645
+        },
+        {
+            "id": 8,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-4",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 9,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-4",
+            "IPT": 6750,
+            "RAM": 1000,
+            "COST": 5.568718270819382,
+            "WATT": 23.477553305176645
+        },
+        {
+            "id": 10,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-5",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 11,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-5",
+            "IPT": 6750,
+            "RAM": 1000,
+            "COST": 3.6876872787410817,
+            "WATT": 21.191888777522813
+        },
+        {
+            "id": 12,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-6",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 13,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-6",
+            "IPT": 6750,
+            "RAM": 1000,
+            "COST": 2.8745518992144135,
+            "WATT": 40.21421152413449
+        },
+        {
+            "id": 14,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-7",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 15,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-7",
+            "IPT": 13500,
+            "RAM": 2000,
+            "COST": 2.1061438787354545,
+            "WATT": 27.95350602746594
+        },
+        {
+            "id": 16,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-8",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 17,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-8",
+            "IPT": 13500,
+            "RAM": 2000,
+            "COST": 4.599537751118093,
+            "WATT": 41.797659224128665
+        },
+        {
+            "id": 18,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-9",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 19,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-9",
+            "IPT": 13500,
+            "RAM": 2000,
+            "COST": 2.881762488162787,
+            "WATT": 43.57062735503635
+        },
+        {
+            "id": 20,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-10",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 21,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-10",
+            "IPT": 13500,
+            "RAM": 2000,
+            "COST": 5.237721826711306,
+            "WATT": 20.25995038712244
+        },
+        {
+            "id": 22,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-11",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 23,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-11",
+            "IPT": 13500,
+            "RAM": 2000,
+            "COST": 5.223277007331232,
+            "WATT": 47.92557579952907
+        },
+        {
+            "id": 24,
+            "model": "gateway",
+            "mytag": "gateway",
+            "label": "Gateway-12",
+            "IPT": 0,
+            "RAM": 0,
+            "COST": 0.0,
+            "WATT": 0.0
+        },
+        {
+            "id": 25,
+            "model": "fog",
+            "mytag": "fog",
+            "label": "Fog-12",
+            "IPT": 13500,
+            "RAM": 2000,
+            "COST": 3.3610020660719675,
+            "WATT": 26.21917999247126
+        },
+        {
+            "id": 26,
+            "model": "EndDevice-1",
+            "label": "EndDevice-1",
+            "IPT": 93000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 27,
+            "model": "EndDevice-2",
+            "label": "EndDevice-2",
+            "IPT": 61000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 28,
+            "model": "EndDevice-3",
+            "label": "EndDevice-3",
+            "IPT": 62000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 29,
+            "model": "EndDevice-4",
+            "label": "EndDevice-4",
+            "IPT": 94000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 30,
+            "model": "EndDevice-5",
+            "label": "EndDevice-5",
+            "IPT": 83000000,
+            "RAM": 16,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 31,
+            "model": "EndDevice-6",
+            "label": "EndDevice-6",
+            "IPT": 55000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 32,
+            "model": "EndDevice-7",
+            "label": "EndDevice-7",
+            "IPT": 108000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 33,
+            "model": "EndDevice-8",
+            "label": "EndDevice-8",
+            "IPT": 65000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 34,
+            "model": "EndDevice-9",
+            "label": "EndDevice-9",
+            "IPT": 60000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 35,
+            "model": "EndDevice-10",
+            "label": "EndDevice-10",
+            "IPT": 87000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 36,
+            "model": "EndDevice-11",
+            "label": "EndDevice-11",
+            "IPT": 96000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 37,
+            "model": "EndDevice-12",
+            "label": "EndDevice-12",
+            "IPT": 74000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 38,
+            "model": "EndDevice-13",
+            "label": "EndDevice-13",
+            "IPT": 58000000,
+            "RAM": 4,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 39,
+            "model": "EndDevice-14",
+            "label": "EndDevice-14",
+            "IPT": 79000000,
+            "RAM": 16,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 40,
+            "model": "EndDevice-15",
+            "label": "EndDevice-15",
+            "IPT": 87000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 41,
+            "model": "EndDevice-16",
+            "label": "EndDevice-16",
+            "IPT": 79000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 42,
+            "model": "EndDevice-17",
+            "label": "EndDevice-17",
+            "IPT": 98000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 43,
+            "model": "EndDevice-18",
+            "label": "EndDevice-18",
+            "IPT": 108000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 44,
+            "model": "EndDevice-19",
+            "label": "EndDevice-19",
+            "IPT": 96000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 45,
+            "model": "EndDevice-20",
+            "label": "EndDevice-20",
+            "IPT": 97000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 46,
+            "model": "EndDevice-21",
+            "label": "EndDevice-21",
+            "IPT": 76000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 47,
+            "model": "EndDevice-22",
+            "label": "EndDevice-22",
+            "IPT": 84000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 48,
+            "model": "EndDevice-23",
+            "label": "EndDevice-23",
+            "IPT": 59000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 49,
+            "model": "EndDevice-24",
+            "label": "EndDevice-24",
+            "IPT": 71000000,
+            "RAM": 12,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 50,
+            "model": "EndDevice-25",
+            "label": "EndDevice-25",
+            "IPT": 81000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 51,
+            "model": "EndDevice-26",
+            "label": "EndDevice-26",
+            "IPT": 109000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 52,
+            "model": "EndDevice-27",
+            "label": "EndDevice-27",
+            "IPT": 84000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 53,
+            "model": "EndDevice-28",
+            "label": "EndDevice-28",
+            "IPT": 78000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 54,
+            "model": "EndDevice-29",
+            "label": "EndDevice-29",
+            "IPT": 91000000,
+            "RAM": 16,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 55,
+            "model": "EndDevice-30",
+            "label": "EndDevice-30",
+            "IPT": 57000000,
+            "RAM": 7,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 56,
+            "model": "EndDevice-31",
+            "label": "EndDevice-31",
+            "IPT": 54000000,
+            "RAM": 16,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 57,
+            "model": "EndDevice-32",
+            "label": "EndDevice-32",
+            "IPT": 90000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 58,
+            "model": "EndDevice-33",
+            "label": "EndDevice-33",
+            "IPT": 84000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 59,
+            "model": "EndDevice-34",
+            "label": "EndDevice-34",
+            "IPT": 77000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 60,
+            "model": "EndDevice-35",
+            "label": "EndDevice-35",
+            "IPT": 90000000,
+            "RAM": 7,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 61,
+            "model": "EndDevice-36",
+            "label": "EndDevice-36",
+            "IPT": 113000000,
+            "RAM": 10,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 62,
+            "model": "EndDevice-37",
+            "label": "EndDevice-37",
+            "IPT": 108000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 63,
+            "model": "EndDevice-38",
+            "label": "EndDevice-38",
+            "IPT": 83000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 64,
+            "model": "EndDevice-39",
+            "label": "EndDevice-39",
+            "IPT": 81000000,
+            "RAM": 15,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 65,
+            "model": "EndDevice-40",
+            "label": "EndDevice-40",
+            "IPT": 118000000,
+            "RAM": 8,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 66,
+            "model": "EndDevice-41",
+            "label": "EndDevice-41",
+            "IPT": 104000000,
+            "RAM": 13,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 67,
+            "model": "EndDevice-42",
+            "label": "EndDevice-42",
+            "IPT": 101000000,
+            "RAM": 9,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 68,
+            "model": "EndDevice-43",
+            "label": "EndDevice-43",
+            "IPT": 78000000,
+            "RAM": 6,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 69,
+            "model": "EndDevice-44",
+            "label": "EndDevice-44",
+            "IPT": 115000000,
+            "RAM": 11,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 70,
+            "model": "EndDevice-45",
+            "label": "EndDevice-45",
+            "IPT": 61000000,
+            "RAM": 16,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 71,
+            "model": "EndDevice-46",
+            "label": "EndDevice-46",
+            "IPT": 56000000,
+            "RAM": 5,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 72,
+            "model": "EndDevice-47",
+            "label": "EndDevice-47",
+            "IPT": 69000000,
+            "RAM": 14,
+            "COST": 1,
+            "WATT": 0.5
+        },
+        {
+            "id": 73,
+            "model": "EndDevice-48",
+            "label": "EndDevice-48",
+            "IPT": 70000000,
+            "RAM": 16,
+            "COST": 1,
+            "WATT": 0.5
+        }
+    ],
+    "link": [
+        {
+            "s": 0,
+            "d": 1,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 2,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 2,
+            "d": 3,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 4,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 4,
+            "d": 5,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 6,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 6,
+            "d": 7,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 8,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 8,
+            "d": 9,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 10,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 10,
+            "d": 11,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 12,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 12,
+            "d": 13,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 14,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 14,
+            "d": 15,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 16,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 16,
+            "d": 17,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 18,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 18,
+            "d": 19,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 20,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 20,
+            "d": 21,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 22,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 22,
+            "d": 23,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 1,
+            "d": 24,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 24,
+            "d": 25,
+            "BW": 1250000000,
+            "PR": 2
+        },
+        {
+            "s": 2,
+            "d": 26,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 2,
+            "d": 27,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 2,
+            "d": 28,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 2,
+            "d": 29,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 4,
+            "d": 30,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 4,
+            "d": 31,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 4,
+            "d": 32,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 4,
+            "d": 33,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 6,
+            "d": 34,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 6,
+            "d": 35,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 6,
+            "d": 36,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 6,
+            "d": 37,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 8,
+            "d": 38,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 8,
+            "d": 39,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 8,
+            "d": 40,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 8,
+            "d": 41,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 10,
+            "d": 42,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 10,
+            "d": 43,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 10,
+            "d": 44,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 10,
+            "d": 45,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 12,
+            "d": 46,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 12,
+            "d": 47,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 12,
+            "d": 48,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 12,
+            "d": 49,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 14,
+            "d": 50,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 14,
+            "d": 51,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 14,
+            "d": 52,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 14,
+            "d": 53,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 16,
+            "d": 54,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 16,
+            "d": 55,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 16,
+            "d": 56,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 16,
+            "d": 57,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 18,
+            "d": 58,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 18,
+            "d": 59,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 18,
+            "d": 60,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 18,
+            "d": 61,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 20,
+            "d": 62,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 20,
+            "d": 63,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 20,
+            "d": 64,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 20,
+            "d": 65,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 22,
+            "d": 66,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 22,
+            "d": 67,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 22,
+            "d": 68,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 22,
+            "d": 69,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 24,
+            "d": 70,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 24,
+            "d": 71,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 24,
+            "d": 72,
+            "BW": 81250,
+            "PR": 2
+        },
+        {
+            "s": 24,
+            "d": 73,
+            "BW": 81250,
+            "PR": 2
+        }
+    ]
+}
