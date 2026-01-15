@@ -245,10 +245,13 @@ def dynamic_app_manager(
     app_creation_interval: int,
     app_lifetime: int,
 ):
-    for idx, app_id in enumerate(sorted_app_ids):
-        if idx > 0:
-            yield simulator.env.timeout(app_creation_interval)
-        app_ctx = register_application(
+    # Keep as generator for env.process
+    yield simulator.env.timeout(0)
+
+    # Deploy all apps immediately
+    app_contexts = {}
+    for app_id in sorted_app_ids:
+        ctx = register_application(
             simulator,
             app_id,
             selection_policy,
@@ -257,6 +260,38 @@ def dynamic_app_manager(
             reallocation_period,
             allocate_now=True,
         )
-        logging.info(f"Deployed {app_ctx['app_name']} at t={simulator.env.now}")
+        app_contexts[app_id] = ctx
+        logging.info(f"Deployed {ctx['app_name']} at t={simulator.env.now}")
         if app_lifetime > 0:
-            simulator.env.process(teardown_after(simulator, app_ctx, app_lifetime))
+            simulator.env.process(teardown_after(simulator, ctx, app_lifetime))
+
+    # If no interval, stop here
+    if app_creation_interval <= 0:
+        return
+
+    # Simple rolling recycle: each interval, remove a small batch and recreate immediately
+    total_apps = len(sorted_app_ids)
+    batch_size = max(1, total_apps // 5)  # ~20% each round
+    cursor = 0
+
+    while True:
+        yield simulator.env.timeout(app_creation_interval)
+
+        batch_ids = random.sample(sorted_app_ids, k=min(batch_size, total_apps))
+
+        for app_id in batch_ids:
+            ctx = app_contexts.get(app_id)
+            if ctx:
+                destroy_application(simulator, ctx)
+
+            new_ctx = register_application(
+                simulator,
+                app_id,
+                selection_policy,
+                source_period,
+                placement_strategy,
+                reallocation_period,
+                allocate_now=True,
+            )
+            app_contexts[app_id] = new_ctx
+            logging.info(f"Re-Deployed {new_ctx['app_name']} at t={simulator.env.now}")
