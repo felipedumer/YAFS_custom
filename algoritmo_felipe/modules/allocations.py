@@ -14,9 +14,48 @@ class CustomPlacement(Placement):
 
     """
     def __init__(self, name, activation_dist=None, logger=None, strategy=None):
-        # strategy accepted for API compatibility; ignored
         super(CustomPlacement, self).__init__(name, activation_dist, logger)
         self.strategy = strategy
+
+    def _sort_fog_nodes_dijkstra(self, sim, app_name, id_fog_list):
+        """Rank fog nodes by the best (minimum) latency (PR) path from any EndDevice of the app."""
+        id_fog_list = [nid for nid in id_fog_list if sim.topology.G.has_node(nid)]
+        if not id_fog_list:
+            return []
+
+        try:
+            app_id = app_name.split("-")[1]
+        except IndexError:
+            return id_fog_list
+
+        sensor_nodes = sim.topology.find_IDs({"model": f"EndDevice-{app_id}"})
+        if not sensor_nodes:
+            return sorted(id_fog_list)
+
+        distances = []
+        for fog_id in id_fog_list:
+            best = float("inf")
+            for sensor_id in sensor_nodes:
+                try:
+                    # Usage of Dijkstra algorithm to find the minimum path based on 'PR' attribute
+                    dist = nx.shortest_path_length(
+                        sim.topology.G, source=sensor_id, target=fog_id, weight="PR"
+                    )
+
+                    # Debug the distance
+                    # logging.debug("[LATENCY] App %s: Distance from Sensor %s to Fog %s = %s", app_name, sensor_id, fog_id, dist)
+
+                    best = min(best, dist)
+                except nx.NetworkXNoPath:
+                    continue
+            distances.append((fog_id, best))
+
+        # Sort by distance (ascending)
+        distances.sort(key=lambda x: x[1])
+
+        ranked_nodes_id = [cluster_id for cluster_id, _ in distances]
+
+        return ranked_nodes_id
 
     def _deploy_end_devices(self, sim, app_name, services, id_cluster):
         """
@@ -42,11 +81,11 @@ class CustomPlacement(Placement):
                 deployed.add(module)
         return deployed
 
-    def initial_allocation(self, sim, app_name):
+    def _static_strategy(self, sim, app_name):
         #We find the ID-nodo/resource
-        value = {"mytag": "cloud"} # or whatever tag
+        cluster_tag = {"model": "cloud"}
 
-        id_cluster = sim.topology.find_IDs(value)
+        id_cluster = sim.topology.find_IDs(cluster_tag)
         app = sim.apps[app_name]
         services = app.services
 
@@ -60,8 +99,100 @@ class CustomPlacement(Placement):
                 for rep in range(0, self.scaleServices[module]):
                     idDES = sim.deploy_module(app_name,module,services[module],id_cluster)
 
-    #end function
+    def _dijkstra_strategy(self, sim, app_name):
+        fog_clusters_id = sim.topology.find_IDs({"model": "fog"})
+        cloud_cluster_id = sim.topology.find_IDs({"model": "cloud"})
 
+        app = sim.apps[app_name]
+        services = app.services
+
+        deployed_end_devices = self._deploy_end_devices(sim, app_name, services, fog_clusters_id)
+        for module in services:
+            if module in deployed_end_devices:
+                continue
+
+            # Search for fog clusters
+            elif module in self.scaleServices:
+                target_nodes = fog_clusters_id
+                if fog_clusters_id:
+                    ranked_nodes = self._sort_fog_nodes_dijkstra(sim, app_name, fog_clusters_id)
+                    target_nodes = ranked_nodes
+
+                # Allocate to cloud if no fog nodes are available
+                if not target_nodes:
+                    target_nodes = list(cloud_cluster_id)
+
+                # Deploy replicas
+                replicas_needed = self.scaleServices[module]
+                ranked_targets = target_nodes[:replicas_needed]
+
+                for target in ranked_targets:
+                    sim.deploy_module(app_name, module, services[module], [target])
+                    
+                    # get the node label based on node id
+                    node_label = sim.topology.get_node(target).get("label", target)
+                    logging.info("Placed %s on node %s", module, node_label)
+
+                remaining = replicas_needed - len(ranked_targets)
+                if remaining > 0 and cloud_cluster_id:
+                    cloud_target = cloud_cluster_id[0]
+                    for _ in range(remaining):
+                        sim.deploy_module(app_name, module, services[module], [cloud_target])
+
+                    # get the node label based on node id
+                    node_label = sim.topology.get_node(cloud_target).get("label", cloud_target)
+                    logging.info("Placed %s on node %s", module, node_label)
+
+    def _roundrobin_strategy(self, sim, app_name):
+        fog_clusters_id = sim.topology.find_IDs({"model": "fog"})
+        cloud_cluster_id = sim.topology.find_IDs({"model": "cloud"})
+
+        app = sim.apps[app_name]
+        services = app.services
+
+        # Deploy sensor-bound modules first
+        deployed_end_devices = self._deploy_end_devices(
+            sim, app_name, services, fog_clusters_id or cloud_cluster_id
+        )
+
+        # Deterministic order for rotation
+        target_nodes = list(fog_clusters_id)
+        if not target_nodes:
+            target_nodes = list(cloud_cluster_id)
+
+        target_nodes.sort()
+
+        # Offset the starting point by app id so multiple CustomPlacement instances
+        # (one per app) do not all begin at the same node.
+        app_id_int = int(app_name.split("-")[1])
+
+        rr_index = app_id_int % len(target_nodes)
+
+        for module in services:
+            if module in deployed_end_devices:
+                continue
+
+            if not target_nodes:
+                target_nodes = list(cloud_cluster_id)
+
+            replicas_needed = self.scaleServices[module]
+
+            for _ in range(replicas_needed):
+                target = target_nodes[rr_index % len(target_nodes)]
+                rr_index += 1
+                sim.deploy_module(app_name, module, services[module], [target])
+
+                node_label = sim.topology.get_node(target).get("label", target)
+                logging.info("Placed %s on node %s", module, node_label)
+
+
+    def initial_allocation(self, sim, app_name):
+        if self.strategy == "static":
+            self._static_strategy(sim, app_name)
+        elif self.strategy == "latency":
+            self._dijkstra_strategy(sim, app_name)
+        elif self.strategy == "roundrobin":
+            self._roundrobin_strategy(sim, app_name)
 
 class CloudPlacement(Placement):
     """
@@ -77,7 +208,7 @@ class CloudPlacement(Placement):
     - 'custom_proposed_by_felipe': Weighted score of Latency, IPT, COST, and WATT.
     """
 
-    def __init__(self, name, activation_dist=None, logger=None, strategy="latency"):
+    def __init__(self, name, activation_dist=None, logger=None, strategy="static"):
         super(CloudPlacement, self).__init__(name, activation_dist, logger)
         self.strategy = strategy
 
