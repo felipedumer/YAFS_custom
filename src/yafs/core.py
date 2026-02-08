@@ -163,6 +163,9 @@ class Sim:
         # This variable control the lag of each busy network links. It avoids the generation of a DES-process for each link
         # edge -> last_use_channel (float) = Simulation time
 
+        self.removed_nodes = []
+        # History of removed nodes with their attributes, edges, and removal time
+
 
 
     # self.__send_message(app_name, message, idDES, self.SOURCE_METRIC)
@@ -623,7 +626,14 @@ class Sim:
         self.logger.debug("Added_Process - Module Consumer: %s\t#DES:%i | T:%s" % (module, ides, self.env.now))
         while not self.stop and self.des_process_running[ides]:
             if self.des_process_running[ides]:
-                msg = yield self.consumer_pipes["%s%s%i"%(app_name,module,ides)].get()
+                pipe_key = "%s%s%i" % (app_name, module, ides)
+                pipe = self.consumer_pipes.get(pipe_key)
+                if pipe is None:
+                    # Pipe can disappear if app was torn down before consumer wakes up
+                    self.logger.debug("Consumer pipe missing, stopping module %s DES:%i | T:%s" % (module, ides, self.env.now))
+                    break
+
+                msg = yield pipe.get()
                 # One pipe for each module name
 
                 m = self.apps[app_name].services[module]
@@ -1143,6 +1153,24 @@ class Sim:
                 break
 
     def remove_node(self, id_node_topology):
+        # Save node attributes and edges before removal
+        node_attrs = dict(self.topology.G.nodes[id_node_topology])
+        node_edges = []
+        for u, v, data in self.topology.G.edges(id_node_topology, data=True):
+            node_edges.append({"src": u, "dst": v, "attrs": dict(data)})
+
+        node_attrs["failures"] += 1
+        node_attrs["execution_time"] += self.env.now
+
+        self.removed_nodes.append({
+            "id": id_node_topology,
+            "attrs": node_attrs,
+            "edges": node_edges,
+            "time_removed": self.env.now,
+        })
+        self.logger.debug("Saved removed node %s with %d edges at T:%s" % (id_node_topology, len(node_edges), self.env.now))
+        self.logger.debug("Attributes: %s" % node_attrs)
+
         # Stopping related processes deployed in the module and clearing main structure: alloc_DES
         des_tmp=[]
         if id_node_topology in self.alloc_DES.values():
@@ -1162,6 +1190,61 @@ class Sim:
 
         # Finally removing node from topology
         self.topology.G.remove_node(id_node_topology)
+
+    def restore_node(self, id_node_topology=None):
+        """
+        Re-add a previously removed node (and its edges) back to the topology
+        using the saved data in self.removed_nodes.
+
+        Args:
+            id_node_topology: the node id to restore. If None, a random node
+                from removed_nodes is selected.
+
+        Returns:
+            The restored entry dict, or None if removed_nodes is empty or the
+            node was not found.
+        """
+        if not self.removed_nodes:
+            self.logger.warning("restore_node: no removed nodes to restore")
+            return None
+
+        # Pick a random node if no id is specified
+        if id_node_topology is None:
+            idx = random.randint(0, len(self.removed_nodes) - 1)
+            entry = self.removed_nodes.pop(idx)
+            id_node_topology = entry["id"]
+        else:
+            # Find the most recent removal entry for this node
+            entry = None
+            for i in range(len(self.removed_nodes) - 1, -1, -1):
+                if self.removed_nodes[i]["id"] == id_node_topology:
+                    entry = self.removed_nodes.pop(i)
+                    break
+
+            if entry is None:
+                self.logger.warning("restore_node: node %s not found in removed_nodes" % id_node_topology)
+                return None
+
+        # Re-add the node with its saved attributes
+        self.topology.G.add_node(id_node_topology, **entry["attrs"])
+
+        # Re-add edges (only if the other endpoint still exists in the topology)
+        restored_edges = 0
+        for edge_info in entry["edges"]:
+            src, dst = edge_info["src"], edge_info["dst"]
+            other = dst if src == id_node_topology else src
+            if self.topology.G.has_node(other):
+                self.topology.G.add_edge(src, dst, **edge_info["attrs"])
+                restored_edges += 1
+            else:
+                self.logger.debug("restore_node: skipping edge (%s, %s) — other endpoint missing" % (src, dst))
+
+        entry["time_restored"] = self.env.now
+        self.logger.debug("Restored node %s with %d/%d edges at T:%s" % (
+            id_node_topology, restored_edges, len(entry["edges"]), self.env.now))
+        self.logger.debug("Attributes: %s" % entry["attrs"])
+
+        return entry
 
 
     def get_DES_from_Service_In_Node(self, node, app_name, service):

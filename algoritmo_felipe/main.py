@@ -11,7 +11,7 @@ from modules.selections import MinimunPath
 from modules.messages import MessageProfile
 from modules.applications import dynamic_app_manager
 from modules.metrics import save_node_counts, save_unprocessed_messages
-from modules.monitors import schedule_random_fog_removals, start_node_count_monitor
+from modules.monitors import schedule_random_fog_removals, schedule_random_fog_restorations, start_node_count_monitor
 from modules.topology import load_topology
 
 MESSAGE_PROFILE = MessageProfile()
@@ -28,9 +28,12 @@ APP_CREATION_INTERVAL = 200 # simulation time units
 APP_LIFETIME = 2000 # simulation time units
 FOG_REMOVAL_INTERVAL = 300 # simulation time units
 MAX_FOG_REMOVALS = 10
+FOG_RESTORE_INTERVAL = 300 # simulation time units
 NODE_COUNT_INTERVAL = 50 # simulation time units
-STOP_TIME = 100000 # simulation time units
+STOP_TIME = 10000 # simulation time units
 RESULTS_FOLDER = "resultados" 
+WAIT_REMOVAL_TIME = 500 # simulation time units before starting removals
+WAIT_RESTORATION_TIME = 1000 # simulation time units before starting restorations
 
 def main():
     root_path = os.path.dirname(os.path.abspath(__file__))
@@ -91,8 +94,8 @@ def main():
         )
     )
 
-    # Optional: Schedule random fog node removals
-    schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, MAX_FOG_REMOVALS)
+    schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, wait_removal_time=WAIT_REMOVAL_TIME, max_removals=MAX_FOG_REMOVALS)
+    schedule_random_fog_restorations(simulator, FOG_RESTORE_INTERVAL, wait_restoration_time=WAIT_RESTORATION_TIME)
 
     node_count_records = start_node_count_monitor(simulator, NODE_COUNT_INTERVAL)
 

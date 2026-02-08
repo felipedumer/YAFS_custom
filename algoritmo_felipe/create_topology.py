@@ -148,6 +148,8 @@ def create_random_topology(
                 "RAM": ram_val,      # MB
                 "COST": proxy_cost * random.uniform(0.5, 1.5),
                 "WATT": proxy_watt * random.uniform(0.5, 1.5),
+                "failures": 0, # History of failures
+                "execution_time": 0 # Simulation time
             }
         )
         topology_json["link"].append(

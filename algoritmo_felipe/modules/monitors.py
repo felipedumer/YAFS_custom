@@ -6,12 +6,13 @@ from yafs.core import Sim
 logger = logging.getLogger(__name__)
 
 
-def schedule_random_fog_removals(simulator: Sim, interval: int, max_removals: int):
+def schedule_random_fog_removals(simulator: Sim, interval: int, wait_removal_time: int, max_removals: int):
     """Remove a random fog node every `interval` simulation time units.
 
     This uses the existing `Sim.remove_node` (no core changes). If no fog nodes
     remain, the process stops early.
     """
+
 
     def current_fog_nodes():
         fog_ids = []
@@ -23,6 +24,7 @@ def schedule_random_fog_removals(simulator: Sim, interval: int, max_removals: in
         return fog_ids
 
     def _loop():
+        yield simulator.env.timeout(wait_removal_time)
         removals = 0
         while removals < max_removals:
             yield simulator.env.timeout(interval)
@@ -47,6 +49,40 @@ def schedule_random_fog_removals(simulator: Sim, interval: int, max_removals: in
             )
             simulator.remove_node(node_id)
             removals += 1
+
+    simulator.env.process(_loop())
+
+
+def schedule_random_fog_restorations(simulator: Sim, interval: int, wait_restoration_time: int, max_restorations: int = None):
+    """Restore a random previously-removed fog node every `interval` simulation time units.
+
+    Uses `Sim.restore_node()` to re-add nodes from `simulator.removed_nodes`.
+    Stops when `max_restorations` have been performed (if set) or no removed nodes remain.
+    """
+
+    def _loop():
+        yield simulator.env.timeout(wait_restoration_time)
+        restorations = 0
+        while max_restorations is None or restorations < max_restorations:
+            yield simulator.env.timeout(interval)
+            if not simulator.removed_nodes:
+                logging.info(
+                    "Stopping restorations: no removed nodes left at t=%s",
+                    simulator.env.now,
+                )
+                return
+
+            entry = simulator.restore_node()  # random pick
+            if entry is None:
+                return
+
+            logging.info(
+                "Restored node %s (id=%s) at t=%s",
+                entry["attrs"].get("label", entry["id"]),
+                entry["id"],
+                simulator.env.now,
+            )
+            restorations += 1
 
     simulator.env.process(_loop())
 
