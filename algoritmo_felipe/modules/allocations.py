@@ -2,7 +2,11 @@ from yafs.placement import Placement
 import logging
 import csv
 import os
+import math
 import networkx as nx
+
+LATENCY_WEIGHT = 0.7 # Must sum to 1.0
+RELIABILITY_WEIGHT = 0.3 # Must sum to 1.0
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +22,8 @@ class CustomPlacement(Placement):
         self.strategy = strategy
 
     def _sort_fog_nodes_dijkstra(self, sim, app_name, id_fog_list):
-        """Rank fog nodes by the best (minimum) latency (PR) path from any EndDevice of the app."""
+        """Rank fog nodes by the best (minimum) latency (PR) path from any EndDevice of the app.
+        Returns a list of (node_id, latency) tuples sorted by latency ascending."""
         id_fog_list = [nid for nid in id_fog_list if sim.topology.G.has_node(nid)]
         if not id_fog_list:
             return []
@@ -26,11 +31,11 @@ class CustomPlacement(Placement):
         try:
             app_id = app_name.split("-")[1]
         except IndexError:
-            return id_fog_list
+            return [(nid, float("inf")) for nid in id_fog_list]
 
         sensor_nodes = sim.topology.find_IDs({"model": f"EndDevice-{app_id}"})
         if not sensor_nodes:
-            return sorted(id_fog_list)
+            return [(nid, float("inf")) for nid in sorted(id_fog_list)]
 
         distances = []
         for fog_id in id_fog_list:
@@ -53,9 +58,7 @@ class CustomPlacement(Placement):
         # Sort by distance (ascending)
         distances.sort(key=lambda x: x[1])
 
-        ranked_nodes_id = [cluster_id for cluster_id, _ in distances]
-
-        return ranked_nodes_id
+        return distances
 
     def _deploy_end_devices(self, sim, app_name, services, id_cluster):
         """
@@ -115,7 +118,8 @@ class CustomPlacement(Placement):
             elif module in self.scaleServices:
                 target_nodes = fog_clusters_id
                 if fog_clusters_id:
-                    ranked_nodes = self._sort_fog_nodes_dijkstra(sim, app_name, fog_clusters_id)
+                    ranked_with_latency = self._sort_fog_nodes_dijkstra(sim, app_name, fog_clusters_id)
+                    ranked_nodes = [nid for nid, _ in ranked_with_latency]
                     target_nodes = ranked_nodes
 
                 # Allocate to cloud if no fog nodes are available
@@ -186,6 +190,9 @@ class CustomPlacement(Placement):
                 logging.info("Placed %s on node %s", module, node_label)
 
     def _custom_strategy(self, sim, app_name):
+        """
+            Implements RAFFA
+        """
         fog_clusters_id = sim.topology.find_IDs({"model": "fog"})
         cloud_cluster_id = sim.topology.find_IDs({"model": "cloud"})
 
@@ -201,32 +208,62 @@ class CustomPlacement(Placement):
 
             # Search for fog clusters
             elif module in self.scaleServices:
-                target_nodes = fog_clusters_id
                 if fog_clusters_id:
-                    ranked_nodes = self._sort_fog_nodes_dijkstra(sim, app_name, fog_clusters_id)
-                    target_nodes = ranked_nodes
+                    ranked_with_latency = self._sort_fog_nodes_dijkstra(sim, app_name, fog_clusters_id)
+                    latency_map = {nid: lat for nid, lat in ranked_with_latency}
+                    ranked_nodes_by_latency = [nid for nid, _ in ranked_with_latency]
                     
-                    for node_id in ranked_nodes:
+                    for node_id in ranked_nodes_by_latency:
+                        node_latency = latency_map[node_id]
                         node_label = sim.topology.get_node(node_id).get("label", node_id)
-                        node_failures = sim.topology.get_node(node_id).get("failures", node_id)
+                        node_failures = int(sim.topology.get_node(node_id).get("failures", node_id))
+                        node_execution_time = int(sim.topology.get_node(node_id).get("execution_time", node_id))
+                        node_failure_rate = node_failures / node_execution_time if node_execution_time > 0 else 0
+
+                        # Gets the IPT which is time to execute the module (application).
+                        for app_module in app.data:
+                            if module in app_module:
+                                module_ipt = app_module[module].get("IPT")
+
+                        # e^(-failure_rate * module_ipt)
+                        node_reliability = math.exp(-node_failure_rate * module_ipt)
+                        logging.info("Node Realiability for %s: %.15f", node_label, node_reliability)
+                        logging.info("Node %s (ID: %s) - Failure Rate Calculated: %.15f", node_label, node_id, node_failure_rate)
                         
+                        # (LATENCY_WEIGHT · node_latency) + (RELIABILITY_WEIGHT · (1 − node_reliability))
+                        allocation_cost = (LATENCY_WEIGHT * node_latency) + (RELIABILITY_WEIGHT * (1 - node_reliability))
+
+                        logging.info("Allocation cost for node %s: %.15f", node_label, allocation_cost)
+
                         node_object = {
-                            "rank": len(allocation_nodes_mapping) + 1,
                             "id": node_id,
                             "label": node_label,
-                            "failures": node_failures
+                            "failure_rate": node_failure_rate,
+                            "reliability": node_reliability,
+                            "latency": node_latency,
+                            "allocation_cost": allocation_cost,
                         }
 
                         allocation_nodes_mapping.append(node_object)
+
+                    # Sort by allocation cost (ascending)
+                    allocation_nodes_mapping.sort(key=lambda x: x["allocation_cost"])
+
                     # Allocate to cloud if no fog nodes are available
-                    if not target_nodes:
+                    if not allocation_nodes_mapping:
                         target_nodes = list(cloud_cluster_id)
-            
-                    # Deploy replicas
+                    else:
+                        target_nodes = [node["id"] for node in allocation_nodes_mapping]    
+                    
+                    # Deploy replicas - default YAFS behavior - 1 replica
                     replicas_needed = self.scaleServices[module]
 
-                    # if has failures, also allocate to the replica
-                    if sim.topology.get_node(ranked_nodes[0]).get("failures", 1) > 0 and len(ranked_nodes) > 1:
+                    for node in allocation_nodes_mapping:
+                        logging.info("Node %s (ID: %s) - Failure Rate: %.15f", node["label"], node["id"], node["failure_rate"])
+
+                    # Verify the treshold for adaptative replication: if the best node has a failure rate higher than 0, we need to replicate in at least 2 nodes.
+                    best_node_failure_rate = allocation_nodes_mapping[0]["failure_rate"] if allocation_nodes_mapping else 0
+                    if best_node_failure_rate > 0 and len(allocation_nodes_mapping) > 1:
                         replicas_needed = 2
 
                     ranked_targets = target_nodes[:replicas_needed]

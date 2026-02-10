@@ -34,6 +34,7 @@ def create_application_structure(name: str) -> Application:
             {
                 serviceApplicationName: {
                     "RAM": random.randint(512, 2048),
+                    "IPT": random.randint(100, 500),
                     "Type": Application.TYPE_MODULE,
                 }
             },
