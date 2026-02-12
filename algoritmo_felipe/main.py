@@ -20,20 +20,20 @@ MESSAGE_PROFILE = MessageProfile()
 
 TOPOLOGY_FILE = "cloud1-gateway12-fog12-end48"
 # Define the placement strategy here
-# Options: 'latency', 'hops', 'cost', 'ipt', 'custom_proposed_by_felipe', 'roundRobin'
+# Options: 'latency', 'custom', 'roundrobin'
 PLACEMENT_STRATEGY = "custom"
-SOURCE_PERIOD = 100 # simulation time units
+SOURCE_PERIOD = 100 # Messages generated every 100 time units
 REALLOCATION_PERIOD = 1000 # simulation time units
-APP_CREATION_INTERVAL = 200 # simulation time units
-APP_LIFETIME = 2000 # simulation time units
+APP_CREATION_INTERVAL = 200 # Each application is created every 200 time units
+APP_LIFETIME = 600 # simulation time units
 FOG_REMOVAL_INTERVAL = 300 # simulation time units
-MAX_FOG_REMOVALS = 10
+MAX_FOG_REMOVALS = 1000000000
 FOG_RESTORE_INTERVAL = 300 # simulation time units
 NODE_COUNT_INTERVAL = 50 # simulation time units
-STOP_TIME = 10000 # simulation time units
+STOP_TIME = 100000 # When to stop the simulation (simulation time units)
 RESULTS_FOLDER = "resultados" 
-WAIT_REMOVAL_TIME = 500 # simulation time units before starting removals
-WAIT_RESTORATION_TIME = 1000 # simulation time units before starting restorations
+WAIT_REMOVAL_TIME = 500 # Wait before starting to remove fog nodes
+WAIT_RESTORATION_TIME = 1000 # Wait before starting to restore fog nodes
 
 def main():
     root_path = os.path.dirname(os.path.abspath(__file__))
