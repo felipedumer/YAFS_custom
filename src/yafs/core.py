@@ -186,24 +186,8 @@ class Sim:
             paths,DES_dst = self.selector_path[app_name].get_path(self,app_name, message, self.alloc_DES[idDES], self.alloc_DES, self.alloc_module, self.last_busy_time,from_des=idDES)
 
             if not paths or not DES_dst:
+                # Failure already recorded by get_path — just log and return
                 self.logger.warning("FAILURE: no path for message %s (app %s) from DES %s", message.name, app_name, idDES)
-                try:
-                    src_node = self.alloc_DES.get(idDES, "")
-                    src_label = self.topology.get_node(src_node).get('label', src_node) if src_node in self.topology.G else ""
-                    self.metrics.insert_failure({
-                        "id": getattr(message, "id", None),
-                        "app": app_name,
-                        "message": message.name,
-                        "reason": "no_path",
-                        "TOPO.src": src_node,
-                        "TOPO.dst": "",
-                        "TOPO.srcLabel": src_label,
-                        "TOPO.dstLabel": "",
-                        "ctime": self.env.now,
-                    })
-                    self.metrics.flush()
-                except Exception:
-                    self.logger.exception("Failed to record failure metric")
                 return
 
             if DES_dst == [None] or DES_dst==[[]]:
