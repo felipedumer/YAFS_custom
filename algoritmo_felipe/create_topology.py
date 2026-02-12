@@ -38,8 +38,8 @@ def create_random_topology(
 ):
     """
     Create a fixed 3-layer topology:
-      - Cloud (1)
-      - Proxy server (1)
+    - Cloud (1)
+    - Proxy server (1)
             - Gateway nodes (1 per fog)
                 - Fog nodes (12)
                 - End devices (48 total, devices_per_edge each)
@@ -107,7 +107,7 @@ def create_random_topology(
     # 3) Gateway + Fog nodes (half small, half big)
     gateway_ids = []
     edge_ids = []
-    small_count = edge_nodes // 2
+    big_count = edge_nodes // 2
     for i in range(edge_nodes):
         # 3a) Gateway (unique per fog)
         gateway_id = next_id()
@@ -135,9 +135,9 @@ def create_random_topology(
 
         # 3b) Fog behind this gateway
         edge_id = next_id()
-        is_small = i < small_count
-        ipt_val = edge_small_ipt if is_small else edge_big_ipt
-        ram_val = edge_small_ram if is_small else edge_big_ram
+        is_big = i < big_count
+        ipt_val = edge_big_ipt if is_big else edge_small_ipt
+        ram_val = edge_big_ram if is_big else edge_small_ram
         topology_json["entity"].append(
             {
                 "id": edge_id,
