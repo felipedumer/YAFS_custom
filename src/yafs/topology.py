@@ -215,6 +215,8 @@ class Topology:
 
         result = []
         for key in self.nodeAttributes.keys():
+            if not self.G.has_node(key):
+                continue
             val = self.nodeAttributes[key]
             if keyS in val:
                 if value[keyS] == val[keyS]:

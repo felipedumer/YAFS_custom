@@ -292,27 +292,19 @@ class Sim:
                 else:
                     src_int = message.dst_int
                     message.dst_int = message.path[message.path.index(message.dst_int) + 1]
-                # arista set by (src_int,message.dst_int)
-                link = (src_int, message.dst_int)
+                # Normalize link key so (a,b) and (b,a) share congestion state
+                link = (min(src_int, message.dst_int), max(src_int, message.dst_int))
 
-
-                # Links in the topology are bidirectional: (a,b) == (b,a)
                 try:
                     last_used = self.last_busy_time[link]
                 except KeyError:
                     last_used = 0.0
-                    # self.last_busy_time[link] = last_used
-
-                    #link = (message.dst_int, src_int)
-                    #last_used = self.last_busy_time[link]
                 """
                 Computing message latency
                 """
-                size_bits = message.bytes
-                #size_bits = message.bytes * 8
+                size_bits = message.bytes * 8  # Convert bytes to bits
                 try:
-                   # transmit = size_bits / (self.topology.get_edge(link)[Topology.LINK_BW] * 1000000.0)  # MBITS!
-                    transmit = size_bits / (self.topology.get_edge(link)[Topology.LINK_BW] * 1000000.0)  # MBITS!
+                    transmit = size_bits / (self.topology.get_edge(link)[Topology.LINK_BW] * 1000000.0)  # BW in Mbps
                     propagation = self.topology.get_edge(link)[Topology.LINK_PR]
                     latency_msg_link = transmit + propagation
 
@@ -340,9 +332,9 @@ class Sim:
 
                     self.last_busy_time[link] = last_used
                     self.env.process(self.__wait_message(message, latency_msg_link, shift_time))
-                except Exception:
+                except KeyError as e:
                     #This fact is produced when a node or edge the topology is changed or disappeared
-                    self.logger.warning("The initial path assigned is unreachable. Link: (%i,%i). Routing a new one. %i"%(link[0],link[1],self.env.now))
+                    self.logger.warning("The initial path assigned is unreachable. Link: (%i,%i). Routing a new one. %i. Error: %s"%(link[0],link[1],self.env.now, e))
 
                     paths, DES_dst = self.selector_path[message.app_name].get_path_from_failure(self, message, link, self.alloc_DES,self.alloc_module, self.last_busy_time,self.env.now,from_des=message.idDES)
 
@@ -715,7 +707,7 @@ class Sim:
                                     msg_out.timestamp = self.env.now
                                     msg_out.last_idDes = copy.copy(msg.last_idDes)
                                     msg_out.id = msg.id
-                                    msg_out.last_idDes = msg.last_idDes.append(ides)
+                                    msg_out.last_idDes.append(ides)
                                     for idx, module_dst in enumerate(register["module_dest"]):
                                         if random.random() <= register["p"][idx]:
                                             self.__send_message(app_name, msg_out, ides,self.FORWARD_METRIC)
@@ -1160,7 +1152,9 @@ class Sim:
             node_edges.append({"src": u, "dst": v, "attrs": dict(data)})
 
         node_attrs["failures"] += 1
-        node_attrs["execution_time"] += self.env.now
+        # Compute actual uptime since last activation (not absolute time)
+        last_activation = node_attrs.pop("_last_activation", 0)
+        node_attrs["execution_time"] += (self.env.now - last_activation)
 
         self.removed_nodes.append({
             "id": id_node_topology,
@@ -1171,22 +1165,11 @@ class Sim:
         self.logger.debug("Saved removed node %s with %d edges at T:%s" % (id_node_topology, len(node_edges), self.env.now))
         self.logger.debug("Attributes: %s" % node_attrs)
 
-        # Stopping related processes deployed in the module and clearing main structure: alloc_DES
-        des_tmp=[]
-        if id_node_topology in self.alloc_DES.values():
-            for k, v in self.alloc_DES.items():
-                if v == id_node_topology:
-                    des_tmp.append(k)
-                    self.stop_process(k)
-                    del self.alloc_DES[k]
-                    break
-
-        # Clearing other related structures
-        for k, v in self.alloc_module.items():
-            for k2, v2 in self.alloc_module[k].items():
-                for item in des_tmp:
-                    if item in v2:
-                        v2.remove(item)
+        # NOTE: We intentionally do NOT clean alloc_DES or alloc_module here.
+        # DES consumer processes stay alive but dormant (blocked on yield pipe.get()).
+        # get_path's has_node filter will exclude them while the node is absent.
+        # When restore_node brings the node back, has_node returns True again and
+        # messages are routed to the still-alive consumer processes — seamless recovery.
 
         # Finally removing node from topology
         self.topology.G.remove_node(id_node_topology)
@@ -1238,6 +1221,9 @@ class Sim:
                 restored_edges += 1
             else:
                 self.logger.debug("restore_node: skipping edge (%s, %s) — other endpoint missing" % (src, dst))
+
+        # Track when this node became active again for accurate execution_time deltas
+        self.topology.G.nodes[id_node_topology]["_last_activation"] = self.env.now
 
         entry["time_restored"] = self.env.now
         self.logger.debug("Restored node %s with %d/%d edges at T:%s" % (
