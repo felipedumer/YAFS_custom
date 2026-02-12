@@ -35,10 +35,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-1",
-            "IPT": 6750,
-            "RAM": 1000,
+            "IPT": 13500,
+            "RAM": 2000,
             "COST": 4.5577071938315346,
-            "WATT": 21.00043020890668
+            "WATT": 21.00043020890668,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 4,
@@ -55,10 +57,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-2",
-            "IPT": 6750,
-            "RAM": 1000,
+            "IPT": 13500,
+            "RAM": 2000,
             "COST": 3.100117273476477,
-            "WATT": 28.92842952595291
+            "WATT": 28.92842952595291,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 6,
@@ -75,10 +79,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-3",
-            "IPT": 6750,
-            "RAM": 1000,
+            "IPT": 13500,
+            "RAM": 2000,
             "COST": 4.94588485665605,
-            "WATT": 47.06797949691645
+            "WATT": 47.06797949691645,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 8,
@@ -95,10 +101,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-4",
-            "IPT": 6750,
-            "RAM": 1000,
+            "IPT": 13500,
+            "RAM": 2000,
             "COST": 5.568718270819382,
-            "WATT": 23.477553305176645
+            "WATT": 23.477553305176645,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 10,
@@ -115,10 +123,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-5",
-            "IPT": 6750,
-            "RAM": 1000,
+            "IPT": 13500,
+            "RAM": 2000,
             "COST": 3.6876872787410817,
-            "WATT": 21.191888777522813
+            "WATT": 21.191888777522813,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 12,
@@ -135,10 +145,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-6",
-            "IPT": 6750,
-            "RAM": 1000,
+            "IPT": 13500,
+            "RAM": 2000,
             "COST": 2.8745518992144135,
-            "WATT": 40.21421152413449
+            "WATT": 40.21421152413449,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 14,
@@ -155,10 +167,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-7",
-            "IPT": 13500,
-            "RAM": 2000,
+            "IPT": 6750,
+            "RAM": 1000,
             "COST": 2.1061438787354545,
-            "WATT": 27.95350602746594
+            "WATT": 27.95350602746594,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 16,
@@ -175,10 +189,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-8",
-            "IPT": 13500,
-            "RAM": 2000,
+            "IPT": 6750,
+            "RAM": 1000,
             "COST": 4.599537751118093,
-            "WATT": 41.797659224128665
+            "WATT": 41.797659224128665,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 18,
@@ -195,10 +211,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-9",
-            "IPT": 13500,
-            "RAM": 2000,
+            "IPT": 6750,
+            "RAM": 1000,
             "COST": 2.881762488162787,
-            "WATT": 43.57062735503635
+            "WATT": 43.57062735503635,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 20,
@@ -215,10 +233,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-10",
-            "IPT": 13500,
-            "RAM": 2000,
+            "IPT": 6750,
+            "RAM": 1000,
             "COST": 5.237721826711306,
-            "WATT": 20.25995038712244
+            "WATT": 20.25995038712244,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 22,
@@ -235,10 +255,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-11",
-            "IPT": 13500,
-            "RAM": 2000,
+            "IPT": 6750,
+            "RAM": 1000,
             "COST": 5.223277007331232,
-            "WATT": 47.92557579952907
+            "WATT": 47.92557579952907,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 24,
@@ -255,10 +277,12 @@
             "model": "fog",
             "mytag": "fog",
             "label": "Fog-12",
-            "IPT": 13500,
-            "RAM": 2000,
+            "IPT": 6750,
+            "RAM": 1000,
             "COST": 3.3610020660719675,
-            "WATT": 26.21917999247126
+            "WATT": 26.21917999247126,
+            "failures": 0,
+            "execution_time": 0
         },
         {
             "id": 26,
