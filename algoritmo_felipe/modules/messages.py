@@ -1,8 +1,8 @@
 import random
 from yafs.application import Message
 
-BYTES_MAX = 2000
-BYTES_MIN = 1000
+BYTES_MAX = 20000
+BYTES_MIN = 100
 INSTRUCTIONS_MAX = 500
 INSTRUCTIONS_MIN = 200
 
