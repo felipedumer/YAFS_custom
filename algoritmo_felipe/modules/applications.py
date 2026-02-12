@@ -8,9 +8,14 @@ from yafs.distribution import deterministic_distribution
 
 from modules.messages import MessageProfile, RandomMessage
 from modules.selections import MinimunPath
-from modules.allocations import CloudPlacement, CustomPlacement
+from modules.allocations import CustomPlacement
 
 MESSAGE_PROFILE = MessageProfile()
+
+APP_MAX_RAM = 1000
+APP_MIN_RAM = 500
+APP_MAX_IPT = 5000
+APP_MIN_IPT = 2500
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +38,8 @@ def create_application_structure(name: str) -> Application:
             {endDeviceApplicationName: {"Type": Application.TYPE_MODULE}},
             {
                 serviceApplicationName: {
-                    "RAM": random.randint(512, 2048),
-                    "IPT": random.randint(100, 500),
+                    "RAM": random.randint(APP_MIN_RAM, APP_MAX_RAM),
+                    "IPT": random.randint(APP_MIN_IPT, APP_MAX_IPT),
                     "Type": Application.TYPE_MODULE,
                 }
             },
@@ -90,6 +95,7 @@ def register_application(
     placement_strategy: str,
     reallocation_period: int,
     allocate_now: bool = False,
+    app_lifetime: int = 2000,
 ) -> dict:
     app_name = f"Application-{app_id}"
     app, endDeviceApplicationName, serviceApplicationName = create_application_structure(app_name)
@@ -103,9 +109,10 @@ def register_application(
     )
 
     placement_policy = CustomPlacement(
-        f"CloudPlacement-{app_id}",
+        f"CustomPlacement-{app_id}",
         activation_dist=reallocation_dist,
         strategy=placement_strategy,
+        app_lifetime=app_lifetime,
     )
     placement_policy.scaleService({endDeviceApplicationName: 1, serviceApplicationName: 1})
 
@@ -230,10 +237,48 @@ def destroy_application(simulator: Sim, app_ctx: dict):
     _stop_policy_process(simulator, population_name, simulator.population_policy)
     logging.info("Destroyed application %s | T:%s", app_name, simulator.env.now)
 
-def teardown_after(simulator: Sim, app_ctx: dict, lifetime: float):
+def teardown_after(
+    simulator: Sim,
+    app_ctx: dict,
+    lifetime: float,
+    app_contexts: dict,
+    app_id: int,
+    selection_policy: MinimunPath,
+    source_period: int,
+    placement_strategy: str,
+    reallocation_period: int,
+    app_lifetime: int,
+):
     yield simulator.env.timeout(lifetime)
+    # Only destroy if this context is still the active one (guard against stale teardowns)
+    if app_contexts.get(app_id) is not app_ctx:
+        logging.debug(f"Skipped stale teardown for {app_ctx['app_name']} at t={simulator.env.now} (already recycled)")
+        return
+
     destroy_application(simulator, app_ctx)
-    logging.info(f"Destroyed {app_ctx['app_name']} at t={simulator.env.now}")
+    logging.info(f"Teardown destroyed {app_ctx['app_name']} at t={simulator.env.now}")
+
+    # Immediately redeploy on fresh surviving nodes
+    new_ctx = register_application(
+        simulator,
+        app_id,
+        selection_policy,
+        source_period,
+        placement_strategy,
+        reallocation_period,
+        allocate_now=True,
+        app_lifetime=app_lifetime,
+    )
+    app_contexts[app_id] = new_ctx
+    logging.info(f"Teardown redeployed {new_ctx['app_name']} at t={simulator.env.now}")
+
+    # Schedule the next teardown cycle
+    if app_lifetime > 0:
+        simulator.env.process(teardown_after(
+            simulator, new_ctx, app_lifetime, app_contexts, app_id,
+            selection_policy, source_period, placement_strategy,
+            reallocation_period, app_lifetime,
+        ))
 
 
 def dynamic_app_manager(
@@ -260,11 +305,16 @@ def dynamic_app_manager(
             placement_strategy,
             reallocation_period,
             allocate_now=True,
+            app_lifetime=app_lifetime,
         )
         app_contexts[app_id] = ctx
         logging.info(f"Deployed {ctx['app_name']} at t={simulator.env.now}")
         if app_lifetime > 0:
-            simulator.env.process(teardown_after(simulator, ctx, app_lifetime))
+            simulator.env.process(teardown_after(
+                simulator, ctx, app_lifetime, app_contexts, app_id,
+                selection_policy, source_period, placement_strategy,
+                reallocation_period, app_lifetime,
+            ))
 
     # If no interval, stop here
     if app_creation_interval <= 0:
@@ -293,6 +343,13 @@ def dynamic_app_manager(
                 placement_strategy,
                 reallocation_period,
                 allocate_now=True,
+                app_lifetime=app_lifetime,
             )
             app_contexts[app_id] = new_ctx
             logging.info(f"Re-Deployed {new_ctx['app_name']} at t={simulator.env.now}")
+            if app_lifetime > 0:
+                simulator.env.process(teardown_after(
+                    simulator, new_ctx, app_lifetime, app_contexts, app_id,
+                    selection_policy, source_period, placement_strategy,
+                    reallocation_period, app_lifetime,
+                ))
