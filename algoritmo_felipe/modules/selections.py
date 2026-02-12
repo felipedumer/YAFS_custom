@@ -38,8 +38,8 @@ class MinimunPath(Selection):
                 logging.exception("Failed to record failure metric")
             return [], []
 
-        # Filter destinations whose node still exists
-        DES_dst = [des for des in alloc_module[app_name][message.dst] if sim.topology.G.has_node(alloc_DES[des])]
+        # Filter destinations whose node still exists (safe guard: check des in alloc_DES first)
+        DES_dst = [des for des in alloc_module[app_name].get(message.dst, []) if des in alloc_DES and sim.topology.G.has_node(alloc_DES[des])]
         if not DES_dst:
             logging.warning("FAILURE: no reachable destination nodes for %s (module %s)", app_name, message.dst)
             try:
@@ -60,17 +60,11 @@ class MinimunPath(Selection):
                 logging.exception("Failed to record failure metric")
             return [], []
 
-        print(("GET PATH"))
-        print(("\tNode _ src (id_topology): %i" %node_src))
-        print(("\tRequest service: %s " %message.dst))
-        print(("\tProcess serving that service: %s " %DES_dst))
-
         bestPath = []
         bestDES = []
 
         for des in DES_dst: ## In this case, there are only one deployment
             dst_node = alloc_DES[des]
-            print(("\t\t Looking the path to id_node: %i" %dst_node))
 
             try:
                 path = list(nx.shortest_path(sim.topology.G, source=node_src, target=dst_node))
@@ -115,21 +109,9 @@ class MinimunPath(Selection):
                     logging.exception("Failed to record failure metric")
                 continue
 
-            # custom
-            # if bestPath is empty array
-            if not bestPath:
+            if not bestPath or len(path) < len(bestPath):
                 bestPath = path
                 bestDES = [des]
-
-            if bestPath > path:
-                bestPath = path
-                bestDES = [des]
-            print("Path: ", path)
-            print("Best DES? ", des)
-
-            # original 
-            # bestPath = [path]
-            # bestDES = [des]
 
         if not bestPath:
             logging.warning("FAILURE: no valid path found for %s to %s", node_src, message.dst)
