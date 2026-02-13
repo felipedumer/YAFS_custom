@@ -31,7 +31,7 @@ MAX_FOG_REMOVALS = 1000000000
 FOG_RESTORE_INTERVAL = 300 # simulation time units
 NODE_COUNT_INTERVAL = 50 # simulation time units
 STOP_TIME = 100000 # When to stop the simulation (simulation time units)
-RESULTS_FOLDER = "resultados" 
+RESULTS_FOLDER = "results" 
 WAIT_REMOVAL_TIME = 500 # Wait before starting to remove fog nodes
 WAIT_RESTORATION_TIME = 1000 # Wait before starting to restore fog nodes
 
