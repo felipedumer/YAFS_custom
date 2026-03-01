@@ -18,6 +18,7 @@ MESSAGE_PROFILE = MessageProfile()
 
 ## Configuration Parameters
 
+NUMBER_OF_EXECUTIONS = 10 # How much execution (e.g., for averaging results)
 TOPOLOGY_FILE = "cloud1-gateway12-fog12-end48"
 # Define the placement strategy here
 # Options: 'latency', 'custom', 'roundrobin'
@@ -55,68 +56,73 @@ def main():
 
     stop_time = STOP_TIME
 
-    topology, topology_json, num_fog_nodes, topology_path = load_topology(
-        root_path, TOPOLOGY_FILE
-    )
-    logging.info(
-        "Loaded topology %s with %d fog nodes", topology_path, num_fog_nodes
-    )
+    for execution_number in range(1, NUMBER_OF_EXECUTIONS + 1):
+        logging.info(f"===== Starting execution {execution_number}/{NUMBER_OF_EXECUTIONS} =====")
 
-    sim_trace_path = results_path + f"{TOPOLOGY_FILE}-{PLACEMENT_STRATEGY}-sim_trace" # {nodes}-{PLACEMENT_STRATEGY}
-
-    simulator = Sim(topology, default_results_path=sim_trace_path)
-
-    # Identify all applications from the topology entities
-    app_ids = set()
-    for entity in topology_json["entity"]:
-        if "model" in entity and entity["model"].startswith("EndDevice-"):
-            # Format: model: EndDevice-{id}
-            parts = entity["model"].split("-")
-            if len(parts) >= 2 and parts[1].isdigit():
-                app_ids.add(int(parts[1]))
-
-
-    sorted_app_ids = sorted(list(app_ids))
-    logging.info(f"Deploying {len(sorted_app_ids)} applications...")
-
-    selection_policy = MinimunPath()
-
-    simulator.env.process(
-        dynamic_app_manager(
-            sorted_app_ids=sorted_app_ids,
-            simulator=simulator,
-            selection_policy=selection_policy,
-            source_period=SOURCE_PERIOD,
-            placement_strategy=PLACEMENT_STRATEGY,
-            reallocation_period=REALLOCATION_PERIOD,
-            app_creation_interval=APP_CREATION_INTERVAL,
-            app_lifetime=APP_LIFETIME,
+        topology, topology_json, num_fog_nodes, topology_path = load_topology(
+            root_path, TOPOLOGY_FILE
         )
-    )
+        logging.info(
+            "Loaded topology %s with %d fog nodes", topology_path, num_fog_nodes
+        )
 
-    schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, wait_removal_time=WAIT_REMOVAL_TIME, max_removals=MAX_FOG_REMOVALS)
-    schedule_random_fog_restorations(simulator, FOG_RESTORE_INTERVAL, wait_restoration_time=WAIT_RESTORATION_TIME)
+        sim_trace_path = results_path + f"{TOPOLOGY_FILE}-{PLACEMENT_STRATEGY}-sim_trace-{execution_number}" # {nodes}-{PLACEMENT_STRATEGY}-{execution_number}
 
-    node_count_records = start_node_count_monitor(simulator, NODE_COUNT_INTERVAL)
+        simulator = Sim(topology, default_results_path=sim_trace_path)
 
-    simulator.run(stop_time)
+        # Identify all applications from the topology entities
+        app_ids = set()
+        for entity in topology_json["entity"]:
+            if "model" in entity and entity["model"].startswith("EndDevice-"):
+                # Format: model: EndDevice-{id}
+                parts = entity["model"].split("-")
+                if len(parts) >= 2 and parts[1].isdigit():
+                    app_ids.add(int(parts[1]))
 
-    node_counts_file = sim_trace_path + "_node_counts.csv"
-    save_node_counts(node_count_records, node_counts_file)
 
-    # Logic to save unprocessed messages (Queue Buildup)
-    unprocessed_file = results_path + "unprocessed_messages.csv"
-    logging.info(f"Saving unprocessed messages to {unprocessed_file}...")
+        sorted_app_ids = sorted(list(app_ids))
+        logging.info(f"Deploying {len(sorted_app_ids)} applications...")
 
-    # DEBUG: Print queue sizes
-    logging.info(f"Network Queue Size: {len(simulator.network_ctrl_pipe.items)}")
-    total_consumer_items = sum(len(p.items) for p in simulator.consumer_pipes.values())
-    logging.info(f"Total Consumer Queues Size: {total_consumer_items}")
-    logging.info(
-        f"In-Transit/Processing Messages: {len(simulator.processing_messages)}"
-    )
+        selection_policy = MinimunPath()
 
-    save_unprocessed_messages(simulator, unprocessed_file)
+        simulator.env.process(
+            dynamic_app_manager(
+                sorted_app_ids=sorted_app_ids,
+                simulator=simulator,
+                selection_policy=selection_policy,
+                source_period=SOURCE_PERIOD,
+                placement_strategy=PLACEMENT_STRATEGY,
+                reallocation_period=REALLOCATION_PERIOD,
+                app_creation_interval=APP_CREATION_INTERVAL,
+                app_lifetime=APP_LIFETIME,
+            )
+        )
+
+        schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, wait_removal_time=WAIT_REMOVAL_TIME, max_removals=MAX_FOG_REMOVALS)
+        schedule_random_fog_restorations(simulator, FOG_RESTORE_INTERVAL, wait_restoration_time=WAIT_RESTORATION_TIME)
+
+        node_count_records = start_node_count_monitor(simulator, NODE_COUNT_INTERVAL)
+
+        simulator.run(stop_time)
+
+        node_counts_file = sim_trace_path + "_node_counts.csv"
+        save_node_counts(node_count_records, node_counts_file)
+
+        # Logic to save unprocessed messages (Queue Buildup)
+        unprocessed_file = results_path + "unprocessed_messages.csv"
+        logging.info(f"Saving unprocessed messages to {unprocessed_file}...")
+
+        # DEBUG: Print queue sizes
+        logging.info(f"Network Queue Size: {len(simulator.network_ctrl_pipe.items)}")
+        total_consumer_items = sum(len(p.items) for p in simulator.consumer_pipes.values())
+        logging.info(f"Total Consumer Queues Size: {total_consumer_items}")
+        logging.info(
+            f"In-Transit/Processing Messages: {len(simulator.processing_messages)}"
+        )
+
+        save_unprocessed_messages(simulator, unprocessed_file)
+
+        logging.info(f"===== Execution {execution_number}/{NUMBER_OF_EXECUTIONS} completed =====")
 
     logging.info("\n--- %s seconds ---" % (time.time() - start_time))
 
