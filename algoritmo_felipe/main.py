@@ -22,12 +22,13 @@ NUMBER_OF_EXECUTIONS = 10 # How much execution (e.g., for averaging results)
 TOPOLOGY_FILE = "cloud1-gateway12-fog12-end48"
 # Define the placement strategy here
 # Options: 'latency', 'custom', 'roundrobin'
-PLACEMENT_STRATEGY = "custom"
+PLACEMENT_STRATEGY = "latency"
 SOURCE_PERIOD = 100 # Messages generated every 100 time units
 REALLOCATION_PERIOD = 1000 # simulation time units
 APP_CREATION_INTERVAL = 200 # Each application is created every 200 time units
 APP_LIFETIME = 600 # simulation time units
 FOG_REMOVAL_INTERVAL = 300 # simulation time units
+NODES_PER_REMOVAL = 3 # How many fog nodes to remove at each interval tick
 MAX_FOG_REMOVALS = 1000000000
 FOG_RESTORE_INTERVAL = 300 # simulation time units
 NODE_COUNT_INTERVAL = 50 # simulation time units
@@ -40,7 +41,7 @@ def main():
     root_path = os.path.dirname(os.path.abspath(__file__))
     log_file_path = os.path.join(root_path, "execution.log")
 
-    results_path = Path(RESULTS_FOLDER)
+    results_path = Path(RESULTS_FOLDER) / f"{NODES_PER_REMOVAL}_removal"
     results_path.mkdir(parents=True, exist_ok=True)
     results_path = str(results_path) + "/"
 
@@ -98,8 +99,8 @@ def main():
             )
         )
 
-        schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, wait_removal_time=WAIT_REMOVAL_TIME, max_removals=MAX_FOG_REMOVALS)
-        schedule_random_fog_restorations(simulator, FOG_RESTORE_INTERVAL, wait_restoration_time=WAIT_RESTORATION_TIME)
+        schedule_random_fog_removals(simulator, FOG_REMOVAL_INTERVAL, wait_removal_time=WAIT_REMOVAL_TIME, max_removals=MAX_FOG_REMOVALS, nodes_per_removal=NODES_PER_REMOVAL)
+        schedule_random_fog_restorations(simulator, FOG_RESTORE_INTERVAL, wait_restoration_time=WAIT_RESTORATION_TIME, nodes_per_restoration=NODES_PER_REMOVAL)
 
         node_count_records = start_node_count_monitor(simulator, NODE_COUNT_INTERVAL)
 
